@@ -21,7 +21,6 @@ public:
 
 private:
     void getMachineCode(string instruction, string argument);
-    size_t getFileSize(ifstream &file);
     bool isArgument(string word);
 
 protected:

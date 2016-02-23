@@ -28,18 +28,13 @@ Assembler::Assembler() {
 
 void Assembler::readFile(string fileName) {
     ifstream file;
-    size_t fileSize;
+    vector<string> words;   //just going to let words vector increase by itself rather tahn trying to reserve space for this one off allocation
 
     file.open(fileName);
 
     if(!file.is_open()) {
         return;
     }
-
-    fileSize = getFileSize(file);
-
-    vector<string> words;
-    words.reserve(fileSize);
 
     string word;
     while (file >> word) {
@@ -73,14 +68,6 @@ bool Assembler::isArgument(string word) {
     } else {
         return false;
     }
-}
-
-size_t Assembler::getFileSize(ifstream &file) {
-    streampos fileSize = file.tellg();
-    file.seekg(0, std::ios::end);
-    size_t fS = file.tellg() - fileSize;
-
-    return fS;
 }
 
 void Assembler::getMachineCode(string instruction, string argument) {

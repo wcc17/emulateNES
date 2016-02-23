@@ -48,10 +48,10 @@ void Assembler::readFile(string fileName) {
         argument = words[i];
 
         if(isArgument(argument)) {
-            getMachineCode(instruction, argument);
+            storeProgramInMemory(instruction, argument);
         } else {
             i -= 1;
-            getMachineCode(instruction, NULL);
+            storeProgramInMemory(instruction, NULL);
         }
     }
 
@@ -70,9 +70,41 @@ bool Assembler::isArgument(string word) {
     }
 }
 
-void Assembler::getMachineCode(string instruction, string argument) {
-    //if instruction starts with #, $, ( then its an argument
-    //otherwise, its an instruction
-    cout << instruction << " " << argument << endl;
+//TODO: this is technically dissassembly. this should be in a differenct class, along with readfile
+//NOTE: WHEN WE'RE READING A ROM FILE, JUST STORE THE BYTES FROM THE FILE IN PROGRAM MEMORY 1 BY 1
+//here we take the instructions from an assembly file (one that uses the syntax, LDA $whatever)
+//convert the string to byte
+//store that byte in program memory
+//then we can execute the machine code from there
+void Assembler::storeProgramInMemory(string instruction, string argument) {
+    //get the addressing mode from the argument first
+    //set up constants for addressing modes and switch addressing mode
+    //inside those cases, switch the instructions that the string instruction could be
+
+    instruction = "LDA";
+
+    if(instruction == "LDA") {
+        cout << "lda" << endl;
+    } else {
+        cout << "default" << endl;
+    }
+}
+
+//TODO: THIS SHOULD PROBLY BE IN ANOTHER CLASS
+//this will take the op codes from program memory and execute them one at a time
+void Assembler::executeOpCode() {
+
+    //if im passing in straight machine code
+    uint8_t opcode = 0xA9;
+
+    switch(opcode) {
+        case LDA_IMM:
+            cout << "lda imm" << endl;
+            break;
+        default:
+            cout << "default" << endl;
+            break;
+    }
+
 }
 

@@ -8,6 +8,8 @@
 using namespace std;
 #include <string>
 #include <fstream>
+#include "opcodes.h"
+#include "addressingmodes.h"
 
 
 class Assembler {
@@ -20,7 +22,8 @@ public:
     void readFile(string filename);
 
 private:
-    void getMachineCode(string instruction, string argument);
+    void storeProgramInMemory(string instruction, string argument);
+    void executeOpCode(); //TODO: THIS SHOULD PROBLY BE IN ANOTHER CLASS
     bool isArgument(string word);
 
 protected:

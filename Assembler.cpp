@@ -70,6 +70,11 @@ bool Assembler::isArgument(string word) {
     }
 }
 
+bool Assembler::isLabel(string word) {
+    //check to see if last char in string is the : symbol
+    //if so, this is a label, needs to be handled accordingly
+}
+
 //TODO: this is technically dissassembly. this should be in a differenct class, along with readfile
 //NOTE: WHEN WE'RE READING A ROM FILE, JUST STORE THE BYTES FROM THE FILE IN PROGRAM MEMORY 1 BY 1
 //here we take the instructions from an assembly file (one that uses the syntax, LDA $whatever)
@@ -80,6 +85,31 @@ void Assembler::storeProgramInMemory(string instruction, string argument) {
     //get the addressing mode from the argument first
     //set up constants for addressing modes and switch addressing mode
     //inside those cases, switch the instructions that the string instruction could be
+
+    //LSR A is a valid instruction/argument combo. A means that lSR is doing something to the accumulator. Called Accumulator
+    //if the first symbol is a # the argument is a value. IMMEDIATE mode
+    //if there is no argument, it is implied addressing mode
+    //relative addressng will look like a label without the : at the end
+    //if the first symbol is a $ the argument is a memory location. These will be two bytes
+    //if the first symbol is a $ and its one byte, its zero page addressing, the byte is a memory location offset
+    //indirect starts with a parenthesis
+    //can have $XX, Y or $XX, X ( i think ) for absolute indexed. where XX is two bytes
+    //zero page indexed is $XX, X where XX is only one byte
+    //indexed indirect ex. LDA ($20,X) ---> need to read more about this
+    //indirect indexed ex. LDA ($86),Y ---> need to read mroe about this
+
+    AddressingMode addressingMode;
+    if(argument[0] == '#') {
+        addressingMode = immediate;
+    }
+
+    switch(addressingMode) {
+        case immediate:
+            if(instruction == "LDA") {
+                //store LDA_IMM in memory 
+            }
+    }
+
 
     instruction = "LDA";
 

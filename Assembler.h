@@ -25,6 +25,7 @@ private:
     void storeProgramInMemory(string instruction, string argument);
     void executeOpCode(); //TODO: THIS SHOULD PROBLY BE IN ANOTHER CLASS
     bool isArgument(string word);
+    bool Assembler::isLabel(string word);
 
 protected:
 

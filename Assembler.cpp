@@ -5,26 +5,13 @@
 #include "Assembler.h"
 #include <iostream>
 #include <vector>
+#include <sstream>
 
 using namespace std;
 
-Assembler::Assembler() {
-    //init
+Assembler::Assembler(CPU* c) {
+    cpu = c;
 }
-
-/**
- * Some rules:
- *
- *  immediate addressing mode = indicated by # before operand
- *  absolute and zero page = indicated by $ before the operand
- *  implied = no operand is given
- *  accumulator = no operand is given
- *  indexed and zero page indexed = indicated by $ before the operand
- *  indirect = operand begins with parenthesis
- *  pre indexed indirect = parenthesis
- *
- *  so operands can start with #, $, or (
- */
 
 void Assembler::readFile(string fileName) {
     ifstream file;
@@ -43,15 +30,16 @@ void Assembler::readFile(string fileName) {
 
     string instruction;
     string argument;
+    uint16_t programLocation = cpu->programStart;
     for(int i = 0; i < words.size(); i++) {
         instruction = words[i++];
         argument = words[i];
 
         if(isArgument(argument)) {
-            storeProgramInMemory(instruction, argument);
+            storeProgramInMemory(instruction, argument, programLocation);
         } else {
             i -= 1;
-            storeProgramInMemory(instruction, NULL);
+            storeProgramInMemory(instruction, NULL, programLocation);
         }
     }
 
@@ -75,13 +63,26 @@ bool Assembler::isLabel(string word) {
     //if so, this is a label, needs to be handled accordingly
 }
 
-//TODO: this is technically dissassembly. this should be in a differenct class, along with readfile
+/**
+ * Some rules:
+ *
+ *  immediate addressing mode = indicated by # before operand
+ *  absolute and zero page = indicated by $ before the operand
+ *  implied = no operand is given
+ *  accumulator = no operand is given
+ *  indexed and zero page indexed = indicated by $ before the operand
+ *  indirect = operand begins with parenthesis
+ *  pre indexed indirect = parenthesis
+ *
+ *  so operands can start with #, $, or (
+ */
+
 //NOTE: WHEN WE'RE READING A ROM FILE, JUST STORE THE BYTES FROM THE FILE IN PROGRAM MEMORY 1 BY 1
 //here we take the instructions from an assembly file (one that uses the syntax, LDA $whatever)
 //convert the string to byte
 //store that byte in program memory
 //then we can execute the machine code from there
-void Assembler::storeProgramInMemory(string instruction, string argument) {
+void Assembler::storeProgramInMemory(string instruction, string argument, uint16_t &programLocation) {
     //get the addressing mode from the argument first
     //set up constants for addressing modes and switch addressing mode
     //inside those cases, switch the instructions that the string instruction could be
@@ -98,43 +99,89 @@ void Assembler::storeProgramInMemory(string instruction, string argument) {
     //indexed indirect ex. LDA ($20,X) ---> need to read more about this
     //indirect indexed ex. LDA ($86),Y ---> need to read mroe about this
 
-    AddressingMode addressingMode;
+    //initializing this with null so that it doesn't initialize to the first value in addressingmodes enum
+    //this is so i can pick it up later if for some reason we don't have an addressing mode
+    AddressingMode addressingMode = NULL_ADDRESSING_MODE;
+
     if(argument[0] == '#') {
-        addressingMode = immediate;
+        //erase # and $ from beginning of argument
+        argument.erase(0, 2);
+
+        addressingMode = IMMEDIATE;
+    } else if(argument[0] == '$') {
+
+        //erase the first $ character
+        argument.erase(0, 1);
+
+        if(argument.size() == 4) {
+            addressingMode = ABSOLUTE;
+        } else if(argument.size() == 2) {
+            addressingMode = ZERO_PAGE;
+        }
     }
+
+    uint16_t arg = convertStringToWord(argument);
 
     switch(addressingMode) {
-        case immediate:
+        case IMMEDIATE:
             if(instruction == "LDA") {
-                //store LDA_IMM in memory 
+                //store LDA_IMM in memory
+                cpu->storeByteInMemory(LDA_IMM, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             }
-    }
+            break;
 
-
-    instruction = "LDA";
-
-    if(instruction == "LDA") {
-        cout << "lda" << endl;
-    } else {
-        cout << "default" << endl;
+        case ABSOLUTE :
+            if(instruction == "LDA") {
+                cpu->storeByteInMemory(LDA_ABS, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+                cpu->storeByteInMemory(getHighByte(arg), programLocation++);
+            }
+            if(instruction == "STA") {
+                //store STA_ABS in memory
+                cpu->storeByteInMemory(STA_ABS, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+                cpu->storeByteInMemory(getHighByte(arg), programLocation++);
+            }
+            break;
     }
 }
 
-//TODO: THIS SHOULD PROBLY BE IN ANOTHER CLASS
-//this will take the op codes from program memory and execute them one at a time
-void Assembler::executeOpCode() {
+uint16_t Assembler::convertStringToWord(string argument) {
+    uint16_t x;
 
-    //if im passing in straight machine code
-    uint8_t opcode = 0xA9;
+    stringstream ss;
+    ss << hex << argument;
+    ss >> x;
 
-    switch(opcode) {
-        case LDA_IMM:
-            cout << "lda imm" << endl;
-            break;
-        default:
-            cout << "default" << endl;
-            break;
-    }
-
+    return x;
 }
+
+//You can cast it to kill the upper-byte of the 16-bit variable:
+//uint16_t A = 120;
+//uint8_t B;
+//
+//B = (uint8_t)A; // Get lower byte of 16-bit var
+//If you need the upper byte, shift and cast instead:
+//uint16_t A = 120;
+//uint8_t B;
+//
+//B = (uint8_t)(A >> 8); // Get upper byte of 16-bit var
+uint8_t Assembler::getLowByte(uint16_t word) {
+    uint8_t byte;
+
+    byte = (uint8_t)word;
+
+    return byte;
+}
+
+uint8_t Assembler::getHighByte(uint16_t word) {
+    uint8_t byte;
+
+    byte = (uint8_t)(word >> 8);
+
+    return byte;
+}
+
+
 

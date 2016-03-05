@@ -7,11 +7,12 @@
 
 //TODO: ADD THE REST
 enum AddressingMode {
-    immediate,
-    zeropage,
-    zeropagex,
-    absolute,
-    absoluteZ
+    NULL_ADDRESSING_MODE,
+    IMMEDIATE,
+    ZERO_PAGE,
+    ZERO_PAGE_X,
+    ABSOLUTE,
+    ABSOLUTE_Z
 };
 
 #endif //EMULATE6502_ADDRESSINGMODES_H

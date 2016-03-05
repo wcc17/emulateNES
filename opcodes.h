@@ -8,8 +8,10 @@
 #include <string>
 
 enum OpCodes {
-    LDA_AB = 0xAD,
+    LDA_ABS = 0xAD,
     LDA_IMM = 0xA9,
+
+    STA_ABS = 0x8D,
 };
 
 #endif //EMULATE6502_OPCODES_H

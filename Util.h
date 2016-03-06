@@ -14,6 +14,8 @@ class Util {
 public:
     void printByte(uint8_t byte);
     void printWord(uint16_t word);
+    bool isNegativeByte(uint8_t c);
+    bool isNegativeWord(uint16_t c);
 };
 
 

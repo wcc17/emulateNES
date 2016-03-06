@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Assembler.h"
 #include "Util.h"
+#include "CPU.h"
 
 using namespace std;
 
@@ -22,6 +23,7 @@ int main() {
 
             Util util;
 
+            cout << "Results of previous instruction: " << endl;
             //display results of previous instruction and argument
             cout << "Program Counter: ";
             util.printWord(cpu->programCounter);
@@ -43,7 +45,10 @@ int main() {
             util.printByte(cpu->stackPointer);
             cout << endl;
 
-            //TODO: eventually need flag status as well
+            cout << "N V - B D I Z C" << endl;
+            printf("%d %d %d %d %d %d %d %d\n", cpu->flags.negative, cpu->flags.overflow, cpu->flags.ignored, cpu->flags.breakFlag, cpu->flags.decimal, cpu->flags.interrupt, cpu->flags.zero, cpu->flags.carry);
+
+            cout << "Next instruction results to be printed: " << endl;
         }
 
         cpu->executeOpCode();

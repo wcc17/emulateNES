@@ -4,8 +4,6 @@
 
 #include "CPU.h"
 #include "opcodes.h"
-#include <iostream>
-#include "Util.h"
 
 using namespace std;
 
@@ -19,10 +17,14 @@ CPU::CPU() {
     yIndex = 0x00;
     stackPointer = 0xff;
 
-//    flags.ignored = 1;
-//    flags.breakFlag = 1;
-//
-//    labelIterator = 0;
+    flags.carry = 0;
+    flags.interrupt = 0;
+    flags.breakFlag = 0;
+    flags.zero = 0;
+    flags.negative = 0;
+    flags.ignored = 1;
+    flags.breakFlag = 1;
+    flags.decimal = 0;
 }
 
 void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
@@ -44,12 +46,11 @@ void CPU::executeOpCode() {
     Util util;
 
     //TODO: IS THIS NECESSARY? I'm not sure that this will happen with 6502 programs that other people wrote
-    if(programCounter > 0xFF) {
-        programCounter = 0x00;
+    if(programCounter > 0xFFFF) {
+        programCounter = 0x0000;
     }
 
 
-    //if im passing in straight machine code
     uint8_t opcode = memory[programCounter++];
 
     //the cases have {} symbols to create a local scope within the case to declare local variables
@@ -70,7 +71,7 @@ void CPU::executeOpCode() {
             argument = getWordFromBytes(byteLow, byteHigh);
             loadAccumulator_Absolute(argument);
 
-            cout << "LDA_ABS"; util.printWord(argument); cout << endl;
+            cout << "LDA_ABS "; util.printWord(argument); cout << endl;
             break;
         }
         case STA_ABS: {
@@ -79,9 +80,9 @@ void CPU::executeOpCode() {
             uint16_t argument;
 
             argument = getWordFromBytes(byteLow, byteHigh);
-            //storeAccumulator_Absolute(argument);
+            storeAccumulator_Absolute(argument);
 
-            cout << "STA_ABS"; util.printWord(argument); cout << endl;
+            cout << "STA_ABS "; util.printWord(argument); cout << endl;
             break;
         }
         default:
@@ -92,10 +93,23 @@ void CPU::executeOpCode() {
     }
 }
 
+//acumulator affects sign flag and zero flag
 void CPU::loadAccumulator_Immediate(uint8_t argument) {
     accumulator = argument;
+
+    if(accumulator == 0x00) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(argument) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
 
 void CPU::loadAccumulator_Absolute(uint16_t argument) {
     accumulator = argument;
+
+    if(accumulator == 0x00) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeWord(argument) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+
+void CPU::storeAccumulator_Absolute(uint16_t argument) {
+    memory[argument] = accumulator;
+
+    //NOTE: STA affects no flags
 }

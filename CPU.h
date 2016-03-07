@@ -13,6 +13,9 @@
 class CPU {
 
 public:
+    //TODO: maybe move this to Util?
+    static const uint8_t ZERO = 0x00;
+
     uint8_t* memory;
     uint16_t programCounter;
     uint8_t accumulator;
@@ -35,14 +38,18 @@ public:
     CPU();
     void executeOpCode();
     void storeByteInMemory(uint8_t byte, uint16_t location);
+    void storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location);
 
 private:
     Util util;
 
     uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
+    void addWithCarry_Immediate(uint8_t argument);
+    void incrementX();
     void loadAccumulator_Immediate(uint8_t argument);
     void loadAccumulator_Absolute(uint16_t argument);
     void storeAccumulator_Absolute(uint16_t argument);
+    void transferAccumulatorToX();
 };
 
 

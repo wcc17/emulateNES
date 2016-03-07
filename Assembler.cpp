@@ -118,13 +118,20 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         } else if(argument.size() == 2) {
             addressingMode = ZERO_PAGE;
         }
+    } else {
+        addressingMode = IMPLIED;
     }
 
     uint16_t arg = convertStringToWord(argument);
 
     switch(addressingMode) {
         case IMMEDIATE:
-            if(instruction == "LDA") {
+
+            if(instruction == "ADC") {
+                cpu->storeByteInMemory(ADC_IMM, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            }
+            else if(instruction == "LDA") {
                 //store LDA_IMM in memory
                 cpu->storeByteInMemory(LDA_IMM, programLocation++);
                 cpu->storeByteInMemory(getLowByte(arg), programLocation++);
@@ -134,19 +141,28 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         case ABSOLUTE :
             if(instruction == "LDA") {
                 cpu->storeByteInMemory(LDA_ABS, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-                cpu->storeByteInMemory(getHighByte(arg), programLocation++);
+                cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation += 2);
+                programLocation += 2; //because we move two spots in storeWordInMemory
             }
-            if(instruction == "STA") {
+            else if(instruction == "STA") {
                 //store STA_ABS in memory
                 cpu->storeByteInMemory(STA_ABS, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-                cpu->storeByteInMemory(getHighByte(arg), programLocation++);
+                cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+                programLocation += 2; //because we move two spots in storeWordInMemory
+            }
+            break;
+        case IMPLIED:
+            if(instruction == "INX") {
+                cpu->storeByteInMemory(TAX, programLocation++);
+            }
+            else if(instruction == "TAX") {
+                cpu->storeByteInMemory(TAX, programLocation++);
             }
             break;
     }
 }
 
+//TODO: MOVE THESE TO UTIL. THEY COULD BE USEFUL ELSEWHERE.
 uint16_t Assembler::convertStringToWord(string argument) {
     uint16_t x;
 
@@ -156,6 +172,7 @@ uint16_t Assembler::convertStringToWord(string argument) {
 
     return x;
 }
+
 
 //You can cast it to kill the upper-byte of the 16-bit variable:
 //uint16_t A = 120;

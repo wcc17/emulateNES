@@ -8,30 +8,192 @@
 #include <string>
 
 enum OpCodes {
-    ADC_IMM = 0x69,
+    
+    ADC_IMMEDIATE = 0x69,
     ADC_ZEROPAGE = 0x65,
     ADC_ZEROPAGEX = 0x75,
-    ADC_ABS = 0x6D,
-    ADC_ABSX = 0x7D,
-    ADC_ABSY = 0x79,
+    ADC_ABSOLUTE = 0x6D,
+    ADC_ABSOLUTEX = 0x7D,
+    ADC_ABSOULTEY = 0x79,
     ADC_INDIRECTX = 0x61,
     ADC_INDIRECTY = 0x71,
 
-    INX = 0XE8,
+    AND_IMMEDIATE = 0x29,
+    AND_ZEROPAGE = 0x25,
+    AND_ZEROPAGEX = 0x35,
+    AND_ABSOLUTE = 0x2D,
+    AND_ABSOLUTEX = 0x3D,
+    AND_ABSOLUTEY = 0x39,
+    AND_INDIRECTX = 0x21,
+    AND_INDIRECTY = 0x31,
 
-    LDA_ABS = 0xAD,
-    LDA_IMM = 0xA9,
+    ASL_ACCUMULATOR = 0x0A,
+    ASL_ZEROPAGE = 0x06,
+    ASL_ZEROPAGEX = 0x16,
+    ASL_ABSOLUTE = 0x0E,
+    ASL_ABSOLUTEX = 0x1E,
+
+    BIT_ZEROPAGE = 0x24,
+    BIT_ABSOLUTE = 0x2C,
+
+    BPL = 0x10,
+    BMI = 0x30,
+    BVC = 0x50,
+    BVS = 0x70,
+    BCC = 0x90,
+    BCS = 0xB0,
+    BNE = 0xD0,
+    BEQ = 0xF0,
+
+    BRK = 0x00,
+
+    CMP_IMMEDIATE = 0xC9,
+    CMP_ZEROPAGE = 0xC5,
+    CMP_ZEROPAGEX = 0xD5,
+    CMP_ABSOLUTE = 0xCD,
+    CMP_ABSOLUTEX = 0xDD,
+    CMP_ABSOLUTEY = 0xD9,
+    CMP_INDIRECTX = 0xC1,
+    CMP_INDIRECTY = 0xD1,
+
+    CPX_IMMEDIATE = 0xE0,
+    CPX_ZEROPAGE = 0xE4,
+    CPX_ABSOLUTE = 0xEC,
+
+    CPY_IMMEDIATE = 0xC0,
+    CPY_ZEROPAGE = 0xC4,
+    CPY_ABSOLUTE = 0xCC,
+
+    DEC_ZEROPAGE = 0xC6,
+    DEC_ZEROPAGEX = 0xD6,
+    DEC_ABSOLUTE = 0xCE,
+    DEC_ABSOLUTEX = 0xDE,
+
+    EOR_IMMEDIATE = 0x49,
+    EOR_ZEROPAGE = 0x45,
+    EOR_ZEROPAGEX = 0x55,
+    EOR_ABSOLUTE = 0x4D,
+    EOR_ABSOLUTEX = 0x5D,
+    EOR_ABSOLUTEY = 0x59,
+    EOR_INDIRECTX = 0x41,
+    EOR_INDIRECTY = 0x51,
+
+    //Flag Instructions
+    CLC = 0x18,
+    SEC = 0x38,
+    CLI = 0x58,
+    SEI = 0x78,
+    CLV = 0xB8,
+    CLD = 0xD8,
+    SED = 0xF8,
+
+    INC_ZEROPAGE = 0xE6,
+    INC_ZEROPAGEX = 0xF6,
+    INC_ABSOLUTE = 0xEE,
+    INC_ABSOLUTEX = 0xFE,
+
+    JMP_ABSOLUTE = 0x4C,
+    JMP_INDIRECT = 0x6C,
+
+    JSR_ABSOLUTE = 0x20,
+
+    LDA_IMMEDIATE = 0xA9,
+    LDA_ZEROPAGE = 0xA5,
+    LDA_ZEROPAGEX = 0xB5,
+    LDA_ABSOLUTE = 0xAD,
+    LDA_ABSOLUTEX = 0xBD,
+    LDA_ABSOLUTEY = 0xB9,
+    LDA_INDIRECTX = 0xA1,
+    LDA_INDIRECTY = 0xB1,
+
+    LDX_IMMEDIATE = 0xA2,
+    LDX_ZEROPAGE = 0xA6,
+    LDX_ZEROPAGEY = 0xB6,
+    LDX_ABSOLUTE = 0xAE,
+    LDX_ABSOLUTEY = 0xBE,
+
+    LDY_IMMEDIATE = 0xA0,
+    LDY_ZEROPAGE = 0xA4,
+    LDY_ZEROPAGEX = 0xB4,
+    LDY_ABSOLUTE = 0xAC,
+    LDY_ABSOLUTEX = 0xBC,
+
+    LSR_ACCUMULATOR = 0x4A,
+    LSR_ZEROPAGE = 0x46,
+    LSR_ZEROPAGEX = 0x56,
+    LSR_ABSOLUTE = 0x4E,
+    LSR_ABSOLUTEX = 0x5E,
+
+    NOP = 0xEA,
+
+    ORA_IMMEDIATE = 0x09,
+    ORA_ZEROPAGE = 0x05,
+    ORA_ZEROPAGEX = 0x15,
+    ORA_ABSOLUTE = 0x0D,
+    ORA_ABSOLUTEX = 0x1D,
+    ORA_ABSOLUTEY = 0x19,
+    ORA_INDIRECTX = 0x01,
+    ORA_INDIRECTY = 0x11,
+
+    //register instructions
+    TAX = 0xAA,
+    TXA = 0x8A,
+    DEX = 0xCA,
+    INX = 0xE8,
+    TAY = 0xA8,
+    TYA = 0x98,
+    DEY = 0x88,
+    INY = 0xC8,
+
+    ROL_ACCUMULATOR = 0x2A,
+    ROL_ZEROPAGE = 0x26,
+    ROL_ZEROPAGEX = 0x36,
+    ROL_ABSOLUTE = 0x2E,
+    ROL_ABSOLUTEX = 0x3E,
+
+    ROR_ACCUMULATOR = 0x6A,
+    ROR_ZEROPAGE = 0x66,
+    ROR_ZEROPAGEX = 0x76,
+    ROR_ABSOLUTE = 0x6E,
+    ROR_ABSOLUTEX = 0x7E,
+
+    RTI = 0x40,
+
+    RTS = 0x60,
+
+    SBC_IMMEDIATE = 0xE9,
+    SBC_ZEROPAGE = 0xE5,
+    SBC_ZEROPAGEX = 0xF5,
+    SBC_ABSOLUTE = 0xED,
+    SBC_ABSOLUTEX = 0xFD,
+    SBC_ABSOLUTEY = 0xF9,
+    SBC_INDIRECTX = 0xE1,
+    SBC_INDIRECTY = 0xF1,
 
     STA_ZEROPAGE = 0x85,
     STA_ZEROPAGEX = 0x95,
-    STA_ABS = 0x8D,
-    STA_ABSX = 0x9D,
-    STA_ABSY = 0x99,
+    STA_ABSOLUTE = 0x8D,
+    STA_ABSOLUTEX = 0x9D,
+    STA_ABSOLUTEY = 0x99,
     STA_INDIRECTX = 0x81,
     STA_INDIRECTY = 0x91,
 
+    //stack instructions
+    TXS = 0x9A,
+    TSX = 0xBA,
+    PHA = 0x48,
+    PLA = 0x68,
+    PHP = 0x08,
+    PLP = 0x28,
 
-    TAX = 0XAA,
+    STX_ZEROPAGE = 0x86,
+    STX_ZEROPAGEY = 0x96,
+    STX_ABSOLUTE = 0x8E,
+
+    STY_ZEROPAGE = 0x84,
+    STY_ZEROPAGEX = 0x94,
+    STY_ABSOLUTE = 0x8C,
+
 };
 
 #endif //EMULATE6502_OPCODES_H

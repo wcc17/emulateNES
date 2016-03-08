@@ -321,6 +321,7 @@ void CPU::storeAccumulator_Absolute(uint16_t argument) {
 
     //NOTE: STA affects no flags
 }
+
 void CPU::storeAccumulator_ZeroPage(uint8_t argument) {
     memory[argument] = accumulator;
 }

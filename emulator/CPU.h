@@ -45,15 +45,21 @@ public:
     Util util;
 
     uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
+
+    void addWithCarry(uint8_t argument);
     void addWithCarry_Immediate(uint8_t argument);
     void addWithCarry_ZeroPage(uint8_t argument);
+    void addWithCarry_ZeroPageX(uint8_t argument);
     void addWithCarry_Absolute(uint16_t argument);
 
     void incrementX();
 
+    void loadAccumulator(uint8_t argument);
     void loadAccumulator_Immediate(uint8_t argument);
+    void loadAccumulator_ZeroPage(uint8_t argument);
     void loadAccumulator_Absolute(uint16_t argument);
 
+    void storeAccumulator(uint16_t argument);
     void storeAccumulator_ZeroPage(uint8_t argument);
     void storeAccumulator_Absolute(uint16_t argument);
 

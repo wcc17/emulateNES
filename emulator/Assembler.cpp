@@ -113,8 +113,27 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         //erase the first $ character
         argument.erase(0, 1);
 
-        if(argument.size() == 4) {
+        //if theres a comma in the argument, its zero page. otherwise, check if the argument is 4 digits or 2 digits
+        if(argument.find(",") != string::npos) {
+
+            //convert all characters to lower case for simplicity because x and y in zeropage indexed instructions aren't case sensitive
+            for(int i = 0; i < argument.size(); i++) {
+                argument[i] = tolower(argument[i]);
+            }
+
+            if(argument.find("x") != string::npos ) {
+                addressingMode = ZERO_PAGEX;
+            } else if(argument.find("y") != string::npos) {
+                addressingMode = ZERO_PAGEY;
+            }
+
+        } else if(argument.size() == 4) {
+            //TODO: CHECKING THE SIZE CANNOT BE THE ONLY CHECK HERE. IF THERE ARE SPACES IN THE ARGUMENT THIS WILL FAIL
+            //TODO: SHOULD BE CHECKING FOR FOUR OR TWO DIGITS, NOT JUST THE LENGTH OF THE STRING
+            //here argument will either be xxxx or xx,x
+            //both are 4 characters
             addressingMode = ABSOLUTE;
+
         } else if(argument.size() == 2) {
             addressingMode = ZERO_PAGE;
         }
@@ -125,33 +144,21 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
     uint16_t arg = convertStringToWord(argument);
 
     switch(addressingMode) {
-        case IMMEDIATE:
-            if(instruction == "ADC") {
-                cpu->storeByteInMemory(ADC_IMM, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-            } else if(instruction == "LDA") {
-                //store LDA_IMM in memory
-                cpu->storeByteInMemory(LDA_IMM, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-            }
-            break;
-        case ABSOLUTE :
-            if(instruction == "LDA") {
-                cpu->storeByteInMemory(LDA_ABS, programLocation++);
-                cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation += 2);
-                programLocation += 2; //because we move two spots in storeWordInMemory
-            } else if(instruction == "STA") {
-                //store STA_ABS in memory
-                cpu->storeByteInMemory(STA_ABS, programLocation++);
-                cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
-                programLocation += 2; //because we move two spots in storeWordInMemory
-            }
-            break;
         case IMPLIED:
             if(instruction == "INX") {
                 cpu->storeByteInMemory(TAX, programLocation++);
             } else if(instruction == "TAX") {
                 cpu->storeByteInMemory(TAX, programLocation++);
+            }
+            break;
+        case IMMEDIATE:
+            if(instruction == "ADC") {
+                cpu->storeByteInMemory(ADC_IMMEDIATE, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            } else if(instruction == "LDA") {
+                //store LDA_IMM in memory
+                cpu->storeByteInMemory(LDA_IMMEDIATE, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             }
             break;
         case ZERO_PAGE:
@@ -162,6 +169,37 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 cpu->storeByteInMemory(STA_ZEROPAGE, programLocation++);
                 cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             }
+            break;
+        case ZERO_PAGEX:
+            if(instruction == "ADC") {
+                cpu->storeByteInMemory(ADC_ZEROPAGEX, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            } else if (instruction == "STA") {
+                cpu->storeByteInMemory(STA_ZEROPAGEX, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++):
+            }
+            break;
+        case ZERO_PAGEY:
+            break;
+        case ABSOLUTE :
+            if(instruction == "LDA") {
+                cpu->storeByteInMemory(LDA_ABSOLUTE, programLocation++);
+                cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation += 2);
+                programLocation += 2; //because we move two spots in storeWordInMemory
+            } else if(instruction == "STA") {
+                //store STA_ABS in memory
+                cpu->storeByteInMemory(STA_ABSOLUTE, programLocation++);
+                cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+                programLocation += 2; //because we move two spots in storeWordInMemory
+            }
+            break;
+        case ABSOLUTEX:
+            break;
+        case ABSOLUTEY:
+            break;
+        case INDIRECTX:
+            break;
+        case INDIRECTY:
             break;
     }
 }

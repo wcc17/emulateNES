@@ -11,10 +11,11 @@ enum AddressingMode {
     IMPLIED,
     IMMEDIATE,
     ZERO_PAGE,
-    ZERO_PAGE_X,
+    ZERO_PAGEX,
+    ZERO_PAGEY,
     ABSOLUTE,
-    ABSOLUTE_X,
-    ABSOLUTE_Y,
+    ABSOLUTEX,
+    ABSOLUTEY,
     INDIRECTX,
     INDIRECTY
 };

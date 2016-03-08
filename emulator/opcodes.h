@@ -8,7 +8,7 @@
 #include <string>
 
 enum OpCodes {
-    
+
     ADC_IMMEDIATE = 0x69,
     ADC_ZEROPAGE = 0x65,
     ADC_ZEROPAGEX = 0x75,

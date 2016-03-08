@@ -60,14 +60,28 @@ void CPU::executeOpCode() {
 
     //the cases have {} symbols to create a local scope within the case to declare local variables
     switch(opcode) {
-        case ADC_IMM:{
+        case ADC_IMMEDIATE:{
             uint8_t argument = memory[programCounter++];
             addWithCarry_Immediate(argument);
 
             cout << "ADC_IMM "; util.printByte(argument); cout << endl;
             break;
         }
-        case ADC_ABS: {
+        case ADC_ZEROPAGE: {
+            uint8_t argument = memory[programCounter++];
+            addWithCarry_ZeroPage(argument);
+
+            cout << "ADC_ZEROPAGE "; util.printByte(argument); cout << endl;
+            break;
+        }
+        case ADC_ZEROPAGEX: {
+            uint8_t argument = memory[programCounter++];
+            argument += xIndex;
+            addWithCarry_ZeroPageX(argument);
+
+            cout << "ADC_ZEROPAGEX "; util.printByte(argument); cout << endl;
+        }
+        case ADC_ABSOLUTE: {
             uint8_t byteLow = memory[programCounter++];
             uint8_t byteHigh = memory[programCounter++];
             uint16_t argument;
@@ -78,13 +92,6 @@ void CPU::executeOpCode() {
             cout << "ADC_ABS"; util.printWord(argument); cout << endl;
             break;
         }
-        case ADC_ZEROPAGE: {
-            uint8_t argument = memory[programCounter++];
-            addWithCarry_ZeroPage(argument);
-
-            cout << "ADC_ZEROPAGE "; util.printByte(argument); cout << endl;
-            break;
-        }
 
         case INX:{
             incrementX();
@@ -93,7 +100,7 @@ void CPU::executeOpCode() {
             break;
         }
 
-        case LDA_IMM:{
+        case LDA_IMMEDIATE:{
             uint8_t argument = memory[programCounter++];
 
             loadAccumulator_Immediate(argument);
@@ -101,7 +108,7 @@ void CPU::executeOpCode() {
             cout << "LDA_IMM "; util.printByte(argument); cout << endl;
             break;
         }
-        case LDA_ABS: {
+        case LDA_ABSOLUTE: {
             uint8_t byteLow = memory[programCounter++];
             uint8_t byteHigh = memory[programCounter++];
             uint16_t argument;
@@ -121,7 +128,7 @@ void CPU::executeOpCode() {
             cout << "STA_ZEROPAGE "; util.printByte(argument); cout << endl;
             break;
         }
-        case STA_ABS: {
+        case STA_ABSOLUTE: {
             uint8_t byteLow = memory[programCounter++];
             uint8_t byteHigh = memory[programCounter++];
             uint16_t argument;
@@ -148,7 +155,7 @@ void CPU::executeOpCode() {
     }
 }
 
-void CPU::addWithCarry_Immediate(uint8_t argument) {
+void CPU::addWithCarry(uint8_t argument) {
     uint8_t carry = 0;
     if(flags.carry == 1) {
         carry = 1;
@@ -195,103 +202,25 @@ void CPU::addWithCarry_Immediate(uint8_t argument) {
     accumulator = sumByte;
 }
 
-void CPU::addWithCarry_Absolute(uint16_t argument) {
-    uint8_t memoryValue = memory[argument];
-
-    uint8_t carry = 0;
-    if(flags.carry == 1) {
-        carry = 1;
-        flags.carry = 0;
-    }
-
-    //CHECK CARRY FLAG
-    //get result in 16 bit variable
-    //if higher than 0xff, figure out carry situation
-    //otherwise, put the result in an 8 bit variable and move on
-    uint16_t sumWord = accumulator + memoryValue + carry;
-    uint8_t sumByte;
-    if(sumWord > 0x00FF) {
-        sumByte = sumWord - 0x0100;
-        flags.carry = 1;
-    } else {
-        sumByte = sumWord;
-    }
-
-    //CHECK OVERFLOW FLAG
-    //if the accumulator and the argument are both negative or both positive
-    //AND if the sum is the opposite of them, set the overflow flag
-    //the accumulator used here is before the result of this instruction is carried out.
-    if(util.isNegativeByte(accumulator) == util.isNegativeByte(memoryValue)) {
-        if(util.isNegativeByte(accumulator) != util.isNegativeByte(sumByte)) {
-            flags.overflow = 1;
-        }
-    }
-
-    //CHECK ZERO FLAG
-    if(sumByte == 0x00) {
-        flags.zero = 1;
-    } else {
-        flags.zero = 0;
-    }
-
-    //CHECK NEGATIVE FLAG
-    if(util.isNegativeByte(sumByte)) {
-        flags.negative = 1;
-    } else {
-        flags.negative = 0;
-    }
-
-    accumulator = sumByte;
+void CPU::addWithCarry_Immediate(uint8_t argument) {
+    addWithCarry(argument);
 }
 
 void CPU::addWithCarry_ZeroPage(uint8_t argument) {
     uint8_t memoryValue = memory[argument];
-
-    uint8_t carry = 0;
-    if(flags.carry == 1) {
-        carry = 1;
-        flags.carry = 0;
-    }
-
-    //CHECK CARRY FLAG
-    //get result in 16 bit variable
-    //if higher than 0xff, figure out carry situation
-    //otherwise, put the result in an 8 bit variable and move on
-    uint16_t sumWord = accumulator + memoryValue + carry;
-    uint8_t sumByte;
-    if(sumWord > 0x00FF) {
-        sumByte = sumWord - 0x0100;
-        flags.carry = 1;
-    } else {
-        sumByte = sumWord;
-    }
-
-    //CHECK OVERFLOW FLAG
-    //if the accumulator and the argument are both negative or both positive
-    //AND if the sum is the opposite of them, set the overflow flag
-    //the accumulator used here is before the result of this instruction is carried out.
-    if(util.isNegativeByte(accumulator) == util.isNegativeByte(memoryValue)) {
-        if(util.isNegativeByte(accumulator) != util.isNegativeByte(sumByte)) {
-            flags.overflow = 1;
-        }
-    }
-
-    //CHECK ZERO FLAG
-    if(sumByte == 0x00) {
-        flags.zero = 1;
-    } else {
-        flags.zero = 0;
-    }
-
-    //CHECK NEGATIVE FLAG
-    if(util.isNegativeByte(sumByte)) {
-        flags.negative = 1;
-    } else {
-        flags.negative = 0;
-    }
-
-    accumulator = sumByte;
+    addWithCarry(memoryValue);
 }
+
+void CPU::addWithCarry_ZeroPageX(uint8_t argument) {
+    uint8_t memoryValue = memory[argument];
+    addWithCarry(memoryValue);
+}
+
+void CPU::addWithCarry_Absolute(uint16_t argument) {
+    uint8_t memoryValue = memory[argument];
+    addWithCarry(memoryValue);
+}
+
 
 void CPU::incrementX() {
     xIndex += 1;
@@ -301,7 +230,8 @@ void CPU::incrementX() {
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
 
-void CPU::loadAccumulator_Immediate(uint8_t argument) {
+
+void CPU::loadAccumulator(uint8_t argument) {
     accumulator = argument;
 
     //acumulator affects sign flag and zero flag
@@ -309,22 +239,28 @@ void CPU::loadAccumulator_Immediate(uint8_t argument) {
     if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
 
-void CPU::loadAccumulator_Absolute(uint16_t argument) {
-    accumulator = memory[argument];
+void CPU::loadAccumulator_Immediate(uint8_t argument) {
+    loadAccumulator(argument);
+}
 
-    if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
-    if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
+void CPU::loadAccumulator_Absolute(uint16_t argument) {
+    loadAccumulator(memory[argument]);
+}
+
+
+void CPU::storeAccumulator(uint16_t argument) {
+    //NOTE: STA affects no flags
+    memory[argument] = accumulator;
 }
 
 void CPU::storeAccumulator_Absolute(uint16_t argument) {
-    memory[argument] = accumulator;
-
-    //NOTE: STA affects no flags
+    storeAccumulator(argument);
 }
 
 void CPU::storeAccumulator_ZeroPage(uint8_t argument) {
-    memory[argument] = accumulator;
+    storeAccumulator(argument);
 }
+
 
 void CPU::transferAccumulatorToX() {
     xIndex = accumulator;

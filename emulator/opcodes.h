@@ -22,7 +22,14 @@ enum OpCodes {
     LDA_ABS = 0xAD,
     LDA_IMM = 0xA9,
 
+    STA_ZEROPAGE = 0x85,
+    STA_ZEROPAGEX = 0x95,
     STA_ABS = 0x8D,
+    STA_ABSX = 0x9D,
+    STA_ABSY = 0x99,
+    STA_INDIRECTX = 0x81,
+    STA_INDIRECTY = 0x91,
+
 
     TAX = 0XAA,
 };

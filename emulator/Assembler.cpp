@@ -126,25 +126,21 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
 
     switch(addressingMode) {
         case IMMEDIATE:
-
             if(instruction == "ADC") {
                 cpu->storeByteInMemory(ADC_IMM, programLocation++);
                 cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-            }
-            else if(instruction == "LDA") {
+            } else if(instruction == "LDA") {
                 //store LDA_IMM in memory
                 cpu->storeByteInMemory(LDA_IMM, programLocation++);
                 cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             }
             break;
-
         case ABSOLUTE :
             if(instruction == "LDA") {
                 cpu->storeByteInMemory(LDA_ABS, programLocation++);
                 cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation += 2);
                 programLocation += 2; //because we move two spots in storeWordInMemory
-            }
-            else if(instruction == "STA") {
+            } else if(instruction == "STA") {
                 //store STA_ABS in memory
                 cpu->storeByteInMemory(STA_ABS, programLocation++);
                 cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
@@ -154,9 +150,17 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         case IMPLIED:
             if(instruction == "INX") {
                 cpu->storeByteInMemory(TAX, programLocation++);
-            }
-            else if(instruction == "TAX") {
+            } else if(instruction == "TAX") {
                 cpu->storeByteInMemory(TAX, programLocation++);
+            }
+            break;
+        case ZERO_PAGE:
+            if(instruction == "ADC") {
+                cpu->storeByteInMemory(ADC_ZEROPAGE, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            } else if (instruction == "STA") {
+                cpu->storeByteInMemory(STA_ZEROPAGE, programLocation++);
+                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             }
             break;
     }

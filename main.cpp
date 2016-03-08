@@ -1,7 +1,8 @@
 #include <iostream>
-#include "Assembler.h"
-#include "Util.h"
-#include "CPU.h"
+#include "emulator/Assembler.h"
+#include "emulator/Util.h"
+#include "emulator/CPU.h"
+#include "test_emulator/CPUTest.h"
 
 using namespace std;
 
@@ -53,10 +54,13 @@ void printDebugInformation(CPU* cpu) {
 }
 
 int main() {
+//    CPUTest cpuTest;
+//    cpuTest.runAllTests();
+
     CPU *cpu = new CPU();
     Assembler assembler(cpu);
 
-    string fileName = "firstProgram.asm";
+    string fileName = "sample_programs/testADCZeroPage.asm";
     assembler.readFile(fileName.c_str());
 
     printMemory(0x0600, 0x0700, cpu);

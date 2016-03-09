@@ -40,11 +40,8 @@ public:
     void storeByteInMemory(uint8_t byte, uint16_t location);
     void storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location);
 
-//I would prefer these to be private but for testing reasons they aren't right now.
-//private:
+private:
     Util util;
-
-    uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
 
     void addWithCarry(uint8_t argument);
     void addWithCarry_Immediate(uint8_t argument);
@@ -84,9 +81,18 @@ public:
 
     void transferAccumulatorToX();
 
-private:
     void printExecutedByteInstruction(std::string instruction, uint8_t argument);
     void printExecutedWordInstruction(std::string instruction, uint16_t argument);
+
+    uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
+
+    uint8_t retrieveImmediateInstruction(std::string instructionString);
+    uint8_t retrieveZeroPageInstruction(std::string instructionString);
+    uint8_t retrieveZeroPageXInstruction(std::string instructionString);
+    uint8_t retrieveZeroPageYInstruction(std::string instructionString);
+    uint16_t retrieveAbsoluteInstruction(std::string instructionString);
+    uint16_t retrieveAbsoluteXInstruction(std::string instructionString);
+    uint16_t retrieveAbsoluteYInstruction(std::string instructionString);
 };
 
 

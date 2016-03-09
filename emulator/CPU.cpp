@@ -42,245 +42,142 @@ void CPU::executeOpCode() {
 
     //the cases have {} symbols to create a local scope within the case to declare local variables
     switch(opcode) {
-        case ADC_IMMEDIATE:{
-            uint8_t argument = memory[programCounter++];
-            addWithCarry_Immediate(argument);
 
-            printExecutedByteInstruction("ADC_IMM", argument);
+        //ADC
+        case ADC_IMMEDIATE:{
+            uint8_t argument = retrieveImmediateInstruction("ADC_IMM");
+            addWithCarry_Immediate(argument);
             break;
         }
         case ADC_ZEROPAGE: {
-            uint8_t argument = memory[programCounter++];
+            uint8_t argument = retrieveZeroPageInstruction("ADC_ZEROPAGE");
             addWithCarry_ZeroPage(argument);
-
-            printExecutedByteInstruction("ADC_ZEROPAGE", argument);
             break;
         }
         case ADC_ZEROPAGEX: {
-            uint8_t argument = memory[programCounter++];
-            argument += xIndex;
+            uint8_t argument = retrieveZeroPageXInstruction("ADC_ZEROPAGEX");
             addWithCarry_ZeroPageX(argument);
-
-            printExecutedByteInstruction("ADC_ZEROPAGEX", argument);
             break;
         }
         case ADC_ABSOLUTE: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
+            uint16_t argument = retrieveAbsoluteInstruction("ADC_ABSOLUTE");
             addWithCarry_Absolute(argument);
-
-            printExecutedWordInstruction("ADC_ABSOLUTE", argument);
             break;
         }
         case ADC_ABSOLUTEX: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
-            argument += xIndex;
+            uint16_t argument = retrieveAbsoluteXInstruction("ADC_ABSOLUTEX");
             addWithCarry_AbsoluteX(argument);
-
-            printExecutedWordInstruction("ADC_ABSOLUTEX", argument);
             break;
         }
         case ADC_ABSOLUTEY: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
-            argument += yIndex;
+            uint16_t argument = retrieveAbsoluteYInstruction("ADC_ABSOLUTEY");
             addWithCarry_AbsoluteY(argument);
-
-            printExecutedWordInstruction("ADC_ABSOLUTEY", argument);
             break;
         }
 
+        //INX
         case INX:{
             incrementX();
-
             cout << "INX" << endl;
             break;
         }
 
+        //LDA
         case LDA_IMMEDIATE:{
-            uint8_t argument = memory[programCounter++];
-
+            uint8_t argument = retrieveImmediateInstruction("LDA_IMM");
             loadAccumulator_Immediate(argument);
-
-            printExecutedByteInstruction("LDA_IMM", argument);
             break;
         }
         case LDA_ABSOLUTE: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
+            uint16_t argument = retrieveAbsoluteInstruction("LDA_ABSOLUTE");
             loadAccumulator_Absolute(argument);
-
-            printExecutedByteInstruction("LDA_ABS", argument);
             break;
         }
 
+        //LDX
         case LDX_IMMEDIATE: {
-            uint8_t argument = memory[programCounter++];
-
+            uint8_t argument = retrieveImmediateInstruction("LDX_IMM");
             loadXIndex_Immediate(argument);
-
-            printExecutedByteInstruction("LDX_IMM", argument);
             break;
         }
         case LDX_ZEROPAGE: {
-            uint8_t argument = memory[programCounter++];
-
+            uint8_t argument = retrieveZeroPageInstruction("LDX_ZEROPAGE");
             loadXIndex_ZeroPage(argument);
-
-            printExecutedByteInstruction("LDX_ZEROPAGE", argument);
             break;
         }
         case LDX_ZEROPAGEY: {
-            uint8_t argument = memory[programCounter++];
-
-            argument += yIndex;
+            uint8_t argument = retrieveZeroPageYInstruction("LDX_ZEROPAGEY");
             loadXIndex_ZeroPageY(argument);
-
-            printExecutedByteInstruction("LDX_ZEROPAGEY", argument);
             break;
         }
         case LDX_ABSOLUTE: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
+            uint16_t argument = retrieveAbsoluteInstruction("LDX_ABSOLUTE");
             loadXIndex_Absolute(argument);
-
-            printExecutedWordInstruction("LDX_ABSOLUTE", argument);
             break;
         }
         case LDX_ABSOLUTEY: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
-            argument += yIndex;
+            uint16_t argument = retrieveAbsoluteYInstruction("LDX_ABSOLUTEY");
             loadXIndex_AbsoluteY(argument);
-
-            printExecutedWordInstruction("LDX_ABSOLUTELY", argument);
             break;
         }
 
+        //LDY
         case LDY_IMMEDIATE: {
-            uint8_t argument = memory[programCounter++];
-
+            uint8_t argument = retrieveImmediateInstruction("LDY_IMM");
             loadYIndex_Immediate(argument);
-
-            printExecutedByteInstruction("LDY_IMM", argument);
             break;
         }
         case LDY_ZEROPAGE: {
-            uint8_t argument = memory[programCounter++];
-
+            uint8_t argument = retrieveZeroPageInstruction("LDY_ZEROPAGE");
             loadYIndex_ZeroPage(argument);
-
-            printExecutedByteInstruction("LDY_ZEROPAGE", argument);
             break;
         }
         case LDY_ZEROPAGEX: {
-            uint8_t argument = memory[programCounter++];
-
-            argument += xIndex;
+            uint8_t argument = retrieveZeroPageXInstruction("LDY_ZEROPAGEX");
             loadYIndex_ZeroPageX(argument);
-
-            printExecutedByteInstruction("LDY_ZEROPAGEX", argument);
             break;
         }
         case LDY_ABSOLUTE: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
+            uint16_t argument = retrieveAbsoluteInstruction("LDY_ABSOLUTE");
             loadYIndex_Absolute(argument);
-
-            printExecutedWordInstruction("LDY_ABSOLUTE", argument);
             break;
         }
         case LDY_ABSOLUTEX: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
-            argument += xIndex;
+            uint16_t argument = retrieveAbsoluteXInstruction("LDY_ABSOLUTEX");
             loadYIndex_AbsoluteX(argument);
-
-            printExecutedWordInstruction("LDY_ABSOLUTELX", argument);
             break;
         }
 
+        //STA
         case STA_ZEROPAGE: {
-            uint8_t argument = memory[programCounter++];
-
+            uint8_t argument = retrieveZeroPageInstruction("STA_ZEROPAGE");
             storeAccumulator_ZeroPage(argument);
-
-            printExecutedByteInstruction("STA_ZEROPAGE", argument);
             break;
         }
         case STA_ZEROPAGEX: {
-            uint8_t argument = memory[programCounter++];
-
-            argument += xIndex;
+            uint8_t argument = retrieveZeroPageXInstruction("STA_ZEROPAGEX");
             storeAccumulator_ZeroPageX(argument);
-
-            printExecutedByteInstruction("STA_ZEROPAGEX", argument);
             break;
         }
         case STA_ABSOLUTE: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
+            uint16_t argument = retrieveAbsoluteInstruction("STA_ABSOLUTE");
             storeAccumulator_Absolute(argument);
-
-            printExecutedWordInstruction("STA_ABSOLUTE", argument);
             break;
         }
         case STA_ABSOLUTEX: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
-            argument += xIndex;
+            uint16_t argument = retrieveAbsoluteXInstruction("STA_ABSOLUTEX");
             storeAccumulator_Absolute(argument);
-
-            printExecutedWordInstruction("STA_ABSOLUTEX", argument);
             break;
         }
         case STA_ABSOLUTEY: {
-            uint8_t byteLow = memory[programCounter++];
-            uint8_t byteHigh = memory[programCounter++];
-            uint16_t argument;
-
-            argument = getWordFromBytes(byteLow, byteHigh);
-            argument += yIndex;
+            uint16_t argument = retrieveAbsoluteYInstruction("STA_ABSOLUTEY");
             storeAccumulator_Absolute(argument);
-
-            printExecutedWordInstruction("STA_ABSOLUTELY", argument);
             break;
         }
 
+        //TAX
         case TAX: {
             transferAccumulatorToX();
-
             cout << "TAX" << endl;
             break;
         }
@@ -436,7 +333,6 @@ void CPU::loadYIndex_AbsoluteX(uint16_t argument) {
     loadYIndex(memory[argument]);
 }
 
-
 void CPU::storeAccumulator(uint16_t argument) {
     //NOTE: STA affects no flags
     memory[argument] = accumulator;
@@ -457,7 +353,6 @@ void CPU::storeAccumulator_AbsoluteY(uint16_t argument) {
     storeAccumulator(argument);
 }
 
-
 void CPU::transferAccumulatorToX() {
     xIndex = accumulator;
 
@@ -465,7 +360,6 @@ void CPU::transferAccumulatorToX() {
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
-
 
 
 void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
@@ -492,4 +386,71 @@ void CPU::printExecutedByteInstruction(string instruction, uint8_t argument) {
 
 void CPU::printExecutedWordInstruction(string instruction, uint16_t argument) {
     cout << instruction << " "; util.printByte(argument); cout << endl;
+}
+
+
+
+uint8_t CPU::retrieveImmediateInstruction(string instructionString) {
+    uint8_t argument = memory[programCounter++];
+    printExecutedByteInstruction(instructionString, argument);
+
+    return argument;
+}
+
+uint8_t CPU::retrieveZeroPageInstruction(string instructionString) {
+    uint8_t argument = memory[programCounter++];
+    printExecutedByteInstruction(instructionString, argument);
+
+    return argument;
+}
+
+uint8_t CPU::retrieveZeroPageXInstruction(string instructionString) {
+    uint8_t argument = memory[programCounter++];
+    argument += xIndex;
+    printExecutedByteInstruction(instructionString, argument);
+
+    return argument;
+}
+
+uint8_t CPU::retrieveZeroPageYInstruction(string instructionString) {
+    uint8_t argument = memory[programCounter++];
+    argument += yIndex;
+    printExecutedByteInstruction(instructionString, argument);
+
+    return argument;
+}
+
+uint16_t CPU::retrieveAbsoluteInstruction(string instructionString) {
+    uint8_t byteLow = memory[programCounter++];
+    uint8_t byteHigh = memory[programCounter++];
+    uint16_t argument;
+
+    argument = getWordFromBytes(byteLow, byteHigh);
+
+    printExecutedWordInstruction(instructionString, argument);
+    return argument;
+}
+
+uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
+    uint8_t byteLow = memory[programCounter++];
+    uint8_t byteHigh = memory[programCounter++];
+    uint16_t argument;
+
+    argument = getWordFromBytes(byteLow, byteHigh);
+    argument += xIndex;
+
+    printExecutedWordInstruction(instructionString, argument);
+    return argument;
+}
+
+uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
+    uint8_t byteLow = memory[programCounter++];
+    uint8_t byteHigh = memory[programCounter++];
+    uint16_t argument;
+
+    argument = getWordFromBytes(byteLow, byteHigh);
+    argument += yIndex;
+
+    printExecutedWordInstruction(instructionString, argument);
+    return argument;
 }

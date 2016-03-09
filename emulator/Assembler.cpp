@@ -196,11 +196,21 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTEX;
             }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+            programLocation += 2;
             break;
         case ABSOLUTEY:
             if(instruction == "LDX") {
                 opcode = LDX_ABSOLUTEY;
+            } else if(instruction == "STA") {
+                opcode = STA_ABSOLUTEY;
             }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+            programLocation += 2;
             break;
         case INDIRECTX:
             break;
@@ -222,6 +232,13 @@ AddressingMode Assembler::determineAddressingMode(string argument) {
         //erase the first $ character
         argument.erase(0, 1);
 
+        int numHexDigits = 0;
+        for(int i = 0; i < argument.size(); i++) {
+            if(isxdigit(argument[i])) {
+                numHexDigits++;
+            }
+        }
+
         //if theres a comma in the argument, its zero page. otherwise, check if the argument is 4 digits or 2 digits
         if(argument.find(",") != string::npos) {
 
@@ -231,19 +248,25 @@ AddressingMode Assembler::determineAddressingMode(string argument) {
             }
 
             if(argument.find("x") != string::npos ) {
-                addressingMode = ZERO_PAGEX;
+                if(numHexDigits == 4) {
+                    addressingMode = ABSOLUTEX;
+                } else if(numHexDigits == 2) {
+                    addressingMode = ZERO_PAGEX;
+                }
             } else if(argument.find("y") != string::npos) {
-                addressingMode = ZERO_PAGEY;
+                if(numHexDigits == 4) {
+                    addressingMode = ABSOLUTEY;
+                } else if(numHexDigits == 2) {
+                    addressingMode = ZERO_PAGEY;
+                }
             }
 
         } else if(argument.size() == 4) {
             //TODO: CHECKING THE SIZE CANNOT BE THE ONLY CHECK HERE. IF THERE ARE SPACES IN THE ARGUMENT THIS WILL FAIL
             //TODO: SHOULD BE CHECKING FOR FOUR OR TWO DIGITS, NOT JUST THE LENGTH OF THE STRING
-            //here argument will either be xxxx or xx,x
-            //both are 4 characters
             addressingMode = ABSOLUTE;
 
-        } else if(argument.size() == 2) {
+        } else if(numHexDigits == 2) {
             addressingMode = ZERO_PAGE;
         }
     } else {

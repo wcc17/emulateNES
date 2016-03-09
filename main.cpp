@@ -64,7 +64,6 @@ int main() {
     assembler.readFile(fileName.c_str());
 
     printMemory(0x0600, 0x0700, cpu);
-    printMemory(0x0000, 0x02FF, cpu);
 
     bool debug = true;
     cpu->programCounter = cpu->programStart;
@@ -87,6 +86,9 @@ int main() {
     //print one last time to see the results of the last instruction
     cout << endl;
     printDebugInformation(cpu);
+    cout << endl << endl;
+
+    printMemory(0x0000, 0x02FF, cpu);
 
     return 0;
 }

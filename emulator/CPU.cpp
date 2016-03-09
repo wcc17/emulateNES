@@ -176,6 +176,55 @@ void CPU::executeOpCode() {
             break;
         }
 
+        case LDY_IMMEDIATE: {
+            uint8_t argument = memory[programCounter++];
+
+            loadYIndex_Immediate(argument);
+
+            printExecutedByteInstruction("LDY_IMM", argument);
+            break;
+        }
+        case LDY_ZEROPAGE: {
+            uint8_t argument = memory[programCounter++];
+
+            loadYIndex_ZeroPage(argument);
+
+            printExecutedByteInstruction("LDY_ZEROPAGE", argument);
+            break;
+        }
+        case LDY_ZEROPAGEX: {
+            uint8_t argument = memory[programCounter++];
+
+            argument += xIndex;
+            loadYIndex_ZeroPageX(argument);
+
+            printExecutedByteInstruction("LDY_ZEROPAGEX", argument);
+            break;
+        }
+        case LDY_ABSOLUTE: {
+            uint8_t byteLow = memory[programCounter++];
+            uint8_t byteHigh = memory[programCounter++];
+            uint16_t argument;
+
+            argument = getWordFromBytes(byteLow, byteHigh);
+            loadYIndex_Absolute(argument);
+
+            printExecutedWordInstruction("LDY_ABSOLUTE", argument);
+            break;
+        }
+        case LDY_ABSOLUTEX: {
+            uint8_t byteLow = memory[programCounter++];
+            uint8_t byteHigh = memory[programCounter++];
+            uint16_t argument;
+
+            argument = getWordFromBytes(byteLow, byteHigh);
+            argument += xIndex;
+            loadYIndex_AbsoluteX(argument);
+
+            printExecutedWordInstruction("LDY_ABSOLUTELX", argument);
+            break;
+        }
+
         case STA_ZEROPAGE: {
             uint8_t argument = memory[programCounter++];
 

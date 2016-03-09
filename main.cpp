@@ -64,6 +64,7 @@ int main() {
     assembler.readFile(fileName.c_str());
 
     printMemory(0x0600, 0x0700, cpu);
+    printMemory(0x0000, 0x02FF, cpu);
 
     bool debug = true;
     cpu->programCounter = cpu->programStart;

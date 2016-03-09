@@ -27,34 +27,16 @@ CPU::CPU() {
     flags.carry = 0;
 }
 
-void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
-    memory[location] = byte;
-}
-
-void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
-    memory[location++] = lowByte;
-    memory[location] = highByte;
-}
-
-uint16_t CPU::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
-
-    //This works because:
-    //(0x0002 << 8) | 0x01 = 0x0200 | 0x0001 = 0x0201
-    uint16_t word = ((uint16_t)byteHigh << 8) | byteLow;
-
-    return word;
-}
-
 //this will take the op codes from program memory and execute them one at a time
 void CPU::executeOpCode() {
 
     Util util;
 
     //TODO: IS THIS NECESSARY? I'm not sure that this will happen with 6502 programs that other people wrote
+    //TODO: i think since programCounter is 16 bit, if it goes above 0xFFFF, it will reset to 0x0000 by itself. needs testing
     if(programCounter > 0xFFFF) {
         programCounter = 0x0000;
     }
-
 
     uint8_t opcode = memory[programCounter++];
 
@@ -64,14 +46,14 @@ void CPU::executeOpCode() {
             uint8_t argument = memory[programCounter++];
             addWithCarry_Immediate(argument);
 
-            cout << "ADC_IMM "; util.printByte(argument); cout << endl;
+            printExecutedByteInstruction("ADC_IMM", argument);
             break;
         }
         case ADC_ZEROPAGE: {
             uint8_t argument = memory[programCounter++];
             addWithCarry_ZeroPage(argument);
 
-            cout << "ADC_ZEROPAGE "; util.printByte(argument); cout << endl;
+            printExecutedByteInstruction("ADC_ZEROPAGE", argument);
             break;
         }
         case ADC_ZEROPAGEX: {
@@ -79,7 +61,8 @@ void CPU::executeOpCode() {
             argument += xIndex;
             addWithCarry_ZeroPageX(argument);
 
-            cout << "ADC_ZEROPAGEX "; util.printByte(argument); cout << endl;
+            printExecutedByteInstruction("ADC_ZEROPAGEX", argument);
+            break;
         }
         case ADC_ABSOLUTE: {
             uint8_t byteLow = memory[programCounter++];
@@ -89,14 +72,38 @@ void CPU::executeOpCode() {
             argument = getWordFromBytes(byteLow, byteHigh);
             addWithCarry_Absolute(argument);
 
-            cout << "ADC_ABS"; util.printWord(argument); cout << endl;
+            printExecutedWordInstruction("ADC_ABSOLUTE", argument);
+            break;
+        }
+        case ADC_ABSOLUTEX: {
+            uint8_t byteLow = memory[programCounter++];
+            uint8_t byteHigh = memory[programCounter++];
+            uint16_t argument;
+
+            argument = getWordFromBytes(byteLow, byteHigh);
+            argument += xIndex;
+            addWithCarry_AbsoluteX(argument);
+
+            printExecutedWordInstruction("ADC_ABSOLUTEX", argument);
+            break;
+        }
+        case ADC_ABSOLUTEY: {
+            uint8_t byteLow = memory[programCounter++];
+            uint8_t byteHigh = memory[programCounter++];
+            uint16_t argument;
+
+            argument = getWordFromBytes(byteLow, byteHigh);
+            argument += yIndex;
+            addWithCarry_AbsoluteY(argument);
+
+            printExecutedWordInstruction("ADC_ABSOLUTEY", argument);
             break;
         }
 
         case INX:{
             incrementX();
 
-            cout << "INX " << endl;
+            cout << "INX" << endl;
             break;
         }
 
@@ -105,7 +112,7 @@ void CPU::executeOpCode() {
 
             loadAccumulator_Immediate(argument);
 
-            cout << "LDA_IMM "; util.printByte(argument); cout << endl;
+            printExecutedByteInstruction("LDA_IMM", argument);
             break;
         }
         case LDA_ABSOLUTE: {
@@ -116,7 +123,56 @@ void CPU::executeOpCode() {
             argument = getWordFromBytes(byteLow, byteHigh);
             loadAccumulator_Absolute(argument);
 
-            cout << "LDA_ABS "; util.printWord(argument); cout << endl;
+            printExecutedByteInstruction("LDA_ABS", argument);
+            break;
+        }
+
+        case LDX_IMMEDIATE: {
+            uint8_t argument = memory[programCounter++];
+
+            loadXIndex_Immediate(argument);
+
+            printExecutedByteInstruction("LDX_IMM", argument);
+            break;
+        }
+        case LDX_ZEROPAGE: {
+            uint8_t argument = memory[programCounter++];
+
+            loadXIndex_ZeroPage(argument);
+
+            printExecutedByteInstruction("LDX_ZEROPAGE", argument);
+            break;
+        }
+        case LDX_ZEROPAGEY: {
+            uint8_t argument = memory[programCounter++];
+
+            argument += yIndex;
+            loadXIndex_ZeroPageY(argument);
+
+            printExecutedByteInstruction("LDX_ZEROPAGEY", argument);
+            break;
+        }
+        case LDX_ABSOLUTE: {
+            uint8_t byteLow = memory[programCounter++];
+            uint8_t byteHigh = memory[programCounter++];
+            uint16_t argument;
+
+            argument = getWordFromBytes(byteLow, byteHigh);
+            loadXIndex_Absolute(argument);
+
+            printExecutedWordInstruction("LDX_ABSOLUTE", argument);
+            break;
+        }
+        case LDX_ABSOLUTEY: {
+            uint8_t byteLow = memory[programCounter++];
+            uint8_t byteHigh = memory[programCounter++];
+            uint16_t argument;
+
+            argument = getWordFromBytes(byteLow, byteHigh);
+            argument += yIndex;
+            loadXIndex_AbsoluteY(argument);
+
+            printExecutedWordInstruction("LDX_ABSOLUTELY", argument);
             break;
         }
 
@@ -125,7 +181,16 @@ void CPU::executeOpCode() {
 
             storeAccumulator_ZeroPage(argument);
 
-            cout << "STA_ZEROPAGE "; util.printByte(argument); cout << endl;
+            printExecutedByteInstruction("STA_ZEROPAGE", argument);
+            break;
+        }
+        case STA_ZEROPAGEX: {
+            uint8_t argument = memory[programCounter++];
+
+            argument += xIndex;
+            storeAccumulator_ZeroPageX(argument);
+
+            printExecutedByteInstruction("STA_ZEROPAGEX", argument);
             break;
         }
         case STA_ABSOLUTE: {
@@ -136,7 +201,31 @@ void CPU::executeOpCode() {
             argument = getWordFromBytes(byteLow, byteHigh);
             storeAccumulator_Absolute(argument);
 
-            cout << "STA_ABS "; util.printWord(argument); cout << endl;
+            printExecutedWordInstruction("STA_ABSOLUTE", argument);
+            break;
+        }
+        case STA_ABSOLUTEX: {
+            uint8_t byteLow = memory[programCounter++];
+            uint8_t byteHigh = memory[programCounter++];
+            uint16_t argument;
+
+            argument = getWordFromBytes(byteLow, byteHigh);
+            argument += xIndex;
+            storeAccumulator_Absolute(argument);
+
+            printExecutedWordInstruction("STA_ABSOLUTEX", argument);
+            break;
+        }
+        case STA_ABSOLUTEY: {
+            uint8_t byteLow = memory[programCounter++];
+            uint8_t byteHigh = memory[programCounter++];
+            uint16_t argument;
+
+            argument = getWordFromBytes(byteLow, byteHigh);
+            argument += yIndex;
+            storeAccumulator_Absolute(argument);
+
+            printExecutedWordInstruction("STA_ABSOLUTELY", argument);
             break;
         }
 
@@ -182,7 +271,11 @@ void CPU::addWithCarry(uint8_t argument) {
     if(util.isNegativeByte(accumulator) == util.isNegativeByte(argument)) {
         if(util.isNegativeByte(accumulator) != util.isNegativeByte(sumByte)) {
             flags.overflow = 1;
+        } else {
+            flags.overflow = 0;
         }
+    } else {
+        flags.overflow = 0;
     }
 
     //CHECK ZERO FLAG
@@ -201,26 +294,30 @@ void CPU::addWithCarry(uint8_t argument) {
 
     accumulator = sumByte;
 }
-
 void CPU::addWithCarry_Immediate(uint8_t argument) {
     addWithCarry(argument);
 }
-
 void CPU::addWithCarry_ZeroPage(uint8_t argument) {
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
-
 void CPU::addWithCarry_ZeroPageX(uint8_t argument) {
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
-
+//TODO: can probably reuse this absolute method for every absolute, absolutex,y, and zeropage + zeropagex,y
 void CPU::addWithCarry_Absolute(uint16_t argument) {
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
-
+void CPU::addWithCarry_AbsoluteX(uint16_t argument) {
+    uint8_t memoryValue = memory[argument];
+    addWithCarry(memoryValue);
+}
+void CPU::addWithCarry_AbsoluteY(uint16_t argument) {
+    uint8_t memoryValue = memory[argument];
+    addWithCarry(memoryValue);
+}
 
 void CPU::incrementX() {
     xIndex += 1;
@@ -230,7 +327,6 @@ void CPU::incrementX() {
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
 
-
 void CPU::loadAccumulator(uint8_t argument) {
     accumulator = argument;
 
@@ -238,13 +334,57 @@ void CPU::loadAccumulator(uint8_t argument) {
     if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
-
 void CPU::loadAccumulator_Immediate(uint8_t argument) {
     loadAccumulator(argument);
 }
-
 void CPU::loadAccumulator_Absolute(uint16_t argument) {
     loadAccumulator(memory[argument]);
+}
+
+void CPU::loadXIndex(uint8_t argument) {
+    xIndex = argument;
+
+    //NOTE: loadXIndex affects sign and zero flags
+    if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+void CPU::loadXIndex_Immediate(uint8_t argument) {
+    loadXIndex(argument);
+}
+void CPU::loadXIndex_ZeroPage(uint8_t argument) {
+    loadXIndex(argument);
+}
+void CPU::loadXIndex_ZeroPageY(uint8_t argument) {
+    loadXIndex(argument);
+}
+void CPU::loadXIndex_Absolute(uint16_t argument) {
+    loadXIndex(memory[argument]);
+}
+void CPU::loadXIndex_AbsoluteY(uint16_t argument) {
+    loadXIndex(memory[argument]);
+}
+
+void CPU::loadYIndex(uint8_t argument) {
+    yIndex = argument;
+
+    //NOTE: loadYIndex affects sign and zero flags
+    if(yIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(yIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+void CPU::loadYIndex_Immediate(uint8_t argument) {
+    loadYIndex(argument);
+}
+void CPU::loadYIndex_ZeroPage(uint8_t argument) {
+    loadYIndex(argument);
+}
+void CPU::loadYIndex_ZeroPageX(uint8_t argument) {
+    loadYIndex(argument);
+}
+void CPU::loadYIndex_Absolute(uint16_t argument) {
+    loadYIndex(memory[argument]);
+}
+void CPU::loadYIndex_AbsoluteX(uint16_t argument) {
+    loadYIndex(memory[argument]);
 }
 
 
@@ -252,12 +392,19 @@ void CPU::storeAccumulator(uint16_t argument) {
     //NOTE: STA affects no flags
     memory[argument] = accumulator;
 }
-
+void CPU::storeAccumulator_ZeroPage(uint8_t argument) {
+    storeAccumulator(argument);
+}
+void CPU::storeAccumulator_ZeroPageX(uint8_t argument) {
+    storeAccumulator(argument);
+}
 void CPU::storeAccumulator_Absolute(uint16_t argument) {
     storeAccumulator(argument);
 }
-
-void CPU::storeAccumulator_ZeroPage(uint8_t argument) {
+void CPU::storeAccumulator_AbsoluteX(uint16_t argument) {
+    storeAccumulator(argument);
+}
+void CPU::storeAccumulator_AbsoluteY(uint16_t argument) {
     storeAccumulator(argument);
 }
 
@@ -268,4 +415,32 @@ void CPU::transferAccumulatorToX() {
     //NOTE: TAX affects N and Z flags
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+
+
+
+void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
+    memory[location] = byte;
+}
+
+void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
+    memory[location++] = lowByte;
+    memory[location] = highByte;
+}
+
+uint16_t CPU::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
+
+    //This works because:
+    //(0x0002 << 8) | 0x01 = 0x0200 | 0x0001 = 0x0201
+    uint16_t word = ((uint16_t)byteHigh << 8) | byteLow;
+
+    return word;
+}
+
+void CPU::printExecutedByteInstruction(string instruction, uint8_t argument) {
+    cout << instruction << " "; util.printByte(argument); cout << endl;
+}
+
+void CPU::printExecutedWordInstruction(string instruction, uint16_t argument) {
+    cout << instruction << " "; util.printByte(argument); cout << endl;
 }

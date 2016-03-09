@@ -103,6 +103,115 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
     //this is so i can pick it up later if for some reason we don't have an addressing mode
     AddressingMode addressingMode = NULL_ADDRESSING_MODE;
 
+    addressingMode = determineAddressingMode(argument);
+    argument = trimArgument(argument);
+
+    uint16_t arg = convertStringToWord(argument);
+
+    OpCodes opcode;
+    switch(addressingMode) {
+        case NULL_ADDRESSING_MODE:
+            opcode = BRK;
+            //fail
+            break;
+        case IMPLIED:
+            if(instruction == "INX") {
+                opcode = INX;
+            } else if(instruction == "TAX") {
+                opcode = TAX;
+            }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+
+            break;
+        case IMMEDIATE:
+            if(instruction == "ADC") {
+                opcode = ADC_IMMEDIATE;
+            } else if(instruction == "LDA") {
+                opcode = LDA_IMMEDIATE;
+            } else if(instruction == "LDX") {
+                opcode = LDX_IMMEDIATE;
+            } else if(instruction == "LDY") {
+                opcode = LDY_IMMEDIATE;
+            }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+
+            break;
+        case ZERO_PAGE:
+            if(instruction == "ADC") {
+                opcode = ADC_ZEROPAGE;
+            } else if (instruction == "STA") {
+                opcode = STA_ZEROPAGE;
+            } else if (instruction == "LDX") {
+                opcode = LDX_ZEROPAGE;
+            } else if (instruction == "LDY") {
+                opcode = LDY_ZEROPAGE;
+            }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+
+            break;
+        case ZERO_PAGEX:
+            if(instruction == "ADC") {
+                opcode = ADC_ZEROPAGEX;
+            } else if (instruction == "STA") {
+                opcode = STA_ZEROPAGEX;
+            } else if (instruction == "LDY") {
+                opcode = LDY_ZEROPAGEX;
+            }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+
+            break;
+        case ZERO_PAGEY:
+            if(instruction == "LDX") {
+                opcode = LDX_ZEROPAGEY;
+            }
+            break;
+        case ABSOLUTE :
+            if(instruction == "ADC") {
+                opcode = ADC_ABSOLUTE;
+            } else if(instruction == "LDA") {
+                opcode = LDA_ABSOLUTE;
+            } else if(instruction == "STA") {
+                opcode = STA_ABSOLUTE;
+            } else if(instruction == "LDX") {
+                opcode = LDX_ABSOLUTE;
+            } else if(instruction == "LDY") {
+                opcode = LDY_ABSOLUTE;
+            }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+            programLocation += 2; //because we move two spots in storeWordInMemory
+
+            break;
+        case ABSOLUTEX:
+            if(instruction == "LDY") {
+                opcode = LDY_ABSOLUTEX;
+            } else if(instruction == "STA") {
+                opcode = STA_ABSOLUTEX;
+            }
+            break;
+        case ABSOLUTEY:
+            if(instruction == "LDX") {
+                opcode = LDX_ABSOLUTEY;
+            }
+            break;
+        case INDIRECTX:
+            break;
+        case INDIRECTY:
+            break;
+    }
+}
+
+AddressingMode Assembler::determineAddressingMode(string argument) {
+    AddressingMode addressingMode = NULL_ADDRESSING_MODE;
+
     if(argument[0] == '#') {
         //erase # and $ from beginning of argument
         argument.erase(0, 2);
@@ -141,67 +250,22 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         addressingMode = IMPLIED;
     }
 
-    uint16_t arg = convertStringToWord(argument);
+    return addressingMode;
+}
 
-    switch(addressingMode) {
-        case IMPLIED:
-            if(instruction == "INX") {
-                cpu->storeByteInMemory(TAX, programLocation++);
-            } else if(instruction == "TAX") {
-                cpu->storeByteInMemory(TAX, programLocation++);
-            }
-            break;
-        case IMMEDIATE:
-            if(instruction == "ADC") {
-                cpu->storeByteInMemory(ADC_IMMEDIATE, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-            } else if(instruction == "LDA") {
-                //store LDA_IMM in memory
-                cpu->storeByteInMemory(LDA_IMMEDIATE, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-            }
-            break;
-        case ZERO_PAGE:
-            if(instruction == "ADC") {
-                cpu->storeByteInMemory(ADC_ZEROPAGE, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-            } else if (instruction == "STA") {
-                cpu->storeByteInMemory(STA_ZEROPAGE, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-            }
-            break;
-        case ZERO_PAGEX:
-            if(instruction == "ADC") {
-                cpu->storeByteInMemory(ADC_ZEROPAGEX, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++);
-            } else if (instruction == "STA") {
-                cpu->storeByteInMemory(STA_ZEROPAGEX, programLocation++);
-                cpu->storeByteInMemory(getLowByte(arg), programLocation++):
-            }
-            break;
-        case ZERO_PAGEY:
-            break;
-        case ABSOLUTE :
-            if(instruction == "LDA") {
-                cpu->storeByteInMemory(LDA_ABSOLUTE, programLocation++);
-                cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation += 2);
-                programLocation += 2; //because we move two spots in storeWordInMemory
-            } else if(instruction == "STA") {
-                //store STA_ABS in memory
-                cpu->storeByteInMemory(STA_ABSOLUTE, programLocation++);
-                cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
-                programLocation += 2; //because we move two spots in storeWordInMemory
-            }
-            break;
-        case ABSOLUTEX:
-            break;
-        case ABSOLUTEY:
-            break;
-        case INDIRECTX:
-            break;
-        case INDIRECTY:
-            break;
+//trims argument string down to only the memory location or value it contains
+string Assembler::trimArgument(string argument) {
+
+    if(argument[0] == '#') {
+        //erase # and $ from beginning of argument
+        argument.erase(0, 2);
+    } else if(argument[0] == '$') {
+
+        //erase the first $ character
+        argument.erase(0, 1);
     }
+
+    return argument;
 }
 
 //TODO: MOVE THESE TO UTIL. THEY COULD BE USEFUL ELSEWHERE.

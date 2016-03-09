@@ -25,6 +25,8 @@ public:
 
 private:
     void storeProgramInMemory(string instruction, string argument, uint16_t &programLocation);
+    AddressingMode determineAddressingMode(string argument);
+    string trimArgument(string argument);
     bool isArgument(string word);
     bool isLabel(string word);
     uint16_t convertStringToWord(string argument);

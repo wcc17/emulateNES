@@ -51,6 +51,8 @@ public:
     void addWithCarry_ZeroPage(uint8_t argument);
     void addWithCarry_ZeroPageX(uint8_t argument);
     void addWithCarry_Absolute(uint16_t argument);
+    void addWithCarry_AbsoluteX(uint16_t argument);
+    void addWithCarry_AbsoluteY(uint16_t argument);
 
     void incrementX();
 
@@ -59,11 +61,32 @@ public:
     void loadAccumulator_ZeroPage(uint8_t argument);
     void loadAccumulator_Absolute(uint16_t argument);
 
+    void loadXIndex(uint8_t argument);
+    void loadXIndex_Immediate(uint8_t argument);
+    void loadXIndex_ZeroPage(uint8_t argument);
+    void loadXIndex_ZeroPageY(uint8_t argument);
+    void loadXIndex_Absolute(uint16_t argument);
+    void loadXIndex_AbsoluteY(uint16_t argument);
+
+    void loadYIndex(uint8_t argument);
+    void loadYIndex_Immediate(uint8_t argument);
+    void loadYIndex_ZeroPage(uint8_t argument);
+    void loadYIndex_ZeroPageX(uint8_t argument);
+    void loadYIndex_Absolute(uint16_t argument);
+    void loadYIndex_AbsoluteX(uint16_t argument);
+
     void storeAccumulator(uint16_t argument);
     void storeAccumulator_ZeroPage(uint8_t argument);
+    void storeAccumulator_ZeroPageX(uint8_t argument);
     void storeAccumulator_Absolute(uint16_t argument);
+    void storeAccumulator_AbsoluteX(uint16_t argument);
+    void storeAccumulator_AbsoluteY(uint16_t argument);
 
     void transferAccumulatorToX();
+
+private:
+    void printExecutedByteInstruction(std::string instruction, uint8_t argument);
+    void printExecutedWordInstruction(std::string instruction, uint16_t argument);
 };
 
 

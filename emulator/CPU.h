@@ -44,40 +44,51 @@ public:
     Util util;
 
     void addWithCarry(uint8_t argument);
-    void addWithCarry_Immediate(uint8_t argument);
-    void addWithCarry_ZeroPage(uint8_t argument);
-    void addWithCarry_ZeroPageX(uint8_t argument);
-    void addWithCarry_Absolute(uint16_t argument);
-    void addWithCarry_AbsoluteX(uint16_t argument);
-    void addWithCarry_AbsoluteY(uint16_t argument);
+    void addWithCarry_Immediate();
+    void addWithCarry_ZeroPage();
+    void addWithCarry_ZeroPageX();
+    void addWithCarry_Absolute();
+    void addWithCarry_AbsoluteX();
+    void addWithCarry_AbsoluteY();
+
+    void andWithAccumulator(uint8_t argument);
+    void andWithAccumulator_Immediate();
+    void andWithAccumulator_ZeroPage();
+    void andWithAccumulator_ZeroPageX();
+    void andWithAccumulator_Absolute();
+    void andWithAccumulator_AbsoluteX();
+    void andWithAccumulator_AbsoluteY();
 
     void incrementX();
 
     void loadAccumulator(uint8_t argument);
-    void loadAccumulator_Immediate(uint8_t argument);
-    void loadAccumulator_ZeroPage(uint8_t argument);
-    void loadAccumulator_Absolute(uint16_t argument);
+    void loadAccumulator_Immediate();
+    void loadAccumulator_ZeroPage();
+    void loadAccumulator_ZeroPageX();
+    void loadAccumulator_Absolute();
+    void loadAccumulator_AbsoluteX();
+    void loadAccumulator_AbsoluteY();
 
     void loadXIndex(uint8_t argument);
-    void loadXIndex_Immediate(uint8_t argument);
-    void loadXIndex_ZeroPage(uint8_t argument);
-    void loadXIndex_ZeroPageY(uint8_t argument);
-    void loadXIndex_Absolute(uint16_t argument);
-    void loadXIndex_AbsoluteY(uint16_t argument);
+    void loadXIndex_Immediate();
+    void loadXIndex_ZeroPage();
+    void loadXIndex_ZeroPageY();
+    void loadXIndex_Absolute();
+    void loadXIndex_AbsoluteY();
 
     void loadYIndex(uint8_t argument);
-    void loadYIndex_Immediate(uint8_t argument);
-    void loadYIndex_ZeroPage(uint8_t argument);
-    void loadYIndex_ZeroPageX(uint8_t argument);
-    void loadYIndex_Absolute(uint16_t argument);
-    void loadYIndex_AbsoluteX(uint16_t argument);
+    void loadYIndex_Immediate();
+    void loadYIndex_ZeroPage();
+    void loadYIndex_ZeroPageX();
+    void loadYIndex_Absolute();
+    void loadYIndex_AbsoluteX();
 
     void storeAccumulator(uint16_t argument);
-    void storeAccumulator_ZeroPage(uint8_t argument);
-    void storeAccumulator_ZeroPageX(uint8_t argument);
-    void storeAccumulator_Absolute(uint16_t argument);
-    void storeAccumulator_AbsoluteX(uint16_t argument);
-    void storeAccumulator_AbsoluteY(uint16_t argument);
+    void storeAccumulator_ZeroPage();
+    void storeAccumulator_ZeroPageX();
+    void storeAccumulator_Absolute();
+    void storeAccumulator_AbsoluteX();
+    void storeAccumulator_AbsoluteY();
 
     void transferAccumulatorToX();
 

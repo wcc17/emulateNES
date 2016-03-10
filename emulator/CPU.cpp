@@ -45,140 +45,156 @@ void CPU::executeOpCode() {
 
         //ADC
         case ADC_IMMEDIATE:{
-            uint8_t argument = retrieveImmediateInstruction("ADC_IMM");
-            addWithCarry_Immediate(argument);
+            addWithCarry_Immediate();
             break;
         }
         case ADC_ZEROPAGE: {
-            uint8_t argument = retrieveZeroPageInstruction("ADC_ZEROPAGE");
-            addWithCarry_ZeroPage(argument);
+            addWithCarry_ZeroPage();
             break;
         }
         case ADC_ZEROPAGEX: {
-            uint8_t argument = retrieveZeroPageXInstruction("ADC_ZEROPAGEX");
-            addWithCarry_ZeroPageX(argument);
+            addWithCarry_ZeroPageX();
             break;
         }
         case ADC_ABSOLUTE: {
-            uint16_t argument = retrieveAbsoluteInstruction("ADC_ABSOLUTE");
-            addWithCarry_Absolute(argument);
+            addWithCarry_Absolute();
             break;
         }
         case ADC_ABSOLUTEX: {
-            uint16_t argument = retrieveAbsoluteXInstruction("ADC_ABSOLUTEX");
-            addWithCarry_AbsoluteX(argument);
+            addWithCarry_AbsoluteX();
             break;
         }
         case ADC_ABSOLUTEY: {
-            uint16_t argument = retrieveAbsoluteYInstruction("ADC_ABSOLUTEY");
-            addWithCarry_AbsoluteY(argument);
+            addWithCarry_AbsoluteY();
+            break;
+        }
+
+        //AND
+        case AND_IMMEDIATE:{
+            andWithAccumulator_Immediate();
+            break;
+        }
+        case AND_ZEROPAGE:{
+            andWithAccumulator_ZeroPage();
+            break;
+        }
+        case AND_ZEROPAGEX:{
+            andWithAccumulator_ZeroPageX();
+            break;
+        }
+        case AND_ABSOLUTE:{
+            andWithAccumulator_Absolute();
+            break;
+        }
+        case AND_ABSOLUTEX:{
+            andWithAccumulator_AbsoluteX();
+            break;
+        }
+        case AND_ABSOLUTEY:{
+            andWithAccumulator_AbsoluteY();
             break;
         }
 
         //INX
         case INX:{
             incrementX();
-            cout << "INX" << endl;
             break;
         }
 
         //LDA
         case LDA_IMMEDIATE:{
-            uint8_t argument = retrieveImmediateInstruction("LDA_IMM");
-            loadAccumulator_Immediate(argument);
+            loadAccumulator_Immediate();
             break;
         }
+        case LDA_ZEROPAGE: {
+            loadAccumulator_ZeroPage();
+            break;
+        }
+        case LDA_ZEROPAGEX: {
+            loadAccumulator_ZeroPageX();
+        }
         case LDA_ABSOLUTE: {
-            uint16_t argument = retrieveAbsoluteInstruction("LDA_ABSOLUTE");
-            loadAccumulator_Absolute(argument);
+            loadAccumulator_Absolute();
+            break;
+        }
+        case LDA_ABSOLUTEX: {
+            loadAccumulator_AbsoluteX();
+            break;
+        }
+        case LDA_ABSOLUTEY: {
+            loadAccumulator_AbsoluteY();
             break;
         }
 
         //LDX
         case LDX_IMMEDIATE: {
-            uint8_t argument = retrieveImmediateInstruction("LDX_IMM");
-            loadXIndex_Immediate(argument);
+            loadXIndex_Immediate();
             break;
         }
         case LDX_ZEROPAGE: {
-            uint8_t argument = retrieveZeroPageInstruction("LDX_ZEROPAGE");
-            loadXIndex_ZeroPage(argument);
+            loadXIndex_ZeroPage();
             break;
         }
         case LDX_ZEROPAGEY: {
-            uint8_t argument = retrieveZeroPageYInstruction("LDX_ZEROPAGEY");
-            loadXIndex_ZeroPageY(argument);
+            loadXIndex_ZeroPageY();
             break;
         }
         case LDX_ABSOLUTE: {
-            uint16_t argument = retrieveAbsoluteInstruction("LDX_ABSOLUTE");
-            loadXIndex_Absolute(argument);
+            loadXIndex_Absolute();
             break;
         }
         case LDX_ABSOLUTEY: {
-            uint16_t argument = retrieveAbsoluteYInstruction("LDX_ABSOLUTEY");
-            loadXIndex_AbsoluteY(argument);
+            loadXIndex_AbsoluteY();
             break;
         }
 
         //LDY
         case LDY_IMMEDIATE: {
-            uint8_t argument = retrieveImmediateInstruction("LDY_IMM");
-            loadYIndex_Immediate(argument);
+            loadYIndex_Immediate();
             break;
         }
         case LDY_ZEROPAGE: {
-            uint8_t argument = retrieveZeroPageInstruction("LDY_ZEROPAGE");
-            loadYIndex_ZeroPage(argument);
+            loadYIndex_ZeroPage();
             break;
         }
         case LDY_ZEROPAGEX: {
-            uint8_t argument = retrieveZeroPageXInstruction("LDY_ZEROPAGEX");
-            loadYIndex_ZeroPageX(argument);
+            loadYIndex_ZeroPageX();
             break;
         }
         case LDY_ABSOLUTE: {
-            uint16_t argument = retrieveAbsoluteInstruction("LDY_ABSOLUTE");
-            loadYIndex_Absolute(argument);
+            loadYIndex_Absolute();
             break;
         }
         case LDY_ABSOLUTEX: {
-            uint16_t argument = retrieveAbsoluteXInstruction("LDY_ABSOLUTEX");
-            loadYIndex_AbsoluteX(argument);
+            loadYIndex_AbsoluteX();
             break;
         }
 
         //STA
         case STA_ZEROPAGE: {
-            uint8_t argument = retrieveZeroPageInstruction("STA_ZEROPAGE");
-            storeAccumulator_ZeroPage(argument);
+            storeAccumulator_ZeroPage();
             break;
         }
         case STA_ZEROPAGEX: {
-            uint8_t argument = retrieveZeroPageXInstruction("STA_ZEROPAGEX");
-            storeAccumulator_ZeroPageX(argument);
+            storeAccumulator_ZeroPageX();
             break;
         }
         case STA_ABSOLUTE: {
-            uint16_t argument = retrieveAbsoluteInstruction("STA_ABSOLUTE");
-            storeAccumulator_Absolute(argument);
+            storeAccumulator_Absolute();
             break;
         }
         case STA_ABSOLUTEX: {
-            uint16_t argument = retrieveAbsoluteXInstruction("STA_ABSOLUTEX");
-            storeAccumulator_Absolute(argument);
+            storeAccumulator_AbsoluteX();
             break;
         }
         case STA_ABSOLUTEY: {
-            uint16_t argument = retrieveAbsoluteYInstruction("STA_ABSOLUTEY");
-            storeAccumulator_Absolute(argument);
+            storeAccumulator_AbsoluteY();
             break;
         }
 
         //TAX
         case TAX: {
             transferAccumulatorToX();
-            cout << "TAX" << endl;
             break;
         }
 
@@ -240,32 +256,77 @@ void CPU::addWithCarry(uint8_t argument) {
 
     accumulator = sumByte;
 }
-void CPU::addWithCarry_Immediate(uint8_t argument) {
+void CPU::addWithCarry_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("ADC_IMM");
     addWithCarry(argument);
 }
-void CPU::addWithCarry_ZeroPage(uint8_t argument) {
+void CPU::addWithCarry_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("ADC_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
-void CPU::addWithCarry_ZeroPageX(uint8_t argument) {
+void CPU::addWithCarry_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("ADC_ZEROPAGEX");
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
 //TODO: can probably reuse this absolute method for every absolute, absolutex,y, and zeropage + zeropagex,y
-void CPU::addWithCarry_Absolute(uint16_t argument) {
+void CPU::addWithCarry_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("ADC_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
-void CPU::addWithCarry_AbsoluteX(uint16_t argument) {
+void CPU::addWithCarry_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("ADC_ABSOLUTEX");
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
-void CPU::addWithCarry_AbsoluteY(uint16_t argument) {
+void CPU::addWithCarry_AbsoluteY() {
+    uint16_t argument = retrieveAbsoluteYInstruction("ADC_ABSOLUTEY");
+    uint8_t memoryValue = memory[argument];
+    addWithCarry(memoryValue);
+}
+
+void CPU::andWithAccumulator(uint8_t argument) {
+    accumulator = accumulator & argument;
+
+    //AND affects sign flag and zero flag
+    if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+void CPU::andWithAccumulator_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("AND_IMM");
+    andWithAccumulator(argument);
+}
+void CPU::andWithAccumulator_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("AND_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    andWithAccumulator(memoryValue);
+}
+void CPU::andWithAccumulator_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("AND_ZEROPAGEX");
+    uint8_t memoryValue = memory[argument];
+    andWithAccumulator(memoryValue);
+}
+void CPU::andWithAccumulator_Absolute() {
+    uint16_t argument = retrieveAbsoluteXInstruction("AND_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    andWithAccumulator(memoryValue);
+}
+void CPU::andWithAccumulator_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("AND_ABSOLUTEX");
+    uint8_t memoryValue = memory[argument];
+    andWithAccumulator(memoryValue);
+}
+void CPU::andWithAccumulator_AbsoluteY() {
+    uint16_t argument = retrieveAbsoluteYInstruction("AND_ABSOLUTEY");
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
 
 void CPU::incrementX() {
+    cout << "INX" << endl;
+
     xIndex += 1;
 
     //NOTE: INX affects negative flag and zero flag
@@ -280,11 +341,34 @@ void CPU::loadAccumulator(uint8_t argument) {
     if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
-void CPU::loadAccumulator_Immediate(uint8_t argument) {
+void CPU::loadAccumulator_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("LDA_IMM");
     loadAccumulator(argument);
 }
-void CPU::loadAccumulator_Absolute(uint16_t argument) {
-    loadAccumulator(memory[argument]);
+void CPU::loadAccumulator_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("LDA_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    loadAccumulator(memoryValue);
+}
+void CPU::loadAccumulator_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("LDA_ZEROPAGEX");
+    uint8_t memoryValue = memory[argument];
+    loadAccumulator(memoryValue);
+}
+void CPU::loadAccumulator_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("LDA_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    loadAccumulator(memoryValue);
+}
+void CPU::loadAccumulator_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("LDA_ABSOLUTEX");
+    uint8_t memoryValue = memory[argument];
+    loadAccumulator(memoryValue);
+}
+void CPU::loadAccumulator_AbsoluteY() {
+    uint16_t argument = retrieveAbsoluteYInstruction("LDA_ABSOLUTEY");
+    uint8_t memoryValue = memory[argument];
+    loadAccumulator(memoryValue);
 }
 
 void CPU::loadXIndex(uint8_t argument) {
@@ -294,20 +378,29 @@ void CPU::loadXIndex(uint8_t argument) {
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
-void CPU::loadXIndex_Immediate(uint8_t argument) {
+void CPU::loadXIndex_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("LDX_IMM");
     loadXIndex(argument);
 }
-void CPU::loadXIndex_ZeroPage(uint8_t argument) {
-    loadXIndex(argument);
+void CPU::loadXIndex_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("LDX_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    loadXIndex(memoryValue);
 }
-void CPU::loadXIndex_ZeroPageY(uint8_t argument) {
-    loadXIndex(argument);
+void CPU::loadXIndex_ZeroPageY() {
+    uint8_t argument = retrieveZeroPageYInstruction("LDX_ZEROPAGEY");
+    uint8_t memoryValue = memory[argument];
+    loadXIndex(memoryValue);
 }
-void CPU::loadXIndex_Absolute(uint16_t argument) {
-    loadXIndex(memory[argument]);
+void CPU::loadXIndex_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("LDX_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    loadXIndex(memoryValue);
 }
-void CPU::loadXIndex_AbsoluteY(uint16_t argument) {
-    loadXIndex(memory[argument]);
+void CPU::loadXIndex_AbsoluteY() {
+    uint16_t argument = retrieveAbsoluteYInstruction("LDX_ABSOLUTEY");
+    uint8_t memoryValue = memory[argument];
+    loadXIndex(memoryValue);
 }
 
 void CPU::loadYIndex(uint8_t argument) {
@@ -317,77 +410,65 @@ void CPU::loadYIndex(uint8_t argument) {
     if(yIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(yIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
-void CPU::loadYIndex_Immediate(uint8_t argument) {
+void CPU::loadYIndex_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("LDY_IMM");
     loadYIndex(argument);
 }
-void CPU::loadYIndex_ZeroPage(uint8_t argument) {
-    loadYIndex(argument);
+void CPU::loadYIndex_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("LDY_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    loadYIndex(memoryValue);
 }
-void CPU::loadYIndex_ZeroPageX(uint8_t argument) {
-    loadYIndex(argument);
+void CPU::loadYIndex_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("LDY_ZEROPAGEX");
+    uint8_t memoryValue = memory[argument];
+    loadYIndex(memoryValue);
 }
-void CPU::loadYIndex_Absolute(uint16_t argument) {
-    loadYIndex(memory[argument]);
+void CPU::loadYIndex_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("LDY_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    loadYIndex(memoryValue);
 }
-void CPU::loadYIndex_AbsoluteX(uint16_t argument) {
-    loadYIndex(memory[argument]);
+void CPU::loadYIndex_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("LDY_ABSOLUTEX");
+    uint8_t memoryValue = memory[argument];
+    loadYIndex(memoryValue);
 }
 
 void CPU::storeAccumulator(uint16_t argument) {
     //NOTE: STA affects no flags
     memory[argument] = accumulator;
 }
-void CPU::storeAccumulator_ZeroPage(uint8_t argument) {
+void CPU::storeAccumulator_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("STA_ZEROPAGE");
     storeAccumulator(argument);
 }
-void CPU::storeAccumulator_ZeroPageX(uint8_t argument) {
+void CPU::storeAccumulator_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("STA_ZEROPAGEX");
     storeAccumulator(argument);
 }
-void CPU::storeAccumulator_Absolute(uint16_t argument) {
+void CPU::storeAccumulator_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("STA_ABSOLUTE");
     storeAccumulator(argument);
 }
-void CPU::storeAccumulator_AbsoluteX(uint16_t argument) {
+void CPU::storeAccumulator_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("STA_ABSOLUTEX");
     storeAccumulator(argument);
 }
-void CPU::storeAccumulator_AbsoluteY(uint16_t argument) {
+void CPU::storeAccumulator_AbsoluteY() {
+    uint16_t argument = retrieveAbsoluteYInstruction("STA_ABSOLUTEY");
     storeAccumulator(argument);
 }
 
 void CPU::transferAccumulatorToX() {
+    cout << "TAX" << endl;
+
     xIndex = accumulator;
 
     //NOTE: TAX affects N and Z flags
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
-
-
-void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
-    memory[location] = byte;
-}
-
-void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
-    memory[location++] = lowByte;
-    memory[location] = highByte;
-}
-
-uint16_t CPU::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
-
-    //This works because:
-    //(0x0002 << 8) | 0x01 = 0x0200 | 0x0001 = 0x0201
-    uint16_t word = ((uint16_t)byteHigh << 8) | byteLow;
-
-    return word;
-}
-
-void CPU::printExecutedByteInstruction(string instruction, uint8_t argument) {
-    cout << instruction << " "; util.printByte(argument); cout << endl;
-}
-
-void CPU::printExecutedWordInstruction(string instruction, uint16_t argument) {
-    cout << instruction << " "; util.printByte(argument); cout << endl;
-}
-
 
 
 uint8_t CPU::retrieveImmediateInstruction(string instructionString) {
@@ -453,4 +534,33 @@ uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
 
     printExecutedWordInstruction(instructionString, argument);
     return argument;
+}
+
+
+
+
+void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
+    memory[location] = byte;
+}
+
+void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
+    memory[location++] = lowByte;
+    memory[location] = highByte;
+}
+
+uint16_t CPU::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
+
+    //This works because:
+    //(0x0002 << 8) | 0x01 = 0x0200 | 0x0001 = 0x0201
+    uint16_t word = ((uint16_t)byteHigh << 8) | byteLow;
+
+    return word;
+}
+
+void CPU::printExecutedByteInstruction(string instruction, uint8_t argument) {
+    cout << instruction << " "; util.printByte(argument); cout << endl;
+}
+
+void CPU::printExecutedWordInstruction(string instruction, uint16_t argument) {
+    cout << instruction << " "; util.printByte(argument); cout << endl;
 }

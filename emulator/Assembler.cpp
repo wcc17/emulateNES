@@ -108,7 +108,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
 
     uint16_t arg = convertStringToWord(argument);
 
-    OpCodes opcode;
+    OpCodes opcode = BRK;
     switch(addressingMode) {
         case NULL_ADDRESSING_MODE:
             opcode = BRK;
@@ -127,6 +127,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         case IMMEDIATE:
             if(instruction == "ADC") {
                 opcode = ADC_IMMEDIATE;
+            } else if(instruction == "AND") {
+                opcode = AND_IMMEDIATE;
             } else if(instruction == "LDA") {
                 opcode = LDA_IMMEDIATE;
             } else if(instruction == "LDX") {
@@ -142,12 +144,16 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         case ZERO_PAGE:
             if(instruction == "ADC") {
                 opcode = ADC_ZEROPAGE;
-            } else if (instruction == "STA") {
-                opcode = STA_ZEROPAGE;
+            } else if(instruction == "AND") {
+                opcode = AND_ZEROPAGE;
+            } else if(instruction == "LDA") {
+                opcode = LDA_ZEROPAGE;
             } else if (instruction == "LDX") {
                 opcode = LDX_ZEROPAGE;
             } else if (instruction == "LDY") {
                 opcode = LDY_ZEROPAGE;
+            } else if (instruction == "STA") {
+                opcode = STA_ZEROPAGE;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
@@ -157,10 +163,14 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         case ZERO_PAGEX:
             if(instruction == "ADC") {
                 opcode = ADC_ZEROPAGEX;
-            } else if (instruction == "STA") {
-                opcode = STA_ZEROPAGEX;
-            } else if (instruction == "LDY") {
+            } else if(instruction == "AND") {
+                opcode = AND_ZEROPAGEX;
+            } else if(instruction == "LDA") {
+                opcode = LDA_ZEROPAGEX;
+            } else if(instruction == "LDY") {
                 opcode = LDY_ZEROPAGEX;
+            } else if(instruction == "STA") {
+                opcode = STA_ZEROPAGEX;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
@@ -175,14 +185,16 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         case ABSOLUTE :
             if(instruction == "ADC") {
                 opcode = ADC_ABSOLUTE;
+            } else if(instruction == "AND") {
+                opcode = AND_ABSOLUTE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTE;
-            } else if(instruction == "STA") {
-                opcode = STA_ABSOLUTE;
             } else if(instruction == "LDX") {
                 opcode = LDX_ABSOLUTE;
             } else if(instruction == "LDY") {
                 opcode = LDY_ABSOLUTE;
+            } else if(instruction == "STA") {
+                opcode = STA_ABSOLUTE;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
@@ -191,7 +203,13 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
 
             break;
         case ABSOLUTEX:
-            if(instruction == "LDY") {
+            if(instruction == "ADC") {
+                opcode = ADC_ABSOLUTEX;
+            } else if(instruction == "AND") {
+                opcode = AND_ABSOLUTEX;
+            } else if(instruction == "LDA") {
+                opcode = LDA_ABSOLUTEX;
+            } else if(instruction == "LDY") {
                 opcode = LDY_ABSOLUTEX;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTEX;
@@ -202,7 +220,13 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             programLocation += 2;
             break;
         case ABSOLUTEY:
-            if(instruction == "LDX") {
+            if(instruction == "ADC") {
+                opcode = ADC_ABSOLUTEY;
+            } else if(instruction == "AND") {
+                opcode = AND_ABSOLUTEY;
+            } else if(instruction == "LDA") {
+                opcode = LDA_ABSOLUTEY;
+            } else if(instruction == "LDX") {
                 opcode = LDX_ABSOLUTEY;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTEY;

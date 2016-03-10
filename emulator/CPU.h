@@ -40,7 +40,7 @@ public:
     void storeByteInMemory(uint8_t byte, uint16_t location);
     void storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location);
 
-private:
+//private: i would like for these to be private but im not sure of a way around it with testing
     Util util;
 
     void addWithCarry(uint8_t argument);
@@ -81,6 +81,7 @@ private:
 
     void transferAccumulatorToX();
 
+private:
     void printExecutedByteInstruction(std::string instruction, uint8_t argument);
     void printExecutedWordInstruction(std::string instruction, uint16_t argument);
 

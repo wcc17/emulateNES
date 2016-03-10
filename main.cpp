@@ -2,7 +2,7 @@
 #include "emulator/Assembler.h"
 #include "emulator/Util.h"
 #include "emulator/CPU.h"
-#include "test_emulator/CPUTest.h"
+#include "test_emulator/cpu_tests/CPUTest.h"
 
 using namespace std;
 

@@ -293,6 +293,20 @@ AddressingMode Assembler::determineAddressingMode(string argument) {
         } else if(numHexDigits == 2) {
             addressingMode = ZERO_PAGE;
         }
+    } else if(argument[0] == '(') {
+
+        //LDA ($20,X)
+        //LDA ($86),Y
+
+        argument.erase(0, 2);
+        
+        //convert all characters to lower case for simplicity because x and y in zeropage indexed instructions aren't case sensitive
+        for(int i = 0; i < argument.size(); i++) {
+            argument[i] = tolower(argument[i]);
+        }
+
+
+
     } else {
         addressingMode = IMPLIED;
     }

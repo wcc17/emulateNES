@@ -112,6 +112,7 @@ void CPU::executeOpCode() {
         }
         case LDA_ZEROPAGEX: {
             loadAccumulator_ZeroPageX();
+            break;
         }
         case LDA_ABSOLUTE: {
             loadAccumulator_Absolute();
@@ -321,7 +322,7 @@ void CPU::andWithAccumulator_AbsoluteX() {
 void CPU::andWithAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("AND_ABSOLUTEY");
     uint8_t memoryValue = memory[argument];
-    addWithCarry(memoryValue);
+    andWithAccumulator(memoryValue);
 }
 
 void CPU::incrementX() {
@@ -536,6 +537,33 @@ uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
     return argument;
 }
 
+uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
+    uint8_t zeroPageLocation = memory[programCounter++];
+
+    zeroPageLocation += xIndex;
+
+    uint8_t lowByte = memory[zeroPageLocation++];
+    uint8_t highByte = memory[zeroPageLocation];
+
+    //get the 16 bit value at zeroPageLocation in memory
+    uint16_t argument = getWordFromBytes(lowByte, highByte);
+
+    printExecutedWordInstruction(instructionString, argument);
+    return argument;
+}
+
+uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
+    uint8_t zeroPageLocation = memory[programCounter++];
+
+    uint8_t lowByte = memory[zeroPageLocation++];
+    uint8_t highByte = memory[zeroPageLocation];
+
+    uint16_t argument = getWordFromBytes(lowByte, highByte);
+    argument += yIndex;
+
+    printExecutedWordInstruction(instructionString, argument);
+    return argument;
+}
 
 
 

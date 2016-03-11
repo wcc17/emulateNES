@@ -105,6 +105,8 @@ private:
     uint16_t retrieveAbsoluteInstruction(std::string instructionString);
     uint16_t retrieveAbsoluteXInstruction(std::string instructionString);
     uint16_t retrieveAbsoluteYInstruction(std::string instructionString);
+    uint16_t retrieveIndexedIndirectXInstruction(std::string instructionString);
+    uint16_t retrieveIndirectIndexedYInstruction(std::string instructionString);
 };
 
 

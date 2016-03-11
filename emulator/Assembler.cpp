@@ -236,9 +236,33 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
             programLocation += 2;
             break;
-        case INDIRECTX:
+        case INDEXED_INDIRECTX:
+            if(instruction == "ADC") {
+                opcode = ADC_INDEXED_INDIRECTX;
+            } else if(instruction == "AND") {
+                opcode = AND_INDEXED_INDIRECTX;
+            } else if(instruction == "LDA") {
+                opcode = LDA_INDEXED_INDIRECTX;
+            } else if(instruction == "STA") {
+                opcode = STA_INDEXED_INDIRECTX;
+            }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             break;
-        case INDIRECTY:
+        case INDIRECT_INDEXEDY:
+            if(instruction == "ADC") {
+                opcode = ADC_INDIRECT_INDEXEDY;
+            } else if(instruction == "AND") {
+                opcode = AND_INDIRECT_INDEXEDY;
+            } else if(instruction == "LDA") {
+                opcode = LDA_INDIRECT_INDEXEDY;
+            } else if(instruction == "STA") {
+                opcode = STA_INDIRECT_INDEXEDY;
+            }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             break;
     }
 }
@@ -299,13 +323,18 @@ AddressingMode Assembler::determineAddressingMode(string argument) {
         //LDA ($86),Y
 
         argument.erase(0, 2);
-        
+
         //convert all characters to lower case for simplicity because x and y in zeropage indexed instructions aren't case sensitive
         for(int i = 0; i < argument.size(); i++) {
             argument[i] = tolower(argument[i]);
         }
 
-
+        //TODO: THIS IS NOT THE FINAL SOLUTION. ASSEMBLER IS LOW PRIORITY FOR NOW
+        if(argument[2] ==  ',') {
+            addressingMode = INDEXED_INDIRECTX;
+        } else if(argument[2] == ')') {
+            addressingMode = INDIRECT_INDEXEDY;
+        }
 
     } else {
         addressingMode = IMPLIED;
@@ -324,6 +353,9 @@ string Assembler::trimArgument(string argument) {
 
         //erase the first $ character
         argument.erase(0, 1);
+    } else if(argument[0] == '(') {
+        argument.erase(0, 2);
+        argument.erase(4, argument.length()-1);
     }
 
     return argument;

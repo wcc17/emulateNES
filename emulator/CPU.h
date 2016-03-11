@@ -50,6 +50,8 @@ public:
     void addWithCarry_Absolute();
     void addWithCarry_AbsoluteX();
     void addWithCarry_AbsoluteY();
+    void addWithCarry_IndexedIndirectX();
+    void addWithCarry_IndirectIndexedY();
 
     void andWithAccumulator(uint8_t argument);
     void andWithAccumulator_Immediate();
@@ -58,6 +60,8 @@ public:
     void andWithAccumulator_Absolute();
     void andWithAccumulator_AbsoluteX();
     void andWithAccumulator_AbsoluteY();
+    void andWithAccumulator_IndexedIndirectX();
+    void andWithAccumulator_IndirectIndexedY();
 
     void incrementX();
 
@@ -68,6 +72,8 @@ public:
     void loadAccumulator_Absolute();
     void loadAccumulator_AbsoluteX();
     void loadAccumulator_AbsoluteY();
+    void loadAccumulator_IndexedIndirectX();
+    void loadAccumulator_IndirectIndexedY();
 
     void loadXIndex(uint8_t argument);
     void loadXIndex_Immediate();
@@ -89,6 +95,8 @@ public:
     void storeAccumulator_Absolute();
     void storeAccumulator_AbsoluteX();
     void storeAccumulator_AbsoluteY();
+    void storeAccumulator_IndexedIndirectX();
+    void storeAccumulator_IndirectIndexedY();
 
     void transferAccumulatorToX();
 

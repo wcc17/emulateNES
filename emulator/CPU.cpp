@@ -68,6 +68,14 @@ void CPU::executeOpCode() {
             addWithCarry_AbsoluteY();
             break;
         }
+        case ADC_INDEXED_INDIRECTX: {
+            addWithCarry_IndexedIndirectX();
+            break;
+        }
+        case ADC_INDIRECT_INDEXEDY: {
+            addWithCarry_IndirectIndexedY();
+            break;
+        }
 
         //AND
         case AND_IMMEDIATE:{
@@ -92,6 +100,14 @@ void CPU::executeOpCode() {
         }
         case AND_ABSOLUTEY:{
             andWithAccumulator_AbsoluteY();
+            break;
+        }
+        case AND_INDEXED_INDIRECTX: {
+            andWithAccumulator_IndexedIndirectX();
+            break;
+        }
+        case AND_INDIRECT_INDEXEDY: {
+            andWithAccumulator_IndirectIndexedY();
             break;
         }
 
@@ -124,6 +140,14 @@ void CPU::executeOpCode() {
         }
         case LDA_ABSOLUTEY: {
             loadAccumulator_AbsoluteY();
+            break;
+        }
+        case LDA_INDEXED_INDIRECTX: {
+            loadAccumulator_IndexedIndirectX();
+            break;
+        }
+        case LDA_INDIRECT_INDEXEDY: {
+            loadAccumulator_IndirectIndexedY();
             break;
         }
 
@@ -190,6 +214,14 @@ void CPU::executeOpCode() {
         }
         case STA_ABSOLUTEY: {
             storeAccumulator_AbsoluteY();
+            break;
+        }
+        case STA_INDEXED_INDIRECTX: {
+            storeAccumulator_IndexedIndirectX();
+            break;
+        }
+        case STA_INDIRECT_INDEXEDY: {
+            storeAccumulator_IndirectIndexedY();
             break;
         }
 
@@ -287,6 +319,16 @@ void CPU::addWithCarry_AbsoluteY() {
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
+void CPU::addWithCarry_IndexedIndirectX() {
+    uint16_t argument = retrieveIndexedIndirectXInstruction("ADC_INDEXED_INDIRECTX");
+    uint8_t memoryValue = memory[argument];
+    addWithCarry(memoryValue);
+}
+void CPU::addWithCarry_IndirectIndexedY() {
+    uint16_t argument = retrieveIndirectIndexedYInstruction("ADC_INDIRECT_INDEXEDY");
+    uint8_t memoryValue = memory[argument];
+    addWithCarry(memoryValue);
+}
 
 void CPU::andWithAccumulator(uint8_t argument) {
     accumulator = accumulator & argument;
@@ -321,6 +363,16 @@ void CPU::andWithAccumulator_AbsoluteX() {
 }
 void CPU::andWithAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("AND_ABSOLUTEY");
+    uint8_t memoryValue = memory[argument];
+    andWithAccumulator(memoryValue);
+}
+void CPU::andWithAccumulator_IndexedIndirectX() {
+    uint16_t argument = retrieveIndexedIndirectXInstruction("AND_INDEXED_INDIRECTX");
+    uint8_t memoryValue = memory[argument];
+    andWithAccumulator(memoryValue);
+}
+void CPU::andWithAccumulator_IndirectIndexedY() {
+    uint16_t argument = retrieveIndirectIndexedYInstruction("AND_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     andWithAccumulator(memoryValue);
 }
@@ -368,6 +420,16 @@ void CPU::loadAccumulator_AbsoluteX() {
 }
 void CPU::loadAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("LDA_ABSOLUTEY");
+    uint8_t memoryValue = memory[argument];
+    loadAccumulator(memoryValue);
+}
+void CPU::loadAccumulator_IndexedIndirectX() {
+    uint16_t argument = retrieveIndexedIndirectXInstruction("LDA_INDEXED_INDIRECTX");
+    uint8_t memoryValue = memory[argument];
+    loadAccumulator(memoryValue);
+}
+void CPU::loadAccumulator_IndirectIndexedY() {
+    uint16_t argument = retrieveIndirectIndexedYInstruction("LDA_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     loadAccumulator(memoryValue);
 }
@@ -460,6 +522,14 @@ void CPU::storeAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("STA_ABSOLUTEY");
     storeAccumulator(argument);
 }
+void CPU::storeAccumulator_IndexedIndirectX() {
+    uint16_t argument = retrieveIndexedIndirectXInstruction("STA_INDEXED_INDIRECTX");
+    storeAccumulator(argument);
+}
+void CPU::storeAccumulator_IndirectIndexedY() {
+    uint16_t argument = retrieveIndirectIndexedYInstruction("STA_INDIRECT_INDEXEDY");
+    storeAccumulator(argument);
+}
 
 void CPU::transferAccumulatorToX() {
     cout << "TAX" << endl;
@@ -547,7 +617,6 @@ uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
 
     //get the 16 bit value at zeroPageLocation in memory
     uint16_t argument = getWordFromBytes(lowByte, highByte);
-
     printExecutedWordInstruction(instructionString, argument);
     return argument;
 }

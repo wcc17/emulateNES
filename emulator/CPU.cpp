@@ -4,6 +4,7 @@
 
 #include "CPU.h"
 #include "opcodes.h"
+#include <bitset>
 
 using namespace std;
 
@@ -108,6 +109,45 @@ void CPU::executeOpCode() {
         }
         case AND_INDIRECT_INDEXEDY: {
             andWithAccumulator_IndirectIndexedY();
+            break;
+        }
+
+        //TODO: REMOVE THE BRACKETS FROM ALL THE SWITCH CASES NOW
+        //ASL
+        case ASL_ACCUMULATOR: {
+            arithmeticShiftLeft_Accumulator();
+            break;
+        }
+        case ASL_ZEROPAGE: {
+            arithmeticShiftLeft_ZeroPage();
+            break;
+        }
+        case ASL_ZEROPAGEX: {
+            arithmeticShiftLeft_ZeroPageX();
+            break;
+        }
+        case ASL_ABSOLUTE: {
+            arithmeticShiftLeft_Absolute();
+            break;
+        }
+        case ASL_ABSOLUTEX: {
+            arithmeticShiftLeft_AbsoluteX();
+            break;
+        }
+
+        //BIT
+        case BIT_ZEROPAGE: {
+            bitTest_ZeroPage();
+            break;
+        }
+        case BIT_ABSOLUTE: {
+            bitTest_Absolute();
+            break;
+        }
+
+        //BRK
+        case BRK: {
+            breakInstruction();
             break;
         }
 
@@ -303,7 +343,6 @@ void CPU::addWithCarry_ZeroPageX() {
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 }
-//TODO: can probably reuse this absolute method for every absolute, absolutex,y, and zeropage + zeropagex,y
 void CPU::addWithCarry_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("ADC_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
@@ -375,6 +414,75 @@ void CPU::andWithAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("AND_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     andWithAccumulator(memoryValue);
+}
+
+void CPU::arithmeticShiftLeft(uint16_t argument, bool useAccumulator) {
+    uint8_t initialValue;
+    uint8_t finalValue;
+
+    if(useAccumulator == true) {
+        initialValue = accumulator;
+        accumulator = accumulator << 1;
+        finalValue = accumulator;
+    } else {
+        uint8_t memoryValue = memory[argument];
+        initialValue = memoryValue;
+
+        memoryValue = memoryValue << 1;
+        memory[argument] = memoryValue;
+        finalValue = memory[argument];
+    }
+
+    //NOTE: ASL AFFECTS SIGN, ZERO, AND CARRY FLAGS
+    if(finalValue == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(finalValue) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(util.isNegativeByte(initialValue) == false) { flags.carry = 0; } else { flags.carry = 1; }
+}
+void CPU::arithmeticShiftLeft_Accumulator() {
+    retrieveAccumulatorInstruction("ASL_ACCUMULATOR");
+    arithmeticShiftLeft(NULL, true);
+}
+void CPU::arithmeticShiftLeft_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("ASL_ZEROPAGE");
+    arithmeticShiftLeft(argument, false);
+}
+void CPU::arithmeticShiftLeft_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("ASL_ZEROPAGEX");
+    arithmeticShiftLeft(argument, false);
+}
+void CPU::arithmeticShiftLeft_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("ASL_ABSOLUTE");
+    arithmeticShiftLeft(argument, false);
+}
+void CPU::arithmeticShiftLeft_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("ASL_ABSOLUTEX");
+    arithmeticShiftLeft(argument, false);
+}
+
+void CPU::bitTest(uint8_t argument) {
+    bitset<8> arg(argument);
+
+    //check 7th bit (negative)
+    if(arg.test(0) == 1) { flags.negative = 1; } else { flags.negative = 0; }
+    //check 6th bit (overflow)
+    if(arg.test(1) == 1) { flags.overflow = 1; } else { flags.overflow = 0; }
+    //check if arg && accumulator are 0 (zero)
+    if(argument && accumulator == 0) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::bitTest_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("BIT_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    bitTest(memoryValue);
+}
+void CPU::bitTest_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("BIT_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    bitTest(memoryValue);
+}
+
+void CPU::breakInstruction() {
+    programCounter++;
+    flags.breakFlag = 1;
 }
 
 void CPU::incrementX() {
@@ -541,6 +649,9 @@ void CPU::transferAccumulatorToX() {
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
 
+void CPU::retrieveAccumulatorInstruction(std::string instructionString) {
+    printExecutedAccumulatorInstruction(instructionString);
+}
 
 uint8_t CPU::retrieveImmediateInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
@@ -636,15 +747,6 @@ uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
 
 
 
-void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
-    memory[location] = byte;
-}
-
-void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
-    memory[location++] = lowByte;
-    memory[location] = highByte;
-}
-
 uint16_t CPU::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
 
     //This works because:
@@ -653,11 +755,19 @@ uint16_t CPU::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
 
     return word;
 }
-
+void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
+    memory[location] = byte;
+}
+void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
+    memory[location++] = lowByte;
+    memory[location] = highByte;
+}
 void CPU::printExecutedByteInstruction(string instruction, uint8_t argument) {
     cout << instruction << " "; util.printByte(argument); cout << endl;
 }
-
 void CPU::printExecutedWordInstruction(string instruction, uint16_t argument) {
     cout << instruction << " "; util.printByte(argument); cout << endl;
+}
+void CPU::printExecutedAccumulatorInstruction(std::string instruction) {
+    cout << instruction << " " << "A" << endl;
 }

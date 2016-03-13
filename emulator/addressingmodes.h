@@ -8,6 +8,7 @@
 //TODO: ADD THE REST
 enum AddressingMode {
     NULL_ADDRESSING_MODE,
+    ACCUMULATOR,
     IMPLIED,
     IMMEDIATE,
     ZERO_PAGE,

@@ -63,6 +63,19 @@ public:
     void andWithAccumulator_IndexedIndirectX();
     void andWithAccumulator_IndirectIndexedY();
 
+    void arithmeticShiftLeft(uint16_t argument, bool useAccumulator);
+    void arithmeticShiftLeft_Accumulator();
+    void arithmeticShiftLeft_ZeroPage();
+    void arithmeticShiftLeft_ZeroPageX();
+    void arithmeticShiftLeft_Absolute();
+    void arithmeticShiftLeft_AbsoluteX();
+
+    void bitTest(uint8_t argument);
+    void bitTest_ZeroPage();
+    void bitTest_Absolute();
+
+    void breakInstruction();
+
     void incrementX();
 
     void loadAccumulator(uint8_t argument);
@@ -103,9 +116,11 @@ public:
 private:
     void printExecutedByteInstruction(std::string instruction, uint8_t argument);
     void printExecutedWordInstruction(std::string instruction, uint16_t argument);
+    void printExecutedAccumulatorInstruction(std::string instruction);
 
     uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
 
+    void retrieveAccumulatorInstruction(std::string instructionString);
     uint8_t retrieveImmediateInstruction(std::string instructionString);
     uint8_t retrieveZeroPageInstruction(std::string instructionString);
     uint8_t retrieveZeroPageXInstruction(std::string instructionString);

@@ -33,13 +33,24 @@ void Assembler::readFile(string fileName) {
     uint16_t programLocation = cpu->programStart;
     for(int i = 0; i < words.size(); i++) {
         instruction = words[i++];
-        argument = words[i];
+
+        if(i != words.size()) {
+            argument = words[i];
+        } else {
+            //if we're at the end of the program, we don't want to pick up something weird here
+            argument = "";
+        }
 
         if(isArgument(argument)) {
             storeProgramInMemory(instruction, argument, programLocation);
         } else {
-            i -= 1;
-            storeProgramInMemory(instruction, NULL, programLocation);
+            if(i != words.size()) {
+                //if we're already at the end of the program, we don't want to go back like normally
+                //when we don't encounter an argument here. this usually means the last instruction
+                //is implied addressing
+                i -= 1;
+            }
+            storeProgramInMemory(instruction, "", programLocation);
         }
     }
 
@@ -47,17 +58,18 @@ void Assembler::readFile(string fileName) {
 }
 
 bool Assembler::isArgument(string word) {
-    char w = word.at(0);
+    if(word != "") {
+        char w = word.at(0);
 
-    if(w == 'A' && word.length() <= 1) {
-        return true;
-    } else if(w == '#'
-            || w == '$'
-            || w == '(') {
-        return true;
-    } else {
-        return false;
+        if( (w == 'A' && word.length() <= 1)
+                || w == '#'
+                || w == '$'
+                || w == '(') {
+            return true;
+        }
     }
+
+    return false;
 }
 
 bool Assembler::isLabel(string word) {

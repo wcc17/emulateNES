@@ -32,8 +32,8 @@ void Assembler::readFile(string fileName) {
     string argument;
     uint16_t programLocation = cpu->programStart;
     for(int i = 0; i < words.size(); i++) {
-        instruction = words[i++];
 
+        instruction = words[i++];
         if(i != words.size()) {
             argument = words[i];
         } else {
@@ -41,13 +41,40 @@ void Assembler::readFile(string fileName) {
             argument = "";
         }
 
-        if(isArgument(argument)) {
-            storeProgramInMemory(instruction, argument, programLocation);
-        } else {
+
+        //different scenarios so far
+        //1. instruction is a normal instruction and argument is a normal argument
+        //2. instruction is implied, no argument will exist
+        //3. instruction can be a label. this will happen if the last instruction had a valid argument
+        //4. argument can be a label. this will happen if the last insturction was implied OR
+        //   if an instruction is using the label as an argument
+
+
+        //if label is not an instruction
+        if(isLabel(instruction)) {
+            //STORE THE LABEL IN A CONTAINER FOR KEEPING UP WITH LABELS
+            instruction.erase(instruction.length() - 1);
+            labels[instruction] = programLocation;
+
             if(i != words.size()) {
-                //if we're already at the end of the program, we don't want to go back like normally
-                //when we don't encounter an argument here. this usually means the last instruction
-                //is implied addressing
+                //if we're already at the end of the program, don't go back
+                i--;
+            }
+        } else if(isArgument(argument)) {
+            //STORE THE NORMAL INSTRUCTION+ARGUMENT AFTER THE INSTRUCTION
+            storeProgramInMemory(instruction, argument, programLocation);
+        } else if(isExistingLabel(argument)) {
+            //CHECK TO SEE IF ARGUMENT CORRESPONDS TO A VALID LABEL
+            //THAT HAS ALREADY BEEN DECLARED EARLIER
+            //memoryLocation will be the location of the original label
+            //need the difference between the programCounter now and that memroyLocation
+            //if negative, store as twos complement. the instructions will take care of th conversion from here
+            uint16_t memoryLocation = labels[argument];
+            cout << "whatever" << endl;
+        }  else {
+            //IF NOTHING ELSE, THE INSTRUCTION IS IMPLIED. STORE IT LIKE THIS
+            if(i != words.size()) {
+                //if we're already at the end of the program, don't go back
                 i -= 1;
             }
             storeProgramInMemory(instruction, "", programLocation);
@@ -73,8 +100,25 @@ bool Assembler::isArgument(string word) {
 }
 
 bool Assembler::isLabel(string word) {
-    //check to see if last char in string is the : symbol
-    //if so, this is a label, needs to be handled accordingly
+    if(word != "") {
+        char w = word.back();
+
+        if(w == ':') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Assembler::isExistingLabel(string word) {
+    if(word != "") {
+        if(labels.find(word) != labels.end()) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 AddressingMode Assembler::determineAddressingMode(string argument) {

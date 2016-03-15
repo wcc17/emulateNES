@@ -4,7 +4,6 @@
 
 #include "Assembler.h"
 #include <iostream>
-#include <vector>
 #include <sstream>
 
 using namespace std;
@@ -27,6 +26,8 @@ void Assembler::readFile(string fileName) {
     while (file >> word) {
         words.push_back(word);
     }
+
+    storeLabels(words);
 
     string instruction;
     string argument;
@@ -52,9 +53,9 @@ void Assembler::readFile(string fileName) {
 
         //if label is not an instruction
         if(isLabel(instruction)) {
-            //STORE THE LABEL IN A CONTAINER FOR KEEPING UP WITH LABELS
-            instruction.erase(instruction.length() - 1);
-            labels[instruction] = programLocation;
+            //this is already taken care of in storeLabels
+//            instruction.erase(instruction.length() - 1);
+//            labels[instruction] = programLocation;
 
             if(i != words.size()) {
                 //if we're already at the end of the program, don't go back
@@ -69,8 +70,14 @@ void Assembler::readFile(string fileName) {
             //memoryLocation will be the location of the original label
             //need the difference between the programCounter now and that memroyLocation
             //if negative, store as twos complement. the instructions will take care of th conversion from here
-            uint16_t memoryLocation = labels[argument];
-            cout << "whatever" << endl;
+            uint16_t labelMemoryLocation = labels[argument];
+
+            //plus two because we want the position after this instruction + argument combo
+            //using 8 bit offset first so that negative numbers are converted correctly
+            uint8_t offset = labelMemoryLocation - (programLocation + 2);
+            uint16_t wordOffset = offset;
+            argument = convertWordToString(wordOffset);
+            storeProgramInMemory(instruction, argument, programLocation);
         }  else {
             //IF NOTHING ELSE, THE INSTRUCTION IS IMPLIED. STORE IT LIKE THIS
             if(i != words.size()) {
@@ -84,41 +91,82 @@ void Assembler::readFile(string fileName) {
     file.close();
 }
 
-bool Assembler::isArgument(string word) {
-    if(word != "") {
-        char w = word.at(0);
+void Assembler::storeLabels(vector<string> words) {
+    uint16_t programLocation = cpu->programStart;
+    string instruction;
+    string argument;
+    for(int i = 0; i < words.size(); i++) {
+        instruction = words[i++];
+        if(i != words.size()) {
+            argument = words[i];
+        } else {
+            argument = "";
+        }
 
-        if( (w == 'A' && word.length() <= 1)
-                || w == '#'
-                || w == '$'
-                || w == '(') {
-            return true;
+        if(isLabel(instruction)) {
+            instruction.erase(instruction.length() - 1);
+            labels[instruction] = programLocation;
+
+            if(i != words.size()) {
+                i--;
+            }
+        } else if(isArgument(argument)) {
+            programLocation = determineInstructionLocation(instruction, argument, programLocation);
+        } else if(isExistingLabel(argument)) {
+            uint16_t memoryLocation = labels[argument];
+            programLocation += 2; //a label will always be one byte. the instruction willl be one byte
+        }  else {
+            if(i != words.size()) {
+                i -= 1;
+            }
+            programLocation = determineInstructionLocation(instruction, "", programLocation);
         }
     }
-
-    return false;
 }
 
-bool Assembler::isLabel(string word) {
-    if(word != "") {
-        char w = word.back();
+uint16_t Assembler::determineInstructionLocation(string instruction, string argument, uint16_t programLocation) {
+    AddressingMode addressingMode = determineAddressingMode(argument);
 
-        if(w == ':') {
-            return true;
-        }
+    switch(addressingMode) {
+        case NULL_ADDRESSING_MODE:
+            //FAIL
+            break;
+        case ACCUMULATOR:
+            programLocation++;
+            break;
+        case IMPLIED:
+            programLocation++;
+            break;
+        case IMMEDIATE:
+            programLocation += 2;
+            break;
+        case ZERO_PAGE:
+            programLocation += 2;
+            break;
+        case ZERO_PAGEX:
+            programLocation += 2;
+            break;
+        case ZERO_PAGEY:
+            programLocation += 2;
+            break;
+        case ABSOLUTE:
+            programLocation += 3;
+            break;
+        case ABSOLUTEX:
+            programLocation += 3;
+            break;
+        case ABSOLUTEY:
+            programLocation += 3;
+            break;
+        case INDEXED_INDIRECTX:
+            programLocation += 2;
+            break;
+        case INDIRECT_INDEXEDY:
+            programLocation += 2;
+            break;
     }
 
-    return false;
-}
-
-bool Assembler::isExistingLabel(string word) {
-    if(word != "") {
-        if(labels.find(word) != labels.end()) {
-            return true;
-        }
-    }
-
-    return false;
+    return programLocation;
 }
 
 AddressingMode Assembler::determineAddressingMode(string argument) {
@@ -240,7 +288,11 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
     //this is so i can pick it up later if for some reason we don't have an addressing mode
     AddressingMode addressingMode = NULL_ADDRESSING_MODE;
 
-    addressingMode = determineAddressingMode(argument);
+    if(isBranchInstruction(instruction)) {
+        addressingMode = RELATIVE;
+    } else {
+        addressingMode = determineAddressingMode(argument);
+    }
     argument = trimArgument(argument);
 
     uint16_t arg = convertStringToWord(argument);
@@ -257,8 +309,32 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
             cpu->storeByteInMemory(opcode, programLocation++);
             break;
+        case RELATIVE:
+            if(instruction == "BPL") {
+                opcode = BPL;
+            } else if(instruction == "BMI") {
+                opcode = BMI;
+            } else if(instruction == "BVC") {
+                opcode = BVC;
+            } else if(instruction == "BVS") {
+                opcode = BVS;
+            } else if(instruction == "BCC") {
+                opcode = BCC;
+            } else if(instruction == "BCS") {
+                opcode = BCS;
+            } else if(instruction == "BNE") {
+                opcode = BNE;
+            } else if(instruction == "BEQ") {
+                opcode = BEQ;
+            }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            break;
         case IMPLIED:
-            if(instruction == "INX") {
+            if(instruction == "DEX") {
+                opcode = DEX;
+            } else if(instruction == "INX") {
                 opcode = INX;
             } else if(instruction == "TAX") {
                 opcode = TAX;
@@ -272,6 +348,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = ADC_IMMEDIATE;
             } else if(instruction == "AND") {
                 opcode = AND_IMMEDIATE;
+            } else if(instruction == "CPX") {
+                opcode = CPX_IMMEDIATE;
             } else if(instruction == "LDA") {
                 opcode = LDA_IMMEDIATE;
             } else if(instruction == "LDX") {
@@ -330,6 +408,9 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             if(instruction == "LDX") {
                 opcode = LDX_ZEROPAGEY;
             }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             break;
         case ABSOLUTE :
             if(instruction == "ADC") {
@@ -348,6 +429,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDY_ABSOLUTE;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTE;
+            } else if(instruction == "STX") {
+                opcode = STX_ABSOLUTE;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
@@ -422,6 +505,65 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
     }
 }
 
+bool Assembler::isArgument(string word) {
+    if(word != "") {
+        char w = word.at(0);
+
+        if( (w == 'A' && word.length() <= 1)
+            || w == '#'
+            || w == '$'
+            || w == '(') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Assembler::isLabel(string word) {
+    if(word != "") {
+        char w = word.back();
+
+        if(w == ':') {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Assembler::isExistingLabel(string word) {
+    if(word != "") {
+        if(labels.find(word) != labels.end()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Assembler::isBranchInstruction(string instruction) {
+    if(instruction == "BPL") {
+        return true;
+    } else if(instruction == "BMI") {
+        return true;
+    } else if(instruction == "BVC") {
+        return true;
+    } else if(instruction == "BVS") {
+        return true;
+    } else if(instruction == "BCC") {
+        return true;
+    } else if(instruction == "BCS") {
+        return true;
+    } else if(instruction == "BNE") {
+        return true;
+    } else if(instruction == "BEQ") {
+        return true;
+    }
+
+    return false;
+}
+
 //trims argument string down to only the memory location or value it contains
 string Assembler::trimArgument(string argument) {
     if (argument[0] == '#') {
@@ -444,10 +586,20 @@ uint16_t Assembler::convertStringToWord(string argument) {
     uint16_t x;
 
     stringstream ss;
-    ss << hex << argument;
+    ss << setfill('0') << setw(4) << hex << argument;
     ss >> x;
 
     return x;
+}
+
+string Assembler::convertWordToString(uint16_t word) {
+    string s;
+
+    stringstream ss;
+    ss << hex << word;
+    s = ss.str();
+
+    return s;
 }
 
 //You can cast it to kill the upper-byte of the 16-bit variable:

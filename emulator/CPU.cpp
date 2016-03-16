@@ -145,13 +145,51 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //BRANCH INSTRUCTIONS
+        case BPL: {
+            branchOnPlus();
+            break;
+        }
+        case BMI: {
+            branchOnMinus();
+            break;
+        }
+        case BVC: {
+            branchOnOverflowClear();
+            break;
+        }
+        case BVS: {
+            branchOnOverflowSet();
+            break;
+        }
+        case BCC: {
+            branchOnCarryClear();
+            break;
+        }
+        case BCS: {
+            branchOnCarrySet();
+            break;
+        }
+        case BNE: {
+            branchOnNotEqual();
+            break;
+        }
+        case BEQ: {
+            branchOnEqual();
+            break;
+        }
+
         //BRK
         case BRK: {
             breakInstruction();
             break;
         }
 
-        //INX
+        //Register Instructions
+        case DEX:{
+            decrementX();
+            break;
+        }
         case INX:{
             incrementX();
             break;
@@ -262,6 +300,34 @@ void CPU::executeOpCode() {
         }
         case STA_INDIRECT_INDEXEDY: {
             storeAccumulator_IndirectIndexedY();
+            break;
+        }
+
+        //STX
+        case STX_ZEROPAGE: {
+            storeXRegister_ZeroPage();
+            break;
+        }
+        case STX_ZEROPAGEY: {
+            storeXRegister_ZeroPageY();
+            break;
+        }
+        case STX_ABSOLUTE: {
+            storeXRegister_Absolute();
+            break;
+        }
+
+        //STY
+        case STY_ZEROPAGE: {
+            storeYRegister_ZeroPage();
+            break;
+        }
+        case STY_ZEROPAGEX: {
+            storeYRegister_ZeroPageX();
+            break;
+        }
+        case STY_ABSOLUTE: {
+            storeYRegister_Absolute();
             break;
         }
 
@@ -480,11 +546,65 @@ void CPU::bitTest_Absolute() {
     bitTest(memoryValue);
 }
 
+void CPU::branchOnPlus() {
+    uint8_t argument = retrieveRelativeInstruction("BPL");
+
+    //do branching
+    if(flags.negative == 0) {
+        if(util.isNegativeByte(argument)) {
+            argument = util.convertTwosComplement(argument);
+            programCounter -= argument;
+        } else {
+            programCounter += argument;
+        }
+
+    }
+}
+void CPU::branchOnMinus() {
+
+}
+void CPU::branchOnOverflowClear() {
+
+}
+void CPU::branchOnOverflowSet() {
+
+}
+void CPU::branchOnCarryClear() {
+
+}
+void CPU::branchOnCarrySet() {
+
+}
+void CPU::branchOnNotEqual() {
+    uint8_t argument = retrieveRelativeInstruction("BNE");
+
+    if(flags.zero == 0) {
+        if(util.isNegativeByte(argument)) {
+            argument = util.convertTwosComplement(argument);
+            programCounter -= argument;
+        } else {
+            programCounter += argument;
+        }
+    }
+}
+void CPU::branchOnEqual() {
+
+}
+
 void CPU::breakInstruction() {
     programCounter++;
     flags.breakFlag = 1;
 }
 
+void CPU::decrementX() {
+    cout << "DEX" << endl;
+
+    xIndex -= 1;
+
+    //NOTE: DEX affects negative flag and zero flag
+    if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
 void CPU::incrementX() {
     cout << "INX" << endl;
 
@@ -639,6 +759,40 @@ void CPU::storeAccumulator_IndirectIndexedY() {
     storeAccumulator(argument);
 }
 
+void CPU::storeXRegister(uint16_t argument) {
+    //NOTE: STX affects no flags
+    memory[argument] = xIndex;
+}
+void CPU::storeXRegister_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("STX_ZEROPAGE");
+    storeXRegister(argument);
+}
+void CPU::storeXRegister_ZeroPageY() {
+    uint8_t argument = retrieveZeroPageYInstruction("STX_ZEROPAGEY");
+    storeXRegister(argument);
+}
+void CPU::storeXRegister_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("STX_ABSOLUTE");
+    storeXRegister(argument);
+}
+
+void CPU::storeYRegister(uint16_t argument) {
+    //NOTE: STY affects no flags
+    memory[argument] = yIndex;
+}
+void CPU::storeYRegister_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("STY_ZEROPAGE");
+    storeYRegister(argument);
+}
+void CPU::storeYRegister_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("STY_ZEROPAGEX");
+    storeYRegister(argument);
+}
+void CPU::storeYRegister_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("STY_ABSOLUTE");
+    storeYRegister(argument);
+}
+
 void CPU::transferAccumulatorToX() {
     cout << "TAX" << endl;
 
@@ -651,6 +805,13 @@ void CPU::transferAccumulatorToX() {
 
 void CPU::retrieveAccumulatorInstruction(std::string instructionString) {
     printExecutedAccumulatorInstruction(instructionString);
+}
+
+uint8_t CPU::retrieveRelativeInstruction(string instructionString) {
+    uint8_t argument = memory[programCounter++];
+    printExecutedByteInstruction(instructionString, argument);
+
+    return argument;
 }
 
 uint8_t CPU::retrieveImmediateInstruction(string instructionString) {

@@ -379,6 +379,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDY_ZEROPAGE;
             } else if (instruction == "STA") {
                 opcode = STA_ZEROPAGE;
+            } else if (instruction == "STX") {
+                opcode = STX_ZEROPAGE;
+            } else if (instruction == "STY") {
+                opcode = STY_ZEROPAGE;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
@@ -398,6 +402,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDY_ZEROPAGEX;
             } else if(instruction == "STA") {
                 opcode = STA_ZEROPAGEX;
+            } else if(instruction == "STY") {
+                opcode = STY_ZEROPAGEX;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
@@ -407,6 +413,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         case ZERO_PAGEY:
             if(instruction == "LDX") {
                 opcode = LDX_ZEROPAGEY;
+            } else if(instruction == "STX") {
+                opcode = STX_ZEROPAGEY;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
@@ -431,6 +439,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = STA_ABSOLUTE;
             } else if(instruction == "STX") {
                 opcode = STX_ABSOLUTE;
+            } else if(instruction == "STY") {
+                opcode = STY_ABSOLUTE;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);

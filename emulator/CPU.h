@@ -74,8 +74,18 @@ public:
     void bitTest_ZeroPage();
     void bitTest_Absolute();
 
+    void branchOnPlus();
+    void branchOnMinus();
+    void branchOnOverflowClear();
+    void branchOnOverflowSet();
+    void branchOnCarryClear();
+    void branchOnCarrySet();
+    void branchOnNotEqual();
+    void branchOnEqual();
+
     void breakInstruction();
 
+    void decrementX();
     void incrementX();
 
     void loadAccumulator(uint8_t argument);
@@ -111,6 +121,16 @@ public:
     void storeAccumulator_IndexedIndirectX();
     void storeAccumulator_IndirectIndexedY();
 
+    void storeXRegister(uint16_t argument);
+    void storeXRegister_ZeroPage();
+    void storeXRegister_ZeroPageY();
+    void storeXRegister_Absolute();
+
+    void storeYRegister(uint16_t argument);
+    void storeYRegister_ZeroPage();
+    void storeYRegister_ZeroPageX();
+    void storeYRegister_Absolute();
+
     void transferAccumulatorToX();
 
 private:
@@ -121,6 +141,7 @@ private:
     uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
 
     void retrieveAccumulatorInstruction(std::string instructionString);
+    uint8_t retrieveRelativeInstruction(std::string instructionString);
     uint8_t retrieveImmediateInstruction(std::string instructionString);
     uint8_t retrieveZeroPageInstruction(std::string instructionString);
     uint8_t retrieveZeroPageXInstruction(std::string instructionString);

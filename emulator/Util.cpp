@@ -24,13 +24,9 @@ bool Util::isNegativeWord(uint16_t c) {
     return isNegative;
 }
 
-//10 & 8
+uint8_t Util::convertTwosComplement(uint8_t argument) {
+    argument = 0xFF - argument;
+    argument -= 1;
 
-
-
-//128 64  32  16  8   4   2  1
-//1   0   1   0   1   0   1  0
-
-//  00001010
-//& 00001000
-//00000000      -> this should be negative
+    return argument;
+}

@@ -16,6 +16,7 @@ public:
     void printWord(uint16_t word);
     bool isNegativeByte(uint8_t c);
     bool isNegativeWord(uint16_t c);
+    uint8_t convertTwosComplement(uint8_t argument);
 };
 
 

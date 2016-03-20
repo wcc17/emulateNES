@@ -353,6 +353,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = CMP_IMMEDIATE;
             } else if(instruction == "CPX") {
                 opcode = CPX_IMMEDIATE;
+            } else if(instruction == "CPY") {
+                opcode = CPY_IMMEDIATE;
             } else if(instruction == "LDA") {
                 opcode = LDA_IMMEDIATE;
             } else if(instruction == "LDX") {
@@ -376,6 +378,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = BIT_ZEROPAGE;
             } else if(instruction == "CMP") {
                 opcode = CMP_ZEROPAGE;
+            } else if(instruction == "CPX") {
+                opcode = CPX_ZEROPAGE;
+            } else if(instruction == "CPY") {
+                opcode = CPY_ZEROPAGE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ZEROPAGE;
             } else if (instruction == "LDX") {
@@ -438,6 +444,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = BIT_ABSOLUTE;
             } else if(instruction == "CMP") {
                 opcode = CMP_ABSOLUTE;
+            } else if(instruction == "CPX") {
+                opcode = CPX_ABSOLUTE;
+            } else if(instruction == "CPY") {
+                opcode = CPY_ABSOLUTE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTE;
             } else if(instruction == "LDX") {

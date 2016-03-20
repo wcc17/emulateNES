@@ -96,6 +96,16 @@ public:
     void compareAccumulator_IndexedIndirectX();
     void compareAccumulator_IndirectIndexedY();
 
+    void compareX(uint8_t argument);
+    void compareX_Immediate();
+    void compareX_ZeroPage();
+    void compareX_Absolute();
+
+    void compareY(uint8_t argument);
+    void compareY_Immediate();
+    void compareY_ZeroPage();
+    void compareY_Absolute();
+
     void decrementX();
     void incrementX();
 

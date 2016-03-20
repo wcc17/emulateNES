@@ -219,6 +219,35 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //CPX
+        case CPX_IMMEDIATE: {
+            compareX_Immediate();
+            break;
+        }
+        case CPX_ZEROPAGE: {
+            compareX_ZeroPage();
+            break;
+        }
+        case CPX_ABSOLUTE: {
+            compareX_Absolute();
+            break;
+        }
+
+        //CPY
+        case CPY_IMMEDIATE: {
+            compareY_Immediate();
+            break;
+        }
+        case CPY_ZEROPAGE: {
+            compareY_ZeroPage();
+            break;
+        }
+        case CPY_ABSOLUTE: {
+            compareY_Absolute();
+            break;
+        }
+
+
         //Register Instructions
         case DEX:{
             decrementX();
@@ -581,6 +610,16 @@ void CPU::bitTest_Absolute() {
 }
 
 void CPU::branch(uint8_t argument) {
+
+    /**
+     * In assembly language, you’ll usually use labels with branch instructions.
+     * When assembled though, this label is converted to a single-byte relative
+     * offset (a number of bytes to go backwards or forwards from the next instruction)
+     * so branch instructions can only go forward and back around 256 bytes.
+     * This means they can only be used to move around local code.
+     * For moving further you’ll need to use the jumping instructions.
+     */
+
     if(util.isNegativeByte(argument)) {
         argument = util.convertTwosComplement(argument);
         programCounter -= argument;
@@ -700,7 +739,49 @@ void CPU::compareAccumulator_IndirectIndexedY() {
     compareAccumulator(memoryValue);
 }
 
+void CPU::compareX(uint8_t argument) {
+    uint8_t result = xIndex - argument;
 
+    if(util.isNegativeByte(result) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(xIndex >= argument) { flags.carry = 1; } else { flags.carry = 0; }
+    if(result == 0) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::compareX_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("CPX_IMM");
+    compareX(argument);
+}
+void CPU::compareX_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("CPX_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    compareX(memoryValue);
+}
+void CPU::compareX_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("CPX_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    compareX(memoryValue);
+}
+
+void CPU::compareY(uint8_t argument) {
+    uint8_t result = yIndex - argument;
+
+    if(util.isNegativeByte(result) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(yIndex >= argument) { flags.carry = 1; } else { flags.carry = 0; }
+    if(result == 0) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::compareY_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("CPY_IMM");
+    compareY(argument);
+}
+void CPU::compareY_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("CPY_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    compareY(memoryValue);
+}
+void CPU::compareY_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("CPY_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    compareY(memoryValue);
+}
 
 void CPU::decrementX() {
     cout << "DEX" << endl;
@@ -1033,7 +1114,7 @@ void CPU::printExecutedByteInstruction(string instruction, uint8_t argument) {
     cout << instruction << " "; util.printByte(argument); cout << endl;
 }
 void CPU::printExecutedWordInstruction(string instruction, uint16_t argument) {
-    cout << instruction << " "; util.printByte(argument); cout << endl;
+    cout << instruction << " "; util.printWord(argument); cout << endl;
 }
 void CPU::printExecutedAccumulatorInstruction(std::string instruction) {
     cout << instruction << " " << "A" << endl;

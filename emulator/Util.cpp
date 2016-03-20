@@ -26,7 +26,7 @@ bool Util::isNegativeWord(uint16_t c) {
 
 uint8_t Util::convertTwosComplement(uint8_t argument) {
     argument = 0xFF - argument;
-    argument -= 1;
+    argument += 1;
 
     return argument;
 }

@@ -74,6 +74,7 @@ public:
     void bitTest_ZeroPage();
     void bitTest_Absolute();
 
+    void branch(uint8_t argument);
     void branchOnPlus();
     void branchOnMinus();
     void branchOnOverflowClear();
@@ -84,6 +85,16 @@ public:
     void branchOnEqual();
 
     void breakInstruction();
+
+    void compareAccumulator(uint8_t argument);
+    void compareAccumulator_Immediate();
+    void compareAccumulator_ZeroPage();
+    void compareAccumulator_ZeroPageX();
+    void compareAccumulator_Absolute();
+    void compareAccumulator_AbsoluteX();
+    void compareAccumulator_AbsoluteY();
+    void compareAccumulator_IndexedIndirectX();
+    void compareAccumulator_IndirectIndexedY();
 
     void decrementX();
     void incrementX();

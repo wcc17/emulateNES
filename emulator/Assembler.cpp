@@ -127,6 +127,7 @@ void Assembler::storeLabels(vector<string> words) {
 uint16_t Assembler::determineInstructionLocation(string instruction, string argument, uint16_t programLocation) {
     AddressingMode addressingMode = determineAddressingMode(argument);
 
+    //compiler generates a warning that RELATIVE is not used here. This is okay, relative is handled else where
     switch(addressingMode) {
         case NULL_ADDRESSING_MODE:
             //FAIL
@@ -348,6 +349,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = ADC_IMMEDIATE;
             } else if(instruction == "AND") {
                 opcode = AND_IMMEDIATE;
+            } else if(instruction == "CMP") {
+                opcode = CMP_IMMEDIATE;
             } else if(instruction == "CPX") {
                 opcode = CPX_IMMEDIATE;
             } else if(instruction == "LDA") {
@@ -371,6 +374,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = ASL_ZEROPAGE;
             } else if(instruction == "BIT") {
                 opcode = BIT_ZEROPAGE;
+            } else if(instruction == "CMP") {
+                opcode = CMP_ZEROPAGE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ZEROPAGE;
             } else if (instruction == "LDX") {
@@ -396,6 +401,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = AND_ZEROPAGEX;
             } else if(instruction == "ASL") {
                 opcode = ASL_ZEROPAGEX;
+            } else if(instruction == "CMP") {
+                opcode = CMP_ZEROPAGEX;
             } else if(instruction == "LDA") {
                 opcode = LDA_ZEROPAGEX;
             } else if(instruction == "LDY") {
@@ -429,6 +436,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = ASL_ABSOLUTE;
             } else if(instruction == "BIT") {
                 opcode = BIT_ABSOLUTE;
+            } else if(instruction == "CMP") {
+                opcode = CMP_ABSOLUTE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTE;
             } else if(instruction == "LDX") {
@@ -455,6 +464,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = AND_ABSOLUTEX;
             } else if(instruction == "ASL") {
                 opcode = ASL_ABSOLUTEX;
+            } else if(instruction == "CMP") {
+                opcode = CMP_ABSOLUTEX;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTEX;
             } else if(instruction == "LDY") {
@@ -472,6 +483,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = ADC_ABSOLUTEY;
             } else if(instruction == "AND") {
                 opcode = AND_ABSOLUTEY;
+            } else if(instruction == "CMP") {
+                opcode = CMP_ABSOLUTEY;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTEY;
             } else if(instruction == "LDX") {
@@ -489,6 +502,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = ADC_INDEXED_INDIRECTX;
             } else if(instruction == "AND") {
                 opcode = AND_INDEXED_INDIRECTX;
+            } else if(instruction == "CMP") {
+                opcode = CMP_INDEXED_INDIRECTX;
             } else if(instruction == "LDA") {
                 opcode = LDA_INDEXED_INDIRECTX;
             } else if(instruction == "STA") {
@@ -503,6 +518,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = ADC_INDIRECT_INDEXEDY;
             } else if(instruction == "AND") {
                 opcode = AND_INDIRECT_INDEXEDY;
+            } else if(instruction == "CMP") {
+                opcode = CMP_INDIRECT_INDEXEDY;
             } else if(instruction == "LDA") {
                 opcode = LDA_INDIRECT_INDEXEDY;
             } else if(instruction == "STA") {

@@ -185,6 +185,40 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //CMP
+        case CMP_IMMEDIATE: {
+            compareAccumulator_Immediate();
+            break;
+        }
+        case CMP_ZEROPAGE: {
+            compareAccumulator_ZeroPage();
+            break;
+        }
+        case CMP_ZEROPAGEX: {
+            compareAccumulator_ZeroPageX();
+            break;
+        }
+        case CMP_ABSOLUTE: {
+            compareAccumulator_Absolute();
+            break;
+        }
+        case CMP_ABSOLUTEX: {
+            compareAccumulator_AbsoluteX();
+            break;
+        }
+        case CMP_ABSOLUTEY: {
+            compareAccumulator_AbsoluteY();
+            break;
+        }
+        case CMP_INDEXED_INDIRECTX: {
+            compareAccumulator_IndexedIndirectX();
+            break;
+        }
+        case CMP_INDIRECT_INDEXEDY: {
+            compareAccumulator_IndirectIndexedY();
+            break;
+        }
+
         //Register Instructions
         case DEX:{
             decrementX();
@@ -546,55 +580,127 @@ void CPU::bitTest_Absolute() {
     bitTest(memoryValue);
 }
 
+void CPU::branch(uint8_t argument) {
+    if(util.isNegativeByte(argument)) {
+        argument = util.convertTwosComplement(argument);
+        programCounter -= argument;
+    } else {
+        programCounter += argument;
+    }
+}
 void CPU::branchOnPlus() {
     uint8_t argument = retrieveRelativeInstruction("BPL");
 
     //do branching
     if(flags.negative == 0) {
-        if(util.isNegativeByte(argument)) {
-            argument = util.convertTwosComplement(argument);
-            programCounter -= argument;
-        } else {
-            programCounter += argument;
-        }
-
+       branch(argument);
     }
 }
 void CPU::branchOnMinus() {
+    uint8_t argument = retrieveRelativeInstruction("BMI");
 
+    if(flags.negative == 1) {
+        branch(argument);
+    }
 }
 void CPU::branchOnOverflowClear() {
+    uint8_t argument = retrieveRelativeInstruction("BVC");
 
+    if(flags.overflow == 0) {
+        branch(argument);
+    }
 }
 void CPU::branchOnOverflowSet() {
+    uint8_t argument = retrieveRelativeInstruction("BVS");
 
+    if(flags.overflow == 1) {
+        branch(argument);
+    }
 }
 void CPU::branchOnCarryClear() {
+    uint8_t argument = retrieveRelativeInstruction("BCC");
 
+    if(flags.carry == 0) {
+        branch(argument);
+    }
 }
 void CPU::branchOnCarrySet() {
+    uint8_t argument = retrieveRelativeInstruction("BCS");
 
+    if(flags.carry == 1) {
+        branch(argument);
+    }
 }
 void CPU::branchOnNotEqual() {
     uint8_t argument = retrieveRelativeInstruction("BNE");
 
     if(flags.zero == 0) {
-        if(util.isNegativeByte(argument)) {
-            argument = util.convertTwosComplement(argument);
-            programCounter -= argument;
-        } else {
-            programCounter += argument;
-        }
+        branch(argument);
     }
 }
 void CPU::branchOnEqual() {
+    uint8_t argument = retrieveRelativeInstruction("BEQ");
 
+    if(flags.zero == 1) {
+        branch(argument);
+    }
 }
 
 void CPU::breakInstruction() {
     programCounter++;
     flags.breakFlag = 1;
 }
+
+
+
+void CPU::compareAccumulator(uint8_t argument) {
+    uint8_t result = accumulator - argument;
+
+    if(util.isNegativeByte(result) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(accumulator >= argument) { flags.carry = 1; } else { flags.carry = 0; }
+    if(result == 0) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::compareAccumulator_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("CMP_IMM");
+    compareAccumulator(argument);
+}
+void CPU::compareAccumulator_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("CMP_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    compareAccumulator(memoryValue);
+}
+void CPU::compareAccumulator_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("CMP_ZEROPAGEX");
+    uint8_t memoryValue = memory[argument];
+    compareAccumulator(memoryValue);
+}
+void CPU::compareAccumulator_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("CMP_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    compareAccumulator(memoryValue);
+}
+void CPU::compareAccumulator_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("CMP_ABSOLUTEX");
+    uint8_t memoryValue = memory[argument];
+    compareAccumulator(memoryValue);
+}
+void CPU::compareAccumulator_AbsoluteY() {
+    uint16_t argument = retrieveAbsoluteYInstruction("CMP_ABSOLUTEY");
+    uint8_t memoryValue = memory[argument];
+    compareAccumulator(memoryValue);
+}
+void CPU::compareAccumulator_IndexedIndirectX() {
+    uint16_t argument = retrieveIndexedIndirectXInstruction("CMP_INDEXED_INDIRECTX");
+    uint8_t memoryValue = memory[argument];
+    compareAccumulator(memoryValue);
+}
+void CPU::compareAccumulator_IndirectIndexedY() {
+    uint16_t argument = retrieveIndirectIndexedYInstruction("CMP_INDIRECT_INDEXEDY");
+    uint8_t memoryValue = memory[argument];
+    compareAccumulator(memoryValue);
+}
+
+
 
 void CPU::decrementX() {
     cout << "DEX" << endl;

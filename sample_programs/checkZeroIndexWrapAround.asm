@@ -1,0 +1,6 @@
+LDX #$60
+LDA #$01
+
+STA $C0,X
+
+LDA $C0,X

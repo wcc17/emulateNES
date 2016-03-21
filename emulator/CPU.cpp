@@ -299,6 +299,24 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //INC
+        case INC_ZEROPAGE: {
+            incrementMemory_ZeroPage();
+            break;
+        }
+        case INC_ZEROPAGEX: {
+            incrementMemory_ZeroPageX();
+            break;
+        }
+        case INC_ABSOLUTE: {
+            incrementMemory_Absolute();
+            break;
+        }
+        case INC_ABSOLUTEX: {
+            incrementMemory_AbsoluteX();
+            break;
+        }
+
         //Register Instructions
         case DEX:{
             decrementX();
@@ -904,6 +922,29 @@ void CPU::exclusiveOrAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("EOR_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     exclusiveOrAccumulator(memoryValue);
+}
+
+void CPU::incrementMemory(uint16_t argument) {
+    memory[argument]++;
+
+    if(util.isNegativeByte(memory[argument]) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(memory[argument] == 0) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::incrementMemory_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("INC_ZEROPAGE");
+    incrementMemory(argument);
+}
+void CPU::incrementMemory_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("INC_ZEROPAGEX");
+    incrementMemory(argument);
+}
+void CPU::incrementMemory_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("INC_ABSOLUTE");
+    incrementMemory(argument);
+}
+void CPU::incrementMemory_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("INC_ABSOLUTEX");
+    incrementMemory(argument);
 }
 
 void CPU::decrementX() {

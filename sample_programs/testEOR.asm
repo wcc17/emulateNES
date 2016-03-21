@@ -1,0 +1,11 @@
+LDA #$AA
+EOR #$AA
+
+LDX #$AA
+STX $0001
+LDX #$01
+EOR $00,X
+
+EOR $0001
+LDA #$AA
+EOR $0000,X

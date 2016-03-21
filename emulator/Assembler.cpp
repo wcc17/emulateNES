@@ -340,6 +340,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = DEY;
             } else if(instruction == "INX") {
                 opcode = INX;
+            } else if(instruction == "INY") {
+                opcode = INY;
             } else if(instruction == "TAX") {
                 opcode = TAX;
             }
@@ -391,6 +393,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = DEC_ZEROPAGE;
             } else if(instruction == "EOR") {
                 opcode = EOR_ZEROPAGE;
+            } else if(instruction == "INC") {
+                opcode = INC_ZEROPAGE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ZEROPAGE;
             } else if (instruction == "LDX") {
@@ -422,6 +426,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = DEC_ZEROPAGEX;
             } else if(instruction == "EOR") {
                 opcode = EOR_ZEROPAGEX;
+            } else if(instruction == "INC") {
+                opcode = INC_ZEROPAGEX;
             } else if(instruction == "LDA") {
                 opcode = LDA_ZEROPAGEX;
             } else if(instruction == "LDY") {
@@ -465,6 +471,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = DEC_ABSOLUTE;
             } else if(instruction == "EOR") {
                 opcode = EOR_ABSOLUTE;
+            } else if(instruction == "INC") {
+                opcode = INC_ABSOLUTE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTE;
             } else if(instruction == "LDX") {
@@ -497,6 +505,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = DEC_ABSOLUTEX;
             } else if(instruction == "EOR") {
                 opcode = EOR_ABSOLUTEX;
+            } else if(instruction == "INC") {
+                opcode = INC_ABSOLUTEX;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTEX;
             } else if(instruction == "LDY") {

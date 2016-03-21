@@ -122,6 +122,12 @@ public:
     void exclusiveOrAccumulator_IndexedIndirectX();
     void exclusiveOrAccumulator_IndirectIndexedY();
 
+    void incrementMemory(uint16_t argument);
+    void incrementMemory_ZeroPage();
+    void incrementMemory_ZeroPageX();
+    void incrementMemory_Absolute();
+    void incrementMemory_AbsoluteX();
+
     void decrementX();
     void decrementY();
     void incrementX();

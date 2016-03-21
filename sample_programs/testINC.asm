@@ -1,0 +1,9 @@
+LDX #$FE
+STX $0001
+
+INC $0001
+
+LDX #$01
+INC $00,X
+INC $0000,X
+INC $00

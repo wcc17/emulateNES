@@ -1,0 +1,8 @@
+LDA #$40
+STA $20,X
+STA $40
+ADC ($20,X)
+
+LDY #$02
+STA ($20),Y
+LDA ($20),Y

@@ -106,6 +106,12 @@ public:
     void compareY_ZeroPage();
     void compareY_Absolute();
 
+    void decrementMemory(uint16_t argument);
+    void decrementMemory_ZeroPage();
+    void decrementMemory_ZeroPageX();
+    void decrementMemory_Absolute();
+    void decrementMemory_AbsoluteX();
+
     void decrementX();
     void incrementX();
 

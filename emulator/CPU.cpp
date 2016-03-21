@@ -247,6 +247,23 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //DEC
+        case DEC_ZEROPAGE: {
+            decrementMemory_ZeroPage();
+            break;
+        }
+        case DEC_ZEROPAGEX: {
+            decrementMemory_ZeroPageX();
+            break;
+        }
+        case DEC_ABSOLUTE: {
+            decrementMemory_Absolute();
+            break;
+        }
+        case DEC_ABSOLUTEX: {
+            decrementMemory_AbsoluteX();
+            break;
+        }
 
         //Register Instructions
         case DEX:{
@@ -690,8 +707,6 @@ void CPU::breakInstruction() {
     flags.breakFlag = 1;
 }
 
-
-
 void CPU::compareAccumulator(uint8_t argument) {
     uint8_t result = accumulator - argument;
 
@@ -783,6 +798,29 @@ void CPU::compareY_Absolute() {
     compareY(memoryValue);
 }
 
+void CPU::decrementMemory(uint16_t argument) {
+    memory[argument]--;
+
+    if(util.isNegativeByte(memory[argument]) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(memory[argument] == 0) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::decrementMemory_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("DEC_ZEROPAGE");
+    decrementMemory(argument);
+}
+void CPU::decrementMemory_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("DEC_ZEROPAGEX");
+    decrementMemory(argument);
+}
+void CPU::decrementMemory_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("DEC_ABSOLUTE");
+    decrementMemory(argument);
+}
+void CPU::decrementMemory_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("DEC_ABSOLUTEX");
+    decrementMemory(argument);
+}
+
 void CPU::decrementX() {
     cout << "DEX" << endl;
 
@@ -791,6 +829,15 @@ void CPU::decrementX() {
     //NOTE: DEX affects negative flag and zero flag
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+void CPU::decrementY() {
+    cout << "DEY" << endl;
+
+    yIndex -= 1;
+
+    //NOTE: DEY affects negative flag and zero flag
+    if(yIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(yIndex) == false) { flags.negative = 0; } else { flags.negative = 1;}
 }
 void CPU::incrementX() {
     cout << "INX" << endl;

@@ -124,6 +124,7 @@ void Assembler::storeLabels(vector<string> words) {
     }
 }
 
+//THIS IS STRICTLY FOR INDEXING LABELS
 uint16_t Assembler::determineInstructionLocation(string instruction, string argument, uint16_t programLocation) {
     AddressingMode addressingMode = determineAddressingMode(argument);
 
@@ -335,6 +336,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         case IMPLIED:
             if(instruction == "DEX") {
                 opcode = DEX;
+            } else if(instruction == "DEY") {
+                opcode = DEY;
             } else if(instruction == "INX") {
                 opcode = INX;
             } else if(instruction == "TAX") {
@@ -355,6 +358,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = CPX_IMMEDIATE;
             } else if(instruction == "CPY") {
                 opcode = CPY_IMMEDIATE;
+            } else if(instruction == "EOR") {
+                opcode = EOR_IMMEDIATE;
             } else if(instruction == "LDA") {
                 opcode = LDA_IMMEDIATE;
             } else if(instruction == "LDX") {
@@ -382,6 +387,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = CPX_ZEROPAGE;
             } else if(instruction == "CPY") {
                 opcode = CPY_ZEROPAGE;
+            } else if(instruction == "DEC") {
+                opcode = DEC_ZEROPAGE;
+            } else if(instruction == "EOR") {
+                opcode = EOR_ZEROPAGE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ZEROPAGE;
             } else if (instruction == "LDX") {
@@ -409,6 +418,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = ASL_ZEROPAGEX;
             } else if(instruction == "CMP") {
                 opcode = CMP_ZEROPAGEX;
+            } else if(instruction == "DEC") {
+                opcode = DEC_ZEROPAGEX;
+            } else if(instruction == "EOR") {
+                opcode = EOR_ZEROPAGEX;
             } else if(instruction == "LDA") {
                 opcode = LDA_ZEROPAGEX;
             } else if(instruction == "LDY") {
@@ -448,6 +461,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = CPX_ABSOLUTE;
             } else if(instruction == "CPY") {
                 opcode = CPY_ABSOLUTE;
+            } else if(instruction == "DEC") {
+                opcode = DEC_ABSOLUTE;
+            } else if(instruction == "EOR") {
+                opcode = EOR_ABSOLUTE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTE;
             } else if(instruction == "LDX") {
@@ -476,6 +493,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = ASL_ABSOLUTEX;
             } else if(instruction == "CMP") {
                 opcode = CMP_ABSOLUTEX;
+            } else if(instruction == "DEC") {
+                opcode = DEC_ABSOLUTEX;
+            } else if(instruction == "EOR") {
+                opcode = EOR_ABSOLUTEX;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTEX;
             } else if(instruction == "LDY") {
@@ -495,6 +516,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = AND_ABSOLUTEY;
             } else if(instruction == "CMP") {
                 opcode = CMP_ABSOLUTEY;
+            } else if(instruction == "EOR") {
+                opcode = EOR_ABSOLUTEY;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTEY;
             } else if(instruction == "LDX") {
@@ -514,6 +537,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = AND_INDEXED_INDIRECTX;
             } else if(instruction == "CMP") {
                 opcode = CMP_INDEXED_INDIRECTX;
+            } else if(instruction == "EOR") {
+                opcode = EOR_INDEXED_INDIRECTX;
             } else if(instruction == "LDA") {
                 opcode = LDA_INDEXED_INDIRECTX;
             } else if(instruction == "STA") {
@@ -530,6 +555,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = AND_INDIRECT_INDEXEDY;
             } else if(instruction == "CMP") {
                 opcode = CMP_INDIRECT_INDEXEDY;
+            } else if(instruction == "EOR") {
+                opcode = EOR_INDIRECT_INDEXEDY;
             } else if(instruction == "LDA") {
                 opcode = LDA_INDIRECT_INDEXEDY;
             } else if(instruction == "STA") {

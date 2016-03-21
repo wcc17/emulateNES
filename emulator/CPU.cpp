@@ -265,9 +265,47 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //EOR
+        case EOR_IMMEDIATE: {
+            exclusiveOrAccumulator_Immediate();
+            break;
+        }
+        case EOR_ZEROPAGE: {
+            exclusiveOrAccumulator_ZeroPage();
+            break;
+        }
+        case EOR_ZEROPAGEX: {
+            exclusiveOrAccumulator_ZeroPageX();
+            break;
+        }
+        case EOR_ABSOLUTE: {
+            exclusiveOrAccumulator_Absolute();
+            break;
+        }
+        case EOR_ABSOLUTEX: {
+            exclusiveOrAccumulator_AbsoluteX();
+            break;
+        }
+        case EOR_ABSOLUTEY: {
+            exclusiveOrAccumulator_AbsoluteY();
+            break;
+        }
+        case EOR_INDEXED_INDIRECTX: {
+            exclusiveOrAccumulator_IndexedIndirectX();
+            break;
+        }
+        case EOR_INDIRECT_INDEXEDY: {
+            exclusiveOrAccumulator_IndirectIndexedY();
+            break;
+        }
+
         //Register Instructions
         case DEX:{
             decrementX();
+            break;
+        }
+        case DEY:{
+            decrementY();
             break;
         }
         case INX:{
@@ -819,6 +857,53 @@ void CPU::decrementMemory_Absolute() {
 void CPU::decrementMemory_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("DEC_ABSOLUTEX");
     decrementMemory(argument);
+}
+
+void CPU::exclusiveOrAccumulator(uint8_t argument) {
+    accumulator = accumulator ^ argument;
+
+    //NOTE: EOR affects zero and sign flags
+    if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::exclusiveOrAccumulator_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("EOR_IMMEDIATE");
+    exclusiveOrAccumulator(argument);
+}
+void CPU::exclusiveOrAccumulator_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("EOR_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    exclusiveOrAccumulator(memoryValue);
+}
+void CPU::exclusiveOrAccumulator_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("EOR_ZEROPAGEX");
+    uint8_t memoryValue = memory[argument];
+    exclusiveOrAccumulator(memoryValue);
+}
+void CPU::exclusiveOrAccumulator_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("EOR_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    exclusiveOrAccumulator(memoryValue);
+}
+void CPU::exclusiveOrAccumulator_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("EOR_ABSOLUTEX");
+    uint8_t memoryValue = memory[argument];
+    exclusiveOrAccumulator(memoryValue);
+}
+void CPU::exclusiveOrAccumulator_AbsoluteY() {
+    uint16_t argument = retrieveAbsoluteYInstruction("EOR_ABSOLUTEY");
+    uint8_t memoryValue = memory[argument];
+    exclusiveOrAccumulator(memoryValue);
+}
+void CPU::exclusiveOrAccumulator_IndexedIndirectX() {
+    uint16_t argument = retrieveIndexedIndirectXInstruction("EOR_INDEXED_INDIRECTX");
+    uint8_t memoryValue = memory[argument];
+    exclusiveOrAccumulator(memoryValue);
+}
+void CPU::exclusiveOrAccumulator_IndirectIndexedY() {
+    uint16_t argument = retrieveIndirectIndexedYInstruction("EOR_INDIRECT_INDEXEDY");
+    uint8_t memoryValue = memory[argument];
+    exclusiveOrAccumulator(memoryValue);
 }
 
 void CPU::decrementX() {

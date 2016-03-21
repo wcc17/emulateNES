@@ -112,7 +112,18 @@ public:
     void decrementMemory_Absolute();
     void decrementMemory_AbsoluteX();
 
+    void exclusiveOrAccumulator(uint8_t argument);
+    void exclusiveOrAccumulator_Immediate();
+    void exclusiveOrAccumulator_ZeroPage();
+    void exclusiveOrAccumulator_ZeroPageX();
+    void exclusiveOrAccumulator_Absolute();
+    void exclusiveOrAccumulator_AbsoluteX();
+    void exclusiveOrAccumulator_AbsoluteY();
+    void exclusiveOrAccumulator_IndexedIndirectX();
+    void exclusiveOrAccumulator_IndirectIndexedY();
+
     void decrementX();
+    void decrementY();
     void incrementX();
 
     void loadAccumulator(uint8_t argument);

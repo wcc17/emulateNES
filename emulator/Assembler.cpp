@@ -306,27 +306,30 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             //fail
             break;
         case ACCUMULATOR:
-            if(instruction == "ASL") {
+            if (instruction == "ASL") {
                 opcode = ASL_ACCUMULATOR;
+            }
+            if (instruction == "LSR") {
+                opcode = LSR_ACCUMULATOR;
             }
             cpu->storeByteInMemory(opcode, programLocation++);
             break;
         case RELATIVE:
-            if(instruction == "BPL") {
+            if (instruction == "BPL") {
                 opcode = BPL;
-            } else if(instruction == "BMI") {
+            } else if (instruction == "BMI") {
                 opcode = BMI;
-            } else if(instruction == "BVC") {
+            } else if (instruction == "BVC") {
                 opcode = BVC;
-            } else if(instruction == "BVS") {
+            } else if (instruction == "BVS") {
                 opcode = BVS;
-            } else if(instruction == "BCC") {
+            } else if (instruction == "BCC") {
                 opcode = BCC;
-            } else if(instruction == "BCS") {
+            } else if (instruction == "BCS") {
                 opcode = BCS;
-            } else if(instruction == "BNE") {
+            } else if (instruction == "BNE") {
                 opcode = BNE;
-            } else if(instruction == "BEQ") {
+            } else if (instruction == "BEQ") {
                 opcode = BEQ;
             }
 
@@ -334,7 +337,15 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             break;
         case IMPLIED:
-            if(instruction == "DEX") {
+            if(instruction == "CLC") {
+                opcode = CLC;
+            } else if(instruction == "CLD") {
+                opcode = CLD;
+            } else if(instruction == "CLI") {
+                opcode = CLI;
+            } else if(instruction == "CLV") {
+                opcode = CLV;
+            } else if(instruction == "DEX") {
                 opcode = DEX;
             } else if(instruction == "DEY") {
                 opcode = DEY;
@@ -342,6 +353,12 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = INX;
             } else if(instruction == "INY") {
                 opcode = INY;
+            } else if(instruction == "SEC") {
+                opcode = SEC;
+            } else if(instruction == "SED") {
+                opcode = SED;
+            } else if(instruction == "SEI") {
+                opcode = SEI;
             } else if(instruction == "TAX") {
                 opcode = TAX;
             }
@@ -401,6 +418,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDX_ZEROPAGE;
             } else if (instruction == "LDY") {
                 opcode = LDY_ZEROPAGE;
+            } else if(instruction == "LSR") {
+                opcode = LSR_ZEROPAGE;
             } else if (instruction == "STA") {
                 opcode = STA_ZEROPAGE;
             } else if (instruction == "STX") {
@@ -432,6 +451,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDA_ZEROPAGEX;
             } else if(instruction == "LDY") {
                 opcode = LDY_ZEROPAGEX;
+            } else if(instruction == "LSR") {
+                opcode = LSR_ZEROPAGEX;
             } else if(instruction == "STA") {
                 opcode = STA_ZEROPAGEX;
             } else if(instruction == "STY") {
@@ -479,6 +500,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDX_ABSOLUTE;
             } else if(instruction == "LDY") {
                 opcode = LDY_ABSOLUTE;
+            } else if(instruction == "LSR") {
+                opcode = LSR_ABSOLUTE;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTE;
             } else if(instruction == "STX") {
@@ -511,6 +534,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDA_ABSOLUTEX;
             } else if(instruction == "LDY") {
                 opcode = LDY_ABSOLUTEX;
+            } else if(instruction == "LSR") {
+                opcode = LSR_ABSOLUTEX;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTEX;
             }

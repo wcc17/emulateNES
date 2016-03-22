@@ -128,6 +128,14 @@ public:
     void incrementMemory_Absolute();
     void incrementMemory_AbsoluteX();
 
+    void clearCarry();
+    void setCarry();
+    void clearInterrupt();
+    void setInterrupt();
+    void clearOverflow();
+    void clearDecimal();
+    void setDecimal();
+
     void decrementX();
     void decrementY();
     void incrementX();
@@ -155,6 +163,13 @@ public:
     void loadYIndex_ZeroPageX();
     void loadYIndex_Absolute();
     void loadYIndex_AbsoluteX();
+
+    void logicalShiftRight(uint16_t argument, bool useAccumulator);
+    void logicalShiftRight_Accumulator();
+    void logicalShiftRight_ZeroPage();
+    void logicalShiftRight_ZeroPageX();
+    void logicalShiftRight_Absolute();
+    void logicalShiftRight_AbsoluteX();
 
     void storeAccumulator(uint16_t argument);
     void storeAccumulator_ZeroPage();

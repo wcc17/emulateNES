@@ -30,3 +30,8 @@ uint8_t Util::convertTwosComplement(uint8_t argument) {
 
     return argument;
 }
+
+bool Util::checkLeastSignificantBit(uint8_t c) {
+    bool isSet = (c >> 0) & 1;
+    return isSet;
+}

@@ -317,6 +317,36 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //Flag Instructions
+        case CLC: {
+            clearCarry();
+            break;
+        }
+        case SEC: {
+            setCarry();
+            break;
+        }
+        case CLI: {
+            clearInterrupt();
+            break;
+        }
+        case SEI: {
+            setInterrupt();
+            break;
+        }
+        case CLV: {
+            clearOverflow();
+            break;
+        }
+        case CLD: {
+            clearDecimal();
+            break;
+        }
+        case SED: {
+            setDecimal();
+            break;
+        }
+
         //Register Instructions
         case DEX:{
             decrementX();
@@ -406,6 +436,28 @@ void CPU::executeOpCode() {
         }
         case LDY_ABSOLUTEX: {
             loadYIndex_AbsoluteX();
+            break;
+        }
+
+        //LSR
+        case LSR_ACCUMULATOR: {
+            logicalShiftRight_Accumulator();
+            break;
+        }
+        case LSR_ZEROPAGE: {
+            logicalShiftRight_ZeroPage();
+            break;
+        }
+        case LSR_ZEROPAGEX: {
+            logicalShiftRight_ZeroPageX();
+            break;
+        }
+        case LSR_ABSOLUTE: {
+            logicalShiftRight_Absolute();
+            break;
+        }
+        case LSR_ABSOLUTEX: {
+            logicalShiftRight_AbsoluteX();
             break;
         }
 
@@ -947,6 +999,38 @@ void CPU::incrementMemory_AbsoluteX() {
     incrementMemory(argument);
 }
 
+void CPU::clearCarry() {
+    cout << "CLC" << endl;
+    flags.carry = 0;
+}
+void CPU::setCarry() {
+    cout << "SEC" << endl;
+    flags.carry = 1;
+}
+
+//TODO: THERE IS MORE TO THIS INSTURCTION THAN JUST SETTING THE FLAG. INTERRUPTS STOP THE CPU OR SOMETHING ON EASY6502. IRQ?
+void CPU::clearInterrupt() {
+    cout << "CLI" << endl;
+    flags.interrupt = 0;
+}
+void CPU::setInterrupt() {
+    cout << "SEI" << endl;
+    flags.interrupt = 1;
+}
+
+void CPU::clearOverflow() {
+    cout << "CLV" << endl;
+    flags.overflow = 0;
+}
+void CPU::clearDecimal() {
+    cout << "CLD" << endl;
+    flags.decimal = 0;
+}
+void CPU::setDecimal() {
+    cout << "SED" << endl;
+    flags.decimal = 1;
+}
+
 void CPU::decrementX() {
     cout << "DEX" << endl;
 
@@ -1084,6 +1168,55 @@ void CPU::loadYIndex_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("LDY_ABSOLUTEX");
     uint8_t memoryValue = memory[argument];
     loadYIndex(memoryValue);
+}
+
+void CPU::logicalShiftRight(uint16_t argument, bool useAccumulator) {
+    uint8_t initialValue;
+    uint8_t finalValue;
+
+    if(useAccumulator == true) {
+        initialValue = accumulator;
+        accumulator = accumulator >> 1;
+        finalValue = accumulator;
+    } else {
+        uint8_t memoryValue = memory[argument];
+        initialValue = memoryValue;
+
+        memoryValue >> 1;
+        memory[argument] = memoryValue;
+        finalValue = memory[argument];
+    }
+
+    //NOTE: LSR AFFECTS SIGN, ZERO, AND CARRY FLAGS
+
+    /**this is true because the first bit of the value is going to be shifted to the right and a zero
+       will be moved in to the most significant bit spot, making negative = 0 always **/
+    flags.negative = 0;
+
+    //if the LSB of the inital value is 1, then carry will be 1
+    if(util.checkLeastSignificantBit(initialValue) == true) { flags.carry = 1; } else { flags.carry = 0; }
+
+    if(finalValue == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::logicalShiftRight_Accumulator() {
+    retrieveAccumulatorInstruction("LSR_ACCUMULATOR");
+    logicalShiftRight(NULL, true);
+}
+void CPU::logicalShiftRight_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("LSR_ZEROPAGE");
+    logicalShiftRight(argument, false);
+}
+void CPU::logicalShiftRight_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("LSR_ZEROPAGEX");
+    logicalShiftRight(argument, false);
+}
+void CPU::logicalShiftRight_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("LSR_ABSOLUTE");
+    logicalShiftRight(argument, false);
+}
+void CPU::logicalShiftRight_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("LSR_ABSOLUTEX");
+    logicalShiftRight(argument, false);
 }
 
 void CPU::storeAccumulator(uint16_t argument) {

@@ -1,0 +1,5 @@
+LDA #$B7
+LSR A
+
+LDA #$01
+LSR A

@@ -348,16 +348,36 @@ void CPU::executeOpCode() {
         }
 
         //Register Instructions
+        case TAX:{
+            transferAccumulatorToX();
+            break;
+        }
+        case TXA:{
+            transferXToAccumulator();
+            break;
+        }
         case DEX:{
             decrementX();
+            break;
+        }
+        case INX:{
+            incrementX();
+            break;
+        }
+        case TAY:{
+            transferAccumulatorToY();
+            break;
+        }
+        case TYA:{
+            transferYToAccumulator();
             break;
         }
         case DEY:{
             decrementY();
             break;
         }
-        case INX:{
-            incrementX();
+        case INY:{
+            incrementY();
             break;
         }
 
@@ -526,12 +546,6 @@ void CPU::executeOpCode() {
         }
         case STY_ABSOLUTE: {
             storeYRegister_Absolute();
-            break;
-        }
-
-        //TAX
-        case TAX: {
-            transferAccumulatorToX();
             break;
         }
 
@@ -1041,6 +1055,24 @@ void CPU::setDecimal() {
     flags.decimal = 1;
 }
 
+void CPU::transferAccumulatorToX() {
+    cout << "TAX" << endl;
+
+    xIndex = accumulator;
+
+    //NOTE: TAX affects N and Z flags
+    if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+void CPU::transferXToAccumulator() {
+    cout << "TXA" << endl;
+
+    accumulator = xIndex;
+
+    //NOTE: TXA affects N and Z flags
+    if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
 void CPU::decrementX() {
     cout << "DEX" << endl;
 
@@ -1049,6 +1081,33 @@ void CPU::decrementX() {
     //NOTE: DEX affects negative flag and zero flag
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+void CPU::incrementX() {
+    cout << "INX" << endl;
+
+    xIndex += 1;
+
+    //NOTE: INX affects negative flag and zero flag
+    if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+void CPU::transferAccumulatorToY() {
+    cout << "TAY" << endl;
+
+    yIndex = accumulator;
+
+    //NOTE: TAY affects N and Z flags
+    if(yIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(yIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+}
+void CPU::transferYToAccumulator() {
+    cout << "TYA" << endl;
+
+    accumulator = yIndex;
+
+    //NOTE: TYA affects N and Z flags
+    if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
 void CPU::decrementY() {
     cout << "DEY" << endl;
@@ -1059,14 +1118,14 @@ void CPU::decrementY() {
     if(yIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(yIndex) == false) { flags.negative = 0; } else { flags.negative = 1;}
 }
-void CPU::incrementX() {
-    cout << "INX" << endl;
+void CPU::incrementY() {
+    cout << "INY" << endl;
 
-    xIndex += 1;
+    yIndex += 1;
 
-    //NOTE: INX affects negative flag and zero flag
-    if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
-    if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    //NOTE: INY affects negative flag and zero flag
+    if(yIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(yIndex) == false) { flags.negative = 0; } else { flags.negative = 1;}
 }
 
 void CPU::jump(uint16_t argument) {
@@ -1306,16 +1365,6 @@ void CPU::storeYRegister_ZeroPageX() {
 void CPU::storeYRegister_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("STY_ABSOLUTE");
     storeYRegister(argument);
-}
-
-void CPU::transferAccumulatorToX() {
-    cout << "TAX" << endl;
-
-    xIndex = accumulator;
-
-    //NOTE: TAX affects N and Z flags
-    if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
-    if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
 
 void CPU::retrieveAccumulatorInstruction(std::string instructionString) {

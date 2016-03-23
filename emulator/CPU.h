@@ -137,9 +137,14 @@ public:
     void clearDecimal();
     void setDecimal();
 
+    void transferAccumulatorToX();
+    void transferXToAccumulator();
     void decrementX();
-    void decrementY();
     void incrementX();
+    void transferAccumulatorToY();
+    void transferYToAccumulator();
+    void decrementY();
+    void incrementY();
 
     void jump(uint16_t argument);
     void jump_Absolute();
@@ -194,8 +199,6 @@ public:
     void storeYRegister_ZeroPage();
     void storeYRegister_ZeroPageX();
     void storeYRegister_Absolute();
-
-    void transferAccumulatorToX();
 
 private:
     void printExecutedByteInstruction(std::string instruction, uint8_t argument);

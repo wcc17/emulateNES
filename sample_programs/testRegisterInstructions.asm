@@ -1,0 +1,20 @@
+LDY #$0B
+LDA #$0C
+
+TAX
+LDX #$0A
+TXA
+
+DEX
+LDA #$01
+INX
+
+LDA #$03
+TAY
+LDY #$0B
+TYA
+
+LDY #$02
+DEY
+LDY #$07
+INY

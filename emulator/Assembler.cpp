@@ -387,6 +387,12 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = SEI;
             } else if(instruction == "TAX") {
                 opcode = TAX;
+            } else if(instruction == "TAY") {
+                opcode = TAY;
+            } else if(instruction == "TXA") {
+                opcode = TXA;
+            } else if(instruction == "TYA") {
+                opcode = TYA;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);

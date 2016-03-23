@@ -68,16 +68,31 @@ void Assembler::readFile(string fileName) {
             //CHECK TO SEE IF ARGUMENT CORRESPONDS TO A VALID LABEL
             //THAT HAS ALREADY BEEN DECLARED EARLIER
             //memoryLocation will be the location of the original label
-            //need the difference between the programCounter now and that memroyLocation
-            //if negative, store as twos complement. the instructions will take care of th conversion from here
-            uint16_t labelMemoryLocation = labels[argument];
 
-            //plus two because we want the position after this instruction + argument combo
-            //using 8 bit offset first so that negative numbers are converted correctly
-            uint8_t offset = labelMemoryLocation - (programLocation + 2);
-            uint16_t wordOffset = offset;
-            argument = convertWordToString(wordOffset);
-            storeProgramInMemory(instruction, argument, programLocation);
+            //only need offset
+            if(isBranchInstruction(instruction)) {
+                //need the difference between the programCounter now and that memroyLocation
+                //if negative, store as twos complement. the instructions will take care of th conversion from here
+                uint16_t labelMemoryLocation = labels[argument];
+
+                //plus two because we want the position after this instruction + argument combo
+                //using 8 bit offset first so that negative numbers are converted correctly
+                uint8_t offset = labelMemoryLocation - (programLocation + 2);
+                uint16_t wordOffset = offset;
+                argument = convertWordToString(wordOffset);
+                storeProgramInMemory(instruction, argument, programLocation);
+            } else {
+                //need entire address of existing label
+                uint16_t labelMemoryLocation = labels[argument];
+                argument = convertWordToString(labelMemoryLocation);
+
+                while (argument.length() < 4) {
+                    argument.insert(0, "0");
+                }
+                argument.insert(0, "$");
+
+                storeProgramInMemory(instruction, argument, programLocation);
+            }
         }  else {
             //IF NOTHING ELSE, THE INSTRUCTION IS IMPLIED. STORE IT LIKE THIS
             if(i != words.size()) {
@@ -112,9 +127,14 @@ void Assembler::storeLabels(vector<string> words) {
             }
         } else if(isArgument(argument)) {
             programLocation = determineInstructionLocation(instruction, argument, programLocation);
-        } else if(isExistingLabel(argument)) {
-            uint16_t memoryLocation = labels[argument];
-            programLocation += 2; //a label will always be one byte. the instruction willl be one byte
+        } else if(!isInstruction(argument) && argument != "") {
+            /**if isInstruction returns false for an argument, that means the argument is a label that hasn't actually been indexed yet. **/
+            //branch instructions use a relative value for the labels. other instructions will use an absolute value for the label
+            if(isBranchInstruction(instruction)) {
+                programLocation += 2;
+            } else {
+                programLocation += 3;
+            }
         }  else {
             if(i != words.size()) {
                 i -= 1;
@@ -165,6 +185,9 @@ uint16_t Assembler::determineInstructionLocation(string instruction, string argu
             break;
         case INDIRECT_INDEXEDY:
             programLocation += 2;
+            break;
+        case INDIRECT:
+            programLocation += 3;
             break;
     }
 
@@ -228,6 +251,7 @@ AddressingMode Assembler::determineAddressingMode(string argument) {
 
         //LDA ($20,X)
         //LDA ($86),Y
+        //JMP ($2222) -> indirect
 
         argument.erase(0, 2);
 
@@ -241,6 +265,8 @@ AddressingMode Assembler::determineAddressingMode(string argument) {
             addressingMode = INDEXED_INDIRECTX;
         } else if(argument[2] == ')') {
             addressingMode = INDIRECT_INDEXEDY;
+        } else {
+            addressingMode = INDIRECT;
         }
 
     } else {
@@ -494,6 +520,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = EOR_ABSOLUTE;
             } else if(instruction == "INC") {
                 opcode = INC_ABSOLUTE;
+            } else if(instruction == "JMP") {
+                opcode = JMP_ABSOLUTE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTE;
             } else if(instruction == "LDX") {
@@ -601,6 +629,14 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             cpu->storeByteInMemory(opcode, programLocation++);
             cpu->storeByteInMemory(getLowByte(arg), programLocation++);
             break;
+        case INDIRECT:
+            if(instruction == "JMP") {
+                opcode = JMP_INDIRECT;
+            }
+
+            cpu->storeByteInMemory(opcode, programLocation++);
+            cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+            programLocation += 2;
     }
 }
 
@@ -635,6 +671,20 @@ bool Assembler::isExistingLabel(string word) {
     if(word != "") {
         if(labels.find(word) != labels.end()) {
             return true;
+        }
+    }
+
+    return false;
+}
+
+bool Assembler::isInstruction(string word) {
+    if(word != "") {
+        for(int i = 0; i < invalidLabels.size(); i++) {
+            string instruction = invalidLabels[i];
+
+            if(word == instruction) {
+                return true;
+            }
         }
     }
 

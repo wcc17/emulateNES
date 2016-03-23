@@ -361,6 +361,16 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //JMP
+        case JMP_ABSOLUTE: {
+            jump_Absolute();
+            break;
+        }
+        case JMP_INDIRECT: {
+            jump_Indirect();
+            break;
+        }
+
         //LDA
         case LDA_IMMEDIATE:{
             loadAccumulator_Immediate();
@@ -1059,6 +1069,18 @@ void CPU::incrementX() {
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
 }
 
+void CPU::jump(uint16_t argument) {
+    programCounter = argument;
+}
+void CPU::jump_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("JMP_ABSOLUTE");
+    jump(argument);
+}
+void CPU::jump_Indirect() {
+    uint16_t argument = retrieveIndirectInstruction("JMP_INDIRECT");
+    jump(argument);
+}
+
 void CPU::loadAccumulator(uint8_t argument) {
     accumulator = argument;
 
@@ -1395,6 +1417,22 @@ uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
     uint16_t argument = getWordFromBytes(lowByte, highByte);
     argument += yIndex;
 
+    printExecutedWordInstruction(instructionString, argument);
+    return argument;
+}
+
+
+uint16_t CPU::retrieveIndirectInstruction(string instructionString) {
+    uint8_t indirectByteLow = memory[programCounter++];
+    uint8_t indirectByteHigh = memory[programCounter++];
+    uint16_t indirectAddress;
+
+    indirectAddress = getWordFromBytes(indirectByteLow, indirectByteHigh);
+    uint8_t byteLow = memory[indirectAddress++];
+    uint8_t byteHigh = memory[indirectAddress];
+    uint16_t argument;
+
+    argument = getWordFromBytes(byteLow, byteHigh);
     printExecutedWordInstruction(instructionString, argument);
     return argument;
 }

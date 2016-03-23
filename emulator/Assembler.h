@@ -21,6 +21,65 @@ class Assembler {
     //int x;
     CPU* cpu;
     std::map <string, uint16_t> labels;
+    std::vector<std::string> invalidLabels = {
+            "A", //FOR ACCUMULATOR ADDRESSING
+        "ADC",
+        "AND",
+        "ASL",
+        "BCC",
+        "BCS",
+        "BEQ",
+        "BIT",
+        "BMI",
+        "BNE",
+        "BPL",
+        "BRK",
+        "BVC",
+        "BVS",
+        "CLC",
+        "CLD",
+        "CLI",
+        "CLV",
+        "CMP",
+        "CPX",
+        "CPY",
+        "DEC",
+        "DEX",
+        "DEY",
+        "EOR",
+        "INC",
+        "INX",
+        "INY",
+        "JMP",
+        "JSR",
+        "LDA",
+        "LDX",
+        "LDY",
+        "LSR",
+        "NOP",
+        "ORA",
+        "PHA",
+        "PHP",
+        "PLA",
+        "PLP",
+        "ROL",
+        "ROR",
+        "RTI",
+        "RTS",
+        "SBC",
+        "SEC",
+        "SED",
+        "SEI",
+        "STA",
+        "STX",
+        "STY",
+        "TAX",
+        "TAY",
+        "TSX",
+        "TXA",
+        "TXS",
+        "TYA"
+    };
 
 public:
     Assembler(CPU* cpu);
@@ -39,6 +98,10 @@ private:
 
     //this method checks to see if the string being passed is a label being declared for the first time.
     bool isLabel(string word);
+
+    //when indexing labels before assembling, we need to know if a label is being used in an argument,
+    //even if the location of the label hasn't been stored yet
+    bool isInstruction(string word);
 
     /**this method checks to see if the string passed in is a label thats already declared and exists in labels.
     will return the memory location that the label points to **/

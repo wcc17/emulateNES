@@ -84,6 +84,7 @@ public:
     void branchOnNotEqual();
     void branchOnEqual();
 
+    //TODO: THIS IS NO WHERE NEAR DONE YET
     void breakInstruction();
 
     void compareAccumulator(uint8_t argument);
@@ -139,6 +140,10 @@ public:
     void decrementX();
     void decrementY();
     void incrementX();
+
+    void jump(uint16_t argument);
+    void jump_Absolute();
+    void jump_Indirect();
 
     void loadAccumulator(uint8_t argument);
     void loadAccumulator_Immediate();
@@ -210,6 +215,7 @@ private:
     uint16_t retrieveAbsoluteYInstruction(std::string instructionString);
     uint16_t retrieveIndexedIndirectXInstruction(std::string instructionString);
     uint16_t retrieveIndirectIndexedYInstruction(std::string instructionString);
+    uint16_t retrieveIndirectInstruction(std::string instructionString);
 };
 
 

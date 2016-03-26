@@ -379,6 +379,14 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = INX;
             } else if(instruction == "INY") {
                 opcode = INY;
+            } else if(instruction == "PHA") {
+                opcode = PHA;
+            } else if(instruction == "PHP") {
+                opcode = PHP;
+            } else if(instruction == "PLA") {
+                opcode = PLA;
+            } else if(instruction == "PLP") {
+                opcode = PLP;
             } else if(instruction == "SEC") {
                 opcode = SEC;
             } else if(instruction == "SED") {
@@ -389,8 +397,12 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = TAX;
             } else if(instruction == "TAY") {
                 opcode = TAY;
+            } else if(instruction == "TSX") {
+                opcode = TSX;
             } else if(instruction == "TXA") {
                 opcode = TXA;
+            } else if(instruction == "TXS") {
+                opcode = TXS;
             } else if(instruction == "TYA") {
                 opcode = TYA;
             }

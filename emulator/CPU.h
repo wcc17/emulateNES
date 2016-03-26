@@ -190,6 +190,13 @@ public:
     void storeAccumulator_IndexedIndirectX();
     void storeAccumulator_IndirectIndexedY();
 
+    void transferXToStackPointer();
+    void transferStackPointerToX();
+    void pushAccumulator();
+    void pullAccumulator();
+    void pushProcessorStatus();
+    void pullProcessorStatus();
+
     void storeXRegister(uint16_t argument);
     void storeXRegister_ZeroPage();
     void storeXRegister_ZeroPageY();
@@ -204,6 +211,9 @@ private:
     void printExecutedByteInstruction(std::string instruction, uint8_t argument);
     void printExecutedWordInstruction(std::string instruction, uint16_t argument);
     void printExecutedAccumulatorInstruction(std::string instruction);
+
+    uint8_t getProcessorFlagsAsByte();
+    void setProcessorFlagsFromByte(uint8_t processorStatus);
 
     uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
 

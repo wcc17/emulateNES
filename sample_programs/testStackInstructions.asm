@@ -1,0 +1,22 @@
+LDX #$02
+STX $0100
+
+PLA
+PHA
+
+LDX #$0A
+TXS
+
+LDX #$01
+TSX
+
+SEC
+SED
+PHP
+
+CLC
+CLD
+PLP
+
+SEC
+PLP

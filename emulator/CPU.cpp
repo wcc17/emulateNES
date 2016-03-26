@@ -521,6 +521,32 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //Stack Instructions
+        case TXS: {
+            transferXToStackPointer();
+            break;
+        }
+        case TSX: {
+            transferStackPointerToX();
+            break;
+        }
+        case PHA: {
+            pushAccumulator();
+            break;
+        }
+        case PLA: {
+            pullAccumulator();
+            break;
+        }
+        case PHP: {
+            pushProcessorStatus();
+            break;
+        }
+        case PLP: {
+            pullProcessorStatus();
+            break;
+        }
+
         //STX
         case STX_ZEROPAGE: {
             storeXRegister_ZeroPage();
@@ -718,6 +744,7 @@ void CPU::arithmeticShiftLeft(uint16_t argument, bool useAccumulator) {
 }
 void CPU::arithmeticShiftLeft_Accumulator() {
     retrieveAccumulatorInstruction("ASL_ACCUMULATOR");
+    //there are compiler warnings about passing NULL here, but if accumulator is true, it will never be used
     arithmeticShiftLeft(NULL, true);
 }
 void CPU::arithmeticShiftLeft_ZeroPage() {
@@ -1263,7 +1290,8 @@ void CPU::logicalShiftRight(uint16_t argument, bool useAccumulator) {
         uint8_t memoryValue = memory[argument];
         initialValue = memoryValue;
 
-        memoryValue >> 1;
+        //TODO: THIS NEEDS TO BE TESTED AGAIN
+        memoryValue = memoryValue >> 1;
         memory[argument] = memoryValue;
         finalValue = memory[argument];
     }
@@ -1281,6 +1309,7 @@ void CPU::logicalShiftRight(uint16_t argument, bool useAccumulator) {
 }
 void CPU::logicalShiftRight_Accumulator() {
     retrieveAccumulatorInstruction("LSR_ACCUMULATOR");
+    //there are compiler warnings about passing NULL here, but if accumulator is true, it will never be used
     logicalShiftRight(NULL, true);
 }
 void CPU::logicalShiftRight_ZeroPage() {
@@ -1333,6 +1362,57 @@ void CPU::storeAccumulator_IndirectIndexedY() {
     storeAccumulator(argument);
 }
 
+void CPU::transferXToStackPointer() {
+    cout << "TXS" << endl;
+
+    stackPointer = xIndex;
+
+    if(util.isNegativeByte(stackPointer)) { flags.negative = 1; } else { flags.negative = 0; }
+    if(stackPointer == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::transferStackPointerToX() {
+    cout << "TSX" << endl;
+
+    xIndex = stackPointer;
+
+    if(util.isNegativeByte(xIndex)) { flags.negative = 1; } else { flags.negative = 0; }
+    if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::pushAccumulator() {
+    cout << "PHA" << endl;
+
+    //stack pointer = 0xff but actually lives at 0x01ff
+    //0xff + 256(0x0100) = 0x1ff
+    memory[256 + (stackPointer--)] = accumulator;
+
+    //NOTE: PHA AFFECTS NO FLAGS
+}
+void CPU::pullAccumulator() {
+    cout << "PLA" << endl;
+
+    accumulator = memory[256 + (++stackPointer)];
+
+    if(util.isNegativeByte(accumulator)) { flags.negative = 1; } else { flags.negative = 0; }
+    if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::pushProcessorStatus() {
+    cout << "PHP" << endl;
+
+    //the binary value for the flags need to be pushed onto stack
+    uint8_t processorStatus = getProcessorFlagsAsByte();
+    memory[256 + (stackPointer--)] = processorStatus;
+
+    //NOTE: PHP AFFECTS NO FLAGS, BUT PLP DOES
+}
+void CPU::pullProcessorStatus() {
+    cout << "PLP" << endl;
+
+    uint8_t processorStatus = memory[256 + (++stackPointer)];
+    setProcessorFlagsFromByte(processorStatus);
+
+    //PLP AFFECTS ALL FLAGS, BUT THEY ARE SET IN setProcessorFlagsFromByte(uint8_t arg)
+}
+
 void CPU::storeXRegister(uint16_t argument) {
     //NOTE: STX affects no flags
     memory[argument] = xIndex;
@@ -1370,28 +1450,24 @@ void CPU::storeYRegister_Absolute() {
 void CPU::retrieveAccumulatorInstruction(std::string instructionString) {
     printExecutedAccumulatorInstruction(instructionString);
 }
-
 uint8_t CPU::retrieveRelativeInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
     printExecutedByteInstruction(instructionString, argument);
 
     return argument;
 }
-
 uint8_t CPU::retrieveImmediateInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
     printExecutedByteInstruction(instructionString, argument);
 
     return argument;
 }
-
 uint8_t CPU::retrieveZeroPageInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
     printExecutedByteInstruction(instructionString, argument);
 
     return argument;
 }
-
 uint8_t CPU::retrieveZeroPageXInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
     argument += xIndex;
@@ -1399,7 +1475,6 @@ uint8_t CPU::retrieveZeroPageXInstruction(string instructionString) {
 
     return argument;
 }
-
 uint8_t CPU::retrieveZeroPageYInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
     argument += yIndex;
@@ -1407,7 +1482,6 @@ uint8_t CPU::retrieveZeroPageYInstruction(string instructionString) {
 
     return argument;
 }
-
 uint16_t CPU::retrieveAbsoluteInstruction(string instructionString) {
     uint8_t byteLow = memory[programCounter++];
     uint8_t byteHigh = memory[programCounter++];
@@ -1418,7 +1492,6 @@ uint16_t CPU::retrieveAbsoluteInstruction(string instructionString) {
     printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
-
 uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
     uint8_t byteLow = memory[programCounter++];
     uint8_t byteHigh = memory[programCounter++];
@@ -1430,7 +1503,6 @@ uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
     printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
-
 uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
     uint8_t byteLow = memory[programCounter++];
     uint8_t byteHigh = memory[programCounter++];
@@ -1442,7 +1514,6 @@ uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
     printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
-
 uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
     uint8_t zeroPageLocation = memory[programCounter++];
 
@@ -1456,7 +1527,6 @@ uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
     printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
-
 uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
     uint8_t zeroPageLocation = memory[programCounter++];
 
@@ -1469,8 +1539,6 @@ uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
     printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
-
-
 uint16_t CPU::retrieveIndirectInstruction(string instructionString) {
     uint8_t indirectByteLow = memory[programCounter++];
     uint8_t indirectByteHigh = memory[programCounter++];
@@ -1487,7 +1555,43 @@ uint16_t CPU::retrieveIndirectInstruction(string instructionString) {
 }
 
 
+void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
+    memory[location] = byte;
+}
+void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
+    memory[location++] = lowByte;
+    memory[location] = highByte;
+}
 
+uint8_t CPU::getProcessorFlagsAsByte() {
+    uint8_t processorFlags = ZERO;
+
+    if(flags.negative == 1) { processorFlags = processorFlags | 128; }
+    if(flags.overflow == 1) { processorFlags = processorFlags | 64; }
+    if(flags.ignored == 1) { processorFlags = processorFlags | 32; }
+    if(flags.breakFlag == 1) { processorFlags = processorFlags | 16; }
+    if(flags.decimal == 1) { processorFlags = processorFlags | 8; }
+    if(flags.interrupt == 1) { processorFlags = processorFlags | 4; }
+    if(flags.zero == 1) { processorFlags = processorFlags | 2; }
+    if(flags.carry == 1) { processorFlags = processorFlags | 1; }
+
+
+    return processorFlags;
+}
+void CPU::setProcessorFlagsFromByte(uint8_t processorStatus) {
+
+    uint8_t whatever = processorStatus & 128;
+
+    if((processorStatus & 128) != 0) { flags.negative = 1; } else { flags.negative = 0; }
+    if((processorStatus & 64) != 0) { flags.overflow = 1; } else { flags.overflow = 0; }
+    //break and ignored are not affected. skip 32 and 16
+    if((processorStatus & 8) != 0) { flags.decimal = 1; } else { flags.decimal = 0; }
+    if((processorStatus & 4) != 0) { flags.interrupt = 1; } else { flags.interrupt = 0; }
+    if((processorStatus & 2) != 0) { flags.zero = 1; } else { flags.zero = 0; }
+    if((processorStatus & 1) != 0) { flags.carry = 1; } else { flags.carry = 0; }
+}
+
+//TODO: move to Util
 uint16_t CPU::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
 
     //This works because:
@@ -1495,13 +1599,6 @@ uint16_t CPU::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
     uint16_t word = ((uint16_t)byteHigh << 8) | byteLow;
 
     return word;
-}
-void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
-    memory[location] = byte;
-}
-void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
-    memory[location++] = lowByte;
-    memory[location] = highByte;
 }
 void CPU::printExecutedByteInstruction(string instruction, uint8_t argument) {
     cout << instruction << " "; util.printByte(argument); cout << endl;

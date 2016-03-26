@@ -22,6 +22,19 @@ void printMemory(uint16_t start, uint16_t end, CPU* cpu) {
     }
 }
 
+void printStack(CPU* cpu) {
+    int x = 0;
+
+    for(int i = 0x0100; i <= 0x01ff; i++) {
+        printf("%02x ", cpu->memory[i]);
+
+        x++;
+        if(x % 16 == 0) {
+            printf("\n");
+        }
+    }
+}
+
 void printDebugInformation(CPU* cpu) {
     Util util;
 
@@ -50,7 +63,11 @@ void printDebugInformation(CPU* cpu) {
     cout << "N V - B D I Z C" << endl;
     printf("%d %d %d %d %d %d %d %d\n", cpu->flags.negative, cpu->flags.overflow, cpu->flags.ignored, cpu->flags.breakFlag, cpu->flags.decimal, cpu->flags.interrupt, cpu->flags.zero, cpu->flags.carry);
 
-    cout << "Next instruction results to be printed: " << endl;
+    cout << "Stack: " << endl;
+    printStack(cpu);
+    cout << endl;
+
+    cout << "Next instruction results to be printed: " << endl << endl;
 }
 
 int main() {
@@ -61,7 +78,7 @@ int main() {
     CPU *cpu = new CPU();
     Assembler assembler(cpu);
 
-    string fileName = "sample_programs/testRegisterInstructions.asm";
+    string fileName = "sample_programs/testStackInstructions.asm";
     assembler.readFile(fileName.c_str());
 
     printMemory(0x0600, 0x0700, cpu);
@@ -80,8 +97,6 @@ int main() {
         cpu->executeOpCode();
     }
 
-    //TODO: WHEN A ZERO IS ENCOUNTERED ON EASY6502, HIS PROGRAMCOUNTER INCREASES BY 1 ONE MORE TIME.
-    //TODO:IS THERE MORE TO THAT THAN JUST DOING THIS?
     cpu->programCounter++;
 
     //print one last time to see the results of the last instruction

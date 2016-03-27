@@ -387,6 +387,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = PLA;
             } else if(instruction == "PLP") {
                 opcode = PLP;
+            } else if(instruction == "RTS") {
+                opcode = RTS;
             } else if(instruction == "SEC") {
                 opcode = SEC;
             } else if(instruction == "SED") {
@@ -540,6 +542,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = INC_ABSOLUTE;
             } else if(instruction == "JMP") {
                 opcode = JMP_ABSOLUTE;
+            } else if(instruction == "JSR") {
+                opcode = JSR_ABSOLUTE;
             } else if(instruction == "LDA") {
                 opcode = LDA_ABSOLUTE;
             } else if(instruction == "LDX") {

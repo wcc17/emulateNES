@@ -391,6 +391,12 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //JSR
+        case JSR_ABSOLUTE: {
+            jumpToSubroutine_Absolute();
+            break;
+        }
+
         //LDA
         case LDA_IMMEDIATE:{
             loadAccumulator_Immediate();
@@ -488,6 +494,12 @@ void CPU::executeOpCode() {
         }
         case LSR_ABSOLUTEX: {
             logicalShiftRight_AbsoluteX();
+            break;
+        }
+
+        //RTS
+        case RTS: {
+            returnFromSubroutine();
             break;
         }
 
@@ -1167,6 +1179,21 @@ void CPU::jump_Indirect() {
     jump(argument);
 }
 
+void CPU::jumpToSubroutine_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("JSR_ABSOLUTE");
+
+    uint16_t t = programCounter - 1;
+    uint16_t h = t & 0xFF00;    //contains the high byte but in the wrong place to convert to uint8_t
+
+    uint8_t highByte = h >> 8;
+    uint8_t lowByte = t & 0xFF;
+
+    memory[256 + (stackPointer--)] = highByte;
+    memory[256 + (stackPointer--)] = lowByte;
+
+    programCounter = argument;
+}
+
 void CPU::loadAccumulator(uint8_t argument) {
     accumulator = argument;
 
@@ -1327,6 +1354,18 @@ void CPU::logicalShiftRight_Absolute() {
 void CPU::logicalShiftRight_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("LSR_ABSOLUTEX");
     logicalShiftRight(argument, false);
+}
+
+void CPU::returnFromSubroutine() {
+    //this doesn't work yet
+//    cout << "RTS" << endl;
+//
+//    uint8_t lowByte = memory[++stackPointer];
+//    uint8_t highByte = memory[++stackPointer];
+//
+//    uint16_t newProgramCounter = getWordFromBytes(lowByte, highByte);
+//    newProgramCounter++;
+//    programCounter = newProgramCounter;
 }
 
 void CPU::storeAccumulator(uint16_t argument) {

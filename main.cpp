@@ -78,7 +78,7 @@ int main() {
     CPU *cpu = new CPU();
     Assembler assembler(cpu);
 
-    string fileName = "sample_programs/testStackInstructions.asm";
+    string fileName = "sample_programs/testSubroutines.asm";
     assembler.readFile(fileName.c_str());
 
     printMemory(0x0600, 0x0700, cpu);

@@ -150,6 +150,8 @@ public:
     void jump_Absolute();
     void jump_Indirect();
 
+    void jumpToSubroutine_Absolute();
+
     void loadAccumulator(uint8_t argument);
     void loadAccumulator_Immediate();
     void loadAccumulator_ZeroPage();
@@ -180,6 +182,8 @@ public:
     void logicalShiftRight_ZeroPageX();
     void logicalShiftRight_Absolute();
     void logicalShiftRight_AbsoluteX();
+
+    void returnFromSubroutine();
 
     void storeAccumulator(uint16_t argument);
     void storeAccumulator_ZeroPage();

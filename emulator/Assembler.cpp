@@ -379,6 +379,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = INX;
             } else if(instruction == "INY") {
                 opcode = INY;
+            } else if(instruction == "NOP") {
+                opcode = NOP;
             } else if(instruction == "PHA") {
                 opcode = PHA;
             } else if(instruction == "PHP") {

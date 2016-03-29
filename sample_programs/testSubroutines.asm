@@ -1,3 +1,8 @@
-JSR there
-there:
-    RTS
+LDX #$A9
+STX $0504
+LDX #$02
+STX $0505
+LDX #$60
+STX $0506
+
+JSR $0504

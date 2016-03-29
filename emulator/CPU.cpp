@@ -497,6 +497,12 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //NOP
+        case NOP: {
+            noOperation();
+            break;
+        }
+
         //RTS
         case RTS: {
             returnFromSubroutine();
@@ -1356,16 +1362,22 @@ void CPU::logicalShiftRight_AbsoluteX() {
     logicalShiftRight(argument, false);
 }
 
+void CPU::noOperation() {
+    cout << "NOP" << endl;
+
+    //cycles += 2;
+    //affects no flags
+}
+
 void CPU::returnFromSubroutine() {
-    //this doesn't work yet
-//    cout << "RTS" << endl;
-//
-//    uint8_t lowByte = memory[++stackPointer];
-//    uint8_t highByte = memory[++stackPointer];
-//
-//    uint16_t newProgramCounter = getWordFromBytes(lowByte, highByte);
-//    newProgramCounter++;
-//    programCounter = newProgramCounter;
+    cout << "RTS" << endl;
+
+    uint8_t lowByte = memory[256 + (++stackPointer)];
+    uint8_t highByte = memory[256 + (++stackPointer)];
+
+    uint16_t newProgramCounter = getWordFromBytes(lowByte, highByte);
+    newProgramCounter++;
+    programCounter = newProgramCounter;
 }
 
 void CPU::storeAccumulator(uint16_t argument) {

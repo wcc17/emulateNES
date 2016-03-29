@@ -183,6 +183,8 @@ public:
     void logicalShiftRight_Absolute();
     void logicalShiftRight_AbsoluteX();
 
+    void noOperation();
+
     void returnFromSubroutine();
 
     void storeAccumulator(uint16_t argument);

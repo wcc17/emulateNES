@@ -433,6 +433,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDX_IMMEDIATE;
             } else if(instruction == "LDY") {
                 opcode = LDY_IMMEDIATE;
+            } else if(instruction == "ORA") {
+                opcode = ORA_IMMEDIATE;
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
@@ -468,6 +470,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDY_ZEROPAGE;
             } else if(instruction == "LSR") {
                 opcode = LSR_ZEROPAGE;
+            } else if(instruction == "ORA") {
+                opcode = ORA_ZEROPAGE;
             } else if (instruction == "STA") {
                 opcode = STA_ZEROPAGE;
             } else if (instruction == "STX") {
@@ -501,6 +505,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDY_ZEROPAGEX;
             } else if(instruction == "LSR") {
                 opcode = LSR_ZEROPAGEX;
+            } else if(instruction == "ORA") {
+                opcode = ORA_ZEROPAGEX;
             } else if(instruction == "STA") {
                 opcode = STA_ZEROPAGEX;
             } else if(instruction == "STY") {
@@ -554,6 +560,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDY_ABSOLUTE;
             } else if(instruction == "LSR") {
                 opcode = LSR_ABSOLUTE;
+            } else if(instruction == "ORA") {
+                opcode = ORA_ABSOLUTE;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTE;
             } else if(instruction == "STX") {
@@ -588,6 +596,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDY_ABSOLUTEX;
             } else if(instruction == "LSR") {
                 opcode = LSR_ABSOLUTEX;
+            } else if(instruction == "ORA") {
+                opcode = ORA_ABSOLUTEX;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTEX;
             }
@@ -609,6 +619,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LDA_ABSOLUTEY;
             } else if(instruction == "LDX") {
                 opcode = LDX_ABSOLUTEY;
+            } else if(instruction == "ORA") {
+                opcode = ORA_ABSOLUTEY;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTEY;
             }
@@ -628,6 +640,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = EOR_INDEXED_INDIRECTX;
             } else if(instruction == "LDA") {
                 opcode = LDA_INDEXED_INDIRECTX;
+            } else if(instruction == "ORA") {
+                opcode = ORA_INDEXED_INDIRECTX;
             } else if(instruction == "STA") {
                 opcode = STA_INDEXED_INDIRECTX;
             }
@@ -646,6 +660,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = EOR_INDIRECT_INDEXEDY;
             } else if(instruction == "LDA") {
                 opcode = LDA_INDIRECT_INDEXEDY;
+            } else if(instruction == "ORA") {
+                opcode = ORA_INDIRECT_INDEXEDY;
             } else if(instruction == "STA") {
                 opcode = STA_INDIRECT_INDEXEDY;
             }

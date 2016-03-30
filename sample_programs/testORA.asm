@@ -1,0 +1,6 @@
+LDA #$00
+ORA #$00
+
+LDX #$FF
+STX $0000
+ORA $0000

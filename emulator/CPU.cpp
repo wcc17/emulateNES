@@ -509,6 +509,40 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //ORA
+        case ORA_IMMEDIATE: {
+            orWithAccumulator_Immediate();
+            break;
+        }
+        case ORA_ZEROPAGE: {
+            orWithAccumulator_ZeroPage();
+            break;
+        }
+        case ORA_ZEROPAGEX: {
+            orWithAccumulator_ZeroPageX();
+            break;
+        }
+        case ORA_ABSOLUTE: {
+            orWithAccumulator_Absolute();
+            break;
+        }
+        case ORA_ABSOLUTEX: {
+            orWithAccumulator_AbsoluteX();
+            break;
+        }
+        case ORA_ABSOLUTEY: {
+            orWithAccumulator_AbsoluteY();
+            break;
+        }
+        case ORA_INDEXED_INDIRECTX: {
+            orWithAccumulator_IndexedIndirectX();
+            break;
+        }
+        case ORA_INDIRECT_INDEXEDY: {
+            orWithAccumulator_IndirectIndexedY();
+            break;
+        }
+
         //STA
         case STA_ZEROPAGE: {
             storeAccumulator_ZeroPage();
@@ -1378,6 +1412,53 @@ void CPU::returnFromSubroutine() {
     uint16_t newProgramCounter = getWordFromBytes(lowByte, highByte);
     newProgramCounter++;
     programCounter = newProgramCounter;
+}
+
+void CPU::orWithAccumulator(uint8_t argument) {
+    accumulator = accumulator | argument;
+
+    //NOTE: ORA AFFECTS SIGN AND ZERO FLAGS
+    if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+}
+void CPU::orWithAccumulator_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("ORA_IMMEDIATE");
+    orWithAccumulator(argument);
+}
+void CPU::orWithAccumulator_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("ORA_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    orWithAccumulator(memoryValue);
+}
+void CPU::orWithAccumulator_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("ORA_ZEROPAGEX");
+    uint8_t memoryValue = memory[argument];
+    orWithAccumulator(memoryValue);
+}
+void CPU::orWithAccumulator_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("ORA_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    orWithAccumulator(memoryValue);
+}
+void CPU::orWithAccumulator_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("ORA_ABSOLUTEX");
+    uint8_t memoryValue = memory[argument];
+    orWithAccumulator(memoryValue);
+}
+void CPU::orWithAccumulator_AbsoluteY() {
+    uint16_t argument = retrieveAbsoluteYInstruction("ORA_ABSOLUTEY");
+    uint8_t memoryValue = memory[argument];
+    orWithAccumulator(memoryValue);
+}
+void CPU::orWithAccumulator_IndexedIndirectX() {
+    uint16_t argument = retrieveIndexedIndirectXInstruction("ORA_INDEXED_INDIRECTX");
+    uint8_t memoryValue = memory[argument];
+    orWithAccumulator(memoryValue);
+}
+void CPU::orWithAccumulator_IndirectIndexedY() {
+    uint16_t argument = retrieveIndirectIndexedYInstruction("ORA_INDIRECT_INDEXEDY");
+    uint8_t memoryValue = memory[argument];
+    orWithAccumulator(memoryValue);
 }
 
 void CPU::storeAccumulator(uint16_t argument) {

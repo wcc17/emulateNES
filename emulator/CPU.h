@@ -187,6 +187,16 @@ public:
 
     void returnFromSubroutine();
 
+    void orWithAccumulator(uint8_t argument);
+    void orWithAccumulator_Immediate();
+    void orWithAccumulator_ZeroPage();
+    void orWithAccumulator_ZeroPageX();
+    void orWithAccumulator_Absolute();
+    void orWithAccumulator_AbsoluteX();
+    void orWithAccumulator_AbsoluteY();
+    void orWithAccumulator_IndexedIndirectX();
+    void orWithAccumulator_IndirectIndexedY();
+
     void storeAccumulator(uint16_t argument);
     void storeAccumulator_ZeroPage();
     void storeAccumulator_ZeroPageX();

@@ -64,7 +64,7 @@ void printDebugInformation(CPU* cpu) {
     printf("%d %d %d %d %d %d %d %d\n", cpu->flags.negative, cpu->flags.overflow, cpu->flags.ignored, cpu->flags.breakFlag, cpu->flags.decimal, cpu->flags.interrupt, cpu->flags.zero, cpu->flags.carry);
 
     cout << "Stack: " << endl;
-    printStack(cpu);
+    //printStack(cpu);
     cout << endl;
 
     cout << "Next instruction results to be printed: " << endl << endl;
@@ -78,7 +78,7 @@ int main() {
     CPU *cpu = new CPU();
     Assembler assembler(cpu);
 
-    string fileName = "sample_programs/testORA.asm";
+    string fileName = "sample_programs/testROLROR.asm";
     assembler.readFile(fileName.c_str());
 
     printMemory(0x0600, 0x0700, cpu);

@@ -197,6 +197,20 @@ public:
     void orWithAccumulator_IndexedIndirectX();
     void orWithAccumulator_IndirectIndexedY();
 
+    void rotateLeft(uint16_t argument, bool useAccumulator);
+    void rotateLeft_Accumulator();
+    void rotateLeft_ZeroPage();
+    void rotateLeft_ZeroPageX();
+    void rotateLeft_Absolute();
+    void rotateLeft_AbsoluteX();
+
+    void rotateRight(uint16_t argument, bool useAccumulator);
+    void rotateRight_Accumulator();
+    void rotateRight_ZeroPage();
+    void rotateRight_ZeroPageX();
+    void rotateRight_Absolute();
+    void rotateRight_AbsoluteX();
+
     void storeAccumulator(uint16_t argument);
     void storeAccumulator_ZeroPage();
     void storeAccumulator_ZeroPageX();

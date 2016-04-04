@@ -334,9 +334,12 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
         case ACCUMULATOR:
             if (instruction == "ASL") {
                 opcode = ASL_ACCUMULATOR;
-            }
-            if (instruction == "LSR") {
+            } else if (instruction == "LSR") {
                 opcode = LSR_ACCUMULATOR;
+            } else if (instruction == "ROL") {
+                opcode = ROL_ACCUMULATOR;
+            } else if(instruction == "ROR") {
+                opcode = ROR_ACCUMULATOR;
             }
             cpu->storeByteInMemory(opcode, programLocation++);
             break;
@@ -472,6 +475,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LSR_ZEROPAGE;
             } else if(instruction == "ORA") {
                 opcode = ORA_ZEROPAGE;
+            } else if(instruction == "ROL") {
+                opcode = ROL_ZEROPAGE;
+            } else if(instruction == "ROR") {
+                opcode = ROR_ZEROPAGE;
             } else if (instruction == "STA") {
                 opcode = STA_ZEROPAGE;
             } else if (instruction == "STX") {
@@ -507,6 +514,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LSR_ZEROPAGEX;
             } else if(instruction == "ORA") {
                 opcode = ORA_ZEROPAGEX;
+            } else if(instruction == "ROL") {
+                opcode = ROL_ZEROPAGEX;
+            } else if(instruction == "ROR") {
+                opcode = ROR_ZEROPAGEX;
             } else if(instruction == "STA") {
                 opcode = STA_ZEROPAGEX;
             } else if(instruction == "STY") {
@@ -562,6 +573,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LSR_ABSOLUTE;
             } else if(instruction == "ORA") {
                 opcode = ORA_ABSOLUTE;
+            } else if(instruction == "ROL") {
+                opcode = ROL_ABSOLUTE;
+            } else if(instruction == "ROR") {
+                opcode = ROR_ABSOLUTE;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTE;
             } else if(instruction == "STX") {
@@ -598,6 +613,10 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = LSR_ABSOLUTEX;
             } else if(instruction == "ORA") {
                 opcode = ORA_ABSOLUTEX;
+            } else if(instruction == "ROL") {
+                opcode = ROL_ABSOLUTEX;
+            } else if(instruction == "ROR") {
+                opcode = ROR_ABSOLUTEX;
             } else if(instruction == "STA") {
                 opcode = STA_ABSOLUTEX;
             }

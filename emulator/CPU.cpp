@@ -543,6 +543,50 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //ROL
+        case ROL_ACCUMULATOR: {
+            rotateLeft_Accumulator();
+            break;
+        }
+        case ROL_ZEROPAGE: {
+            rotateLeft_ZeroPage();
+            break;
+        }
+        case ROL_ZEROPAGEX: {
+            rotateLeft_ZeroPageX();
+            break;
+        }
+        case ROL_ABSOLUTE: {
+            rotateLeft_Absolute();
+            break;
+        }
+        case ROL_ABSOLUTEX: {
+            rotateLeft_AbsoluteX();
+            break;
+        }
+
+        //ROR
+        case ROR_ACCUMULATOR: {
+            rotateRight_Accumulator();
+            break;
+        }
+        case ROR_ZEROPAGE: {
+            rotateRight_ZeroPage();
+            break;
+        }
+        case ROR_ZEROPAGEX: {
+            rotateRight_ZeroPageX();
+            break;
+        }
+        case ROR_ABSOLUTE: {
+            rotateRight_Absolute();
+            break;
+        }
+        case ROR_ABSOLUTEX: {
+            rotateRight_AbsoluteX();
+            break;
+        }
+
         //STA
         case STA_ZEROPAGE: {
             storeAccumulator_ZeroPage();
@@ -913,6 +957,7 @@ void CPU::branchOnEqual() {
     }
 }
 
+//TODO: AM NOT DONE WITH THIS INSTRUCTION YET
 void CPU::breakInstruction() {
     programCounter++;
     flags.breakFlag = 1;
@@ -1459,6 +1504,93 @@ void CPU::orWithAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("ORA_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     orWithAccumulator(memoryValue);
+}
+
+void CPU::rotateLeft(uint16_t argument, bool useAccumulator) {
+    uint8_t initialValue;
+    uint8_t finalValue;
+
+    /** how this works:
+     *  shift all bits one position to the left.
+     * the carry is shifted into bit 0 and bit 7 is shifted into carry
+     **/
+
+    if(useAccumulator) {
+        initialValue = accumulator;
+    } else {
+        initialValue = memory[argument];
+    }
+
+    //if the 7th bit is set (if value is negative) set carry to 1, otherwise set to 0
+    bool setCarry = false;
+    if(util.isNegativeByte(initialValue)) { setCarry = true; } else { setCarry = false; }
+
+    //get the final value
+    finalValue = initialValue << 1;
+
+    //set the LSB based on the carry flag
+    if(flags.carry == 1) {
+        finalValue = finalValue | 0x01;
+    }
+
+    //now change carry based on the original value's MSB
+    if(setCarry) { flags.carry = 1; } else { flags.carry = 0; }
+
+    //instruction also affects sign and zero flags
+    if(finalValue == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(finalValue)) { flags.negative = 1; } else { flags.negative = 0; }
+
+    //finally, put the value back in memory (or in the accumulator)
+    if(useAccumulator) {
+        accumulator = finalValue;
+    } else {
+        memory[argument] = finalValue;
+    }
+
+}
+void CPU::rotateLeft_Accumulator() {
+    retrieveAccumulatorInstruction("ROL_ACCUMULATOR");
+    rotateLeft(NULL, true);
+}
+void CPU::rotateLeft_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("ROL_ZEROPAGE");
+    rotateLeft(argument, false);
+}
+void CPU::rotateLeft_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("ROL_ZEROPAGEX");
+    rotateLeft(argument, false);
+}
+void CPU::rotateLeft_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("ROL_ABSOLUTE");
+    rotateLeft(argument, false);
+}
+void CPU::rotateLeft_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("ROL_ABSOLUTEX");
+    rotateLeft(argument, false);
+}
+
+void CPU::rotateRight(uint16_t argument, bool useAccumulator) {
+
+}
+void CPU::rotateRight_Accumulator() {
+    retrieveAccumulatorInstruction("ROR_ACCUMULATOR");
+    rotateRight(NULL, true);
+}
+void CPU::rotateRight_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("ROR_ZEROPAGE");
+    rotateRight(argument, false);
+}
+void CPU::rotateRight_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("ROR_ZEROPAGEX");
+    rotateRight(argument, false);
+}
+void CPU::rotateRight_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("ROR_ABSOLUTE");
+    rotateRight(argument, false);
+}
+void CPU::rotateRight_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("ROR_ABSOLUTEX");
+    rotateRight(argument, false);
 }
 
 void CPU::storeAccumulator(uint16_t argument) {

@@ -1512,7 +1512,7 @@ void CPU::rotateLeft(uint16_t argument, bool useAccumulator) {
 
     /** how this works:
      *  shift all bits one position to the left.
-     * the carry is shifted into bit 0 and bit 7 is shifted into carry
+     * the carry is shifted into least significant bit and most significant bit is shifted into carry
      **/
 
     if(useAccumulator) {
@@ -1570,7 +1570,50 @@ void CPU::rotateLeft_AbsoluteX() {
 }
 
 void CPU::rotateRight(uint16_t argument, bool useAccumulator) {
+    uint8_t initialValue;
+    uint8_t finalValue;
 
+    /**
+     * Shift all bits one position to the right
+     * The carry is shifted into most significant bit
+     * least significant bit is shifted into carry
+     */
+
+    if(useAccumulator) {
+        initialValue = accumulator;
+    } else {
+        initialValue = memory[argument];
+    }
+
+    //if the least significant bit is set, set carry to 1 later, or 0 if otherwise
+    bool setCarry = false;
+    if(util.checkLeastSignificantBit(initialValue)) {
+        setCarry = true;
+    } else {
+        setCarry = false;
+    }
+
+    //get the final value (shift bits to the right 1
+    finalValue = initialValue >> 1;
+
+    //set the MSB based on the carry flag
+    if(flags.carry == 1) {
+        finalValue = finalValue | 0x80; //0x80h == 128 == 10000000b
+    }
+
+    //now change carry based on the original values LSB
+    if(setCarry) { flags.carry = 1; } else { flags.carry = 0; }
+
+    //instruction also affects sign and zero flags
+    if(finalValue == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(finalValue)) { flags.negative = 1; } else { flags.negative = 0; }
+
+    //put value back in memory or in accumulator
+    if(useAccumulator) {
+        accumulator = finalValue;
+    } else {
+        memory[argument] = finalValue;
+    }
 }
 void CPU::rotateRight_Accumulator() {
     retrieveAccumulatorInstruction("ROR_ACCUMULATOR");

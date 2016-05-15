@@ -1,0 +1,4 @@
+LDA #$AA
+SEC
+ROR A
+ROR A

@@ -220,6 +220,16 @@ public:
     void storeAccumulator_IndexedIndirectX();
     void storeAccumulator_IndirectIndexedY();
 
+    void subtractWithBorrow(uint8_t argument);
+    void subtractWithBorrow_Immediate();
+    void subtractWithBorrow_ZeroPage();
+    void subtractWithBorrow_ZeroPageX();
+    void subtractWithBorrow_Absolute();
+    void subtractWithBorrow_AbsoluteX();
+    void subtractWithBorrow_AbsoluteY();
+    void subtractWithBorrow_IndexedIndirectX();
+    void subtractWithBorrow_IndirectIndexedY();
+
     void transferXToStackPointer();
     void transferStackPointerToX();
     void pushAccumulator();

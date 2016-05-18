@@ -587,6 +587,40 @@ void CPU::executeOpCode() {
             break;
         }
 
+        //SBC
+        case SBC_IMMEDIATE: {
+            subtractWithBorrow_Immediate();
+            break;
+        }
+        case SBC_ZEROPAGE: {
+            subtractWithBorrow_ZeroPage();
+            break;
+        }
+        case SBC_ZEROPAGEX: {
+            subtractWithBorrow_ZeroPageX();
+            break;
+        }
+        case SBC_ABSOLUTE: {
+            subtractWithBorrow_Absolute();
+            break;
+        }
+        case SBC_ABSOLUTEX: {
+            subtractWithBorrow_AbsoluteX();
+            break;
+        }
+        case SBC_ABSOLUTEY: {
+            subtractWithBorrow_AbsoluteY();
+            break;
+        }
+        case SBC_INDEXED_INDIRECTX: {
+            subtractWithBorrow_IndexedIndirectX();
+            break;
+        }
+        case SBC_INDIRECT_INDEXEDY: {
+            subtractWithBorrow_IndirectIndexedY();
+            break;
+        }
+
         //STA
         case STA_ZEROPAGE: {
             storeAccumulator_ZeroPage();
@@ -680,6 +714,8 @@ void CPU::executeOpCode() {
 }
 
 void CPU::addWithCarry(uint8_t argument) {
+    //TODO: should I implement Decimal flag behavior? Not sure if NES uses it
+
     uint8_t carry = 0;
     if(flags.carry == 1) {
         carry = 1;
@@ -767,6 +803,73 @@ void CPU::addWithCarry_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("ADC_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
+}
+
+//TODO: move down below to be in ABC order after implementation
+void CPU::subtractWithBorrow(uint8_t argument) {
+    //TODO: should I implement Decimal flag behavior? Not sure if NES uses it
+
+    /**
+     * ELSE
+        t = A - M - !P.C
+        P.V = (t>127 OR t<-128) ? 1:0
+      P.C = (t>=0) ? 1:0
+      P.N = t.7
+      P.Z = (t==0) ? 1:0
+      A = t & 0xFF
+     */
+
+    //t = A - M - !P.C
+    uint8_t borrow;
+    if(flags.carry == 1) {
+        borrow = 0;
+    } else {
+        borrow = 1;
+    }
+
+    //result and overflow flag only happen if decimal flag is not set. keep in mind if implementing decimal mode
+    uint8_t result = accumulator - argument - borrow;
+
+
+}
+void CPU::subtractWithBorrow_Immediate() {
+    uint8_t argument = retrieveImmediateInstruction("SBC_IMM");
+    subtractWithBorrow(argument);
+}
+void CPU::subtractWithBorrow_ZeroPage() {
+    uint8_t argument = retrieveZeroPageInstruction("SBC_ZEROPAGE");
+    uint8_t memoryValue = memory[argument];
+    subtractWithBorrow(memoryValue);
+}
+void CPU::subtractWithBorrow_ZeroPageX() {
+    uint8_t argument = retrieveZeroPageXInstruction("SBC_ZEROPAGEX");
+    uint8_t memoryValue = memory[argument];
+    subtractWithBorrow(memoryValue);
+}
+void CPU::subtractWithBorrow_Absolute() {
+    uint16_t argument = retrieveAbsoluteInstruction("SBC_ABSOLUTE");
+    uint8_t memoryValue = memory[argument];
+    subtractWithBorrow(memoryValue);
+}
+void CPU::subtractWithBorrow_AbsoluteX() {
+    uint16_t argument = retrieveAbsoluteXInstruction("SBC_ABSOLUTEX");
+    uint8_t memoryValue = memory[argument];
+    subtractWithBorrow(memoryValue);
+}
+void CPU::subtractWithBorrow_AbsoluteY() {
+    uint16_t argument = retrieveAbsoluteYInstruction("SBC_ABSOLUTEY");
+    uint8_t memoryValue = memory[argument];
+    subtractWithBorrow(memoryValue);
+}
+void CPU::subtractWithBorrow_IndexedIndirectX() {
+    uint16_t argument = retrieveIndexedIndirectXInstruction("SBC_INDEXED_INDIRECTX");
+    uint8_t memoryValue = memory[argument];
+    subtractWithBorrow(memoryValue);
+}
+void CPU::subtractWithBorrow_IndirectIndexedY() {
+    uint16_t argument = retrieveIndirectIndexedYInstruction("SBC_INDIRECT_INDEXEDY");
+    uint8_t memoryValue = memory[argument];
+    subtractWithBorrow(memoryValue);
 }
 
 void CPU::andWithAccumulator(uint8_t argument) {

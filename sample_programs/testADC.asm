@@ -1,2 +1,3 @@
-LDA #$50
-ADC #$50
+CLC
+LDA #$80
+ADC #$FF

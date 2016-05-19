@@ -1,0 +1,11 @@
+SEC
+LDA #$00
+SBC #$01
+
+SEC
+LDA #$80
+SBC #$01
+
+SEC
+LDA #$7F
+SBC #$FF

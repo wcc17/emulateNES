@@ -71,7 +71,7 @@ void printDebugInformation(CPU* cpu) {
 }
 
 int main() {
-    //in hindsight, adding google testing wasn't really a good idea
+    //in hindsight, adding google testing wasn't really a good idea for me
 //    CPUTest cpuTest;
 //    cpuTest.runAllTests();
 

@@ -35,6 +35,12 @@ public:
         uint8_t carry : 1;      //C
     } flags;
 
+    //will be used if a device raises an interrupt. this is not final, just now starting implementation of interrupts
+    bool interruptRaised = false;
+
+    int cycleCount = 0;
+    bool pageBoundaryCrossed = false;
+
     CPU();
     void executeOpCode();
     void storeByteInMemory(uint8_t byte, uint16_t location);

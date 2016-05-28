@@ -18,6 +18,7 @@ CPU::CPU() {
     yIndex = 0x00;
     stackPointer = 0xff;
 
+    //TODO: all flags should be set on startup except for
     flags.negative = 0;
     flags.overflow = 0;
     flags.ignored = 1;
@@ -877,6 +878,9 @@ void CPU::branch(uint8_t argument) {
 void CPU::branchOnPlus() {
     uint8_t argument = retrieveRelativeInstruction("BPL");
 
+    //a branch not taken requires two machine cycles
+    cyclesToExecute += 2;
+
     //do branching
     if(flags.negative == 0) {
         uint16_t oldProgramCounter = programCounter;
@@ -893,63 +897,134 @@ void CPU::branchOnPlus() {
 void CPU::branchOnMinus() {
     uint8_t argument = retrieveRelativeInstruction("BMI");
 
+    //a branch not taken requires two machine cycles
+    cyclesToExecute += 2;
+
     if(flags.negative == 1) {
         uint16_t oldProgramCounter = programCounter;
         branch(argument);
 
         //if a page boundary was crossed
         if((oldProgramCounter & 0xFF00) != (programCounter & 0xFF00)) {
-            cyclesToExecute += 2;
+            cyclesToExecute += 2; //increase cycle count for branch + penalty for page boundary crossing
         } else {
-            cyclesToExecute += 1;
+            cyclesToExecute += 1; //otherwise increase cycle count for the branch happening only
         }
     }
 }
 void CPU::branchOnOverflowClear() {
     uint8_t argument = retrieveRelativeInstruction("BVC");
 
+    //a branch not taken requires two machine cycles
+    cyclesToExecute += 2;
+
     if(flags.overflow == 0) {
+        uint16_t oldProgramCounter = programCounter;
         branch(argument);
+
+        //if a page boundary was crossed
+        if((oldProgramCounter & 0xFF00) != (programCounter & 0xFF00)) {
+            cyclesToExecute += 2; //increase cycle count for branch + penalty for page boundary crossing
+        } else {
+            cyclesToExecute += 1; //otherwise increase cycle count for the branch happening only
+        }
     }
 }
 void CPU::branchOnOverflowSet() {
     uint8_t argument = retrieveRelativeInstruction("BVS");
 
+    //a branch not taken requires two machine cycles
+    cyclesToExecute += 2;
+
     if(flags.overflow == 1) {
+        uint16_t oldProgramCounter = programCounter;
         branch(argument);
+
+        //if a page boundary was crossed
+        if((oldProgramCounter & 0xFF00) != (programCounter & 0xFF00)) {
+            cyclesToExecute += 2; //increase cycle count for branch + penalty for page boundary crossing
+        } else {
+            cyclesToExecute += 1; //otherwise increase cycle count for the branch happening only
+        }
     }
 }
 void CPU::branchOnCarryClear() {
     uint8_t argument = retrieveRelativeInstruction("BCC");
 
+    //a branch not taken requires two machine cycles
+    cyclesToExecute += 2;
+
     if(flags.carry == 0) {
+        uint16_t oldProgramCounter = programCounter;
         branch(argument);
+
+        //if a page boundary was crossed
+        if((oldProgramCounter & 0xFF00) != (programCounter & 0xFF00)) {
+            cyclesToExecute += 2; //increase cycle count for branch + penalty for page boundary crossing
+        } else {
+            cyclesToExecute += 1; //otherwise increase cycle count for the branch happening only
+        }
     }
 }
 void CPU::branchOnCarrySet() {
     uint8_t argument = retrieveRelativeInstruction("BCS");
 
+    //a branch not taken requires two machine cycles
+    cyclesToExecute += 2;
+
     if(flags.carry == 1) {
+        uint16_t oldProgramCounter = programCounter;
         branch(argument);
+
+        //if a page boundary was crossed
+        if((oldProgramCounter & 0xFF00) != (programCounter & 0xFF00)) {
+            cyclesToExecute += 2; //increase cycle count for branch + penalty for page boundary crossing
+        } else {
+            cyclesToExecute += 1; //otherwise increase cycle count for the branch happening only
+        }
     }
 }
 void CPU::branchOnNotEqual() {
     uint8_t argument = retrieveRelativeInstruction("BNE");
 
+    //a branch not taken requires two machine cycles
+    cyclesToExecute += 2;
+
     if(flags.zero == 0) {
+        uint16_t oldProgramCounter = programCounter;
         branch(argument);
+
+        //if a page boundary was crossed
+        if((oldProgramCounter & 0xFF00) != (programCounter & 0xFF00)) {
+            cyclesToExecute += 2; //increase cycle count for branch + penalty for page boundary crossing
+        } else {
+            cyclesToExecute += 1; //otherwise increase cycle count for the branch happening only
+        }
     }
 }
 void CPU::branchOnEqual() {
     uint8_t argument = retrieveRelativeInstruction("BEQ");
 
+    //a branch not taken requires two machine cycles
+    cyclesToExecute += 2;
+
     if(flags.zero == 1) {
+        uint16_t oldProgramCounter = programCounter;
         branch(argument);
+
+        //if a page boundary was crossed
+        if((oldProgramCounter & 0xFF00) != (programCounter & 0xFF00)) {
+            cyclesToExecute += 2; //increase cycle count for branch + penalty for page boundary crossing
+        } else {
+            cyclesToExecute += 1; //otherwise increase cycle count for the branch happening only
+        }
     }
 }
 
 //TODO: AM NOT DONE WITH THIS INSTRUCTION YET
 void CPU::breakInstruction() {
+    cyclesToExecute += 7;
+
     programCounter++;
     flags.breakFlag = 1;
 }
@@ -964,41 +1039,69 @@ void CPU::compareAccumulator(uint8_t argument) {
 void CPU::compareAccumulator_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("CMP_IMM");
     compareAccumulator(argument);
+
+    cyclesToExecute += 2;
 }
 void CPU::compareAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("CMP_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     compareAccumulator(memoryValue);
+
+    cyclesToExecute += 3;
 }
 void CPU::compareAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("CMP_ZEROPAGEX");
     uint8_t memoryValue = memory[argument];
     compareAccumulator(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::compareAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("CMP_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     compareAccumulator(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::compareAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("CMP_ABSOLUTEX");
     uint8_t memoryValue = memory[argument];
     compareAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::compareAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("CMP_ABSOLUTEY");
     uint8_t memoryValue = memory[argument];
     compareAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::compareAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("CMP_INDEXED_INDIRECTX");
     uint8_t memoryValue = memory[argument];
     compareAccumulator(memoryValue);
+
+    cyclesToExecute += 6;
 }
 void CPU::compareAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("CMP_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     compareAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 6;
+    } else {
+        cyclesToExecute += 5;
+    }
 }
 
 void CPU::compareX(uint8_t argument) {
@@ -1011,16 +1114,22 @@ void CPU::compareX(uint8_t argument) {
 void CPU::compareX_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("CPX_IMM");
     compareX(argument);
+
+    cyclesToExecute += 2;
 }
 void CPU::compareX_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("CPX_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     compareX(memoryValue);
+
+    cyclesToExecute += 3;
 }
 void CPU::compareX_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("CPX_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     compareX(memoryValue);
+
+    cyclesToExecute += 4;
 }
 
 void CPU::compareY(uint8_t argument) {
@@ -1033,16 +1142,22 @@ void CPU::compareY(uint8_t argument) {
 void CPU::compareY_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("CPY_IMM");
     compareY(argument);
+
+    cyclesToExecute += 2;
 }
 void CPU::compareY_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("CPY_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     compareY(memoryValue);
+
+    cyclesToExecute += 3;
 }
 void CPU::compareY_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("CPY_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     compareY(memoryValue);
+
+    cyclesToExecute += 4;
 }
 
 void CPU::decrementMemory(uint16_t argument) {
@@ -1054,18 +1169,26 @@ void CPU::decrementMemory(uint16_t argument) {
 void CPU::decrementMemory_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("DEC_ZEROPAGE");
     decrementMemory(argument);
+
+    cyclesToExecute += 5;
 }
 void CPU::decrementMemory_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("DEC_ZEROPAGEX");
     decrementMemory(argument);
+
+    cyclesToExecute += 6;
 }
 void CPU::decrementMemory_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("DEC_ABSOLUTE");
     decrementMemory(argument);
+
+    cyclesToExecute += 6;
 }
 void CPU::decrementMemory_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("DEC_ABSOLUTEX");
     decrementMemory(argument);
+
+    cyclesToExecute += 7;
 }
 
 void CPU::exclusiveOrAccumulator(uint8_t argument) {
@@ -1078,41 +1201,69 @@ void CPU::exclusiveOrAccumulator(uint8_t argument) {
 void CPU::exclusiveOrAccumulator_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("EOR_IMMEDIATE");
     exclusiveOrAccumulator(argument);
+
+    cyclesToExecute += 2;
 }
 void CPU::exclusiveOrAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("EOR_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     exclusiveOrAccumulator(memoryValue);
+
+    cyclesToExecute += 3;
 }
 void CPU::exclusiveOrAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("EOR_ZEROPAGEX");
     uint8_t memoryValue = memory[argument];
     exclusiveOrAccumulator(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::exclusiveOrAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("EOR_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     exclusiveOrAccumulator(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::exclusiveOrAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("EOR_ABSOLUTEX");
     uint8_t memoryValue = memory[argument];
     exclusiveOrAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::exclusiveOrAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("EOR_ABSOLUTEY");
     uint8_t memoryValue = memory[argument];
     exclusiveOrAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::exclusiveOrAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("EOR_INDEXED_INDIRECTX");
     uint8_t memoryValue = memory[argument];
     exclusiveOrAccumulator(memoryValue);
+
+    cyclesToExecute += 6;
 }
 void CPU::exclusiveOrAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("EOR_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     exclusiveOrAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 6;
+    } else {
+        cyclesToExecute += 5;
+    }
 }
 
 void CPU::incrementMemory(uint16_t argument) {
@@ -1124,50 +1275,70 @@ void CPU::incrementMemory(uint16_t argument) {
 void CPU::incrementMemory_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("INC_ZEROPAGE");
     incrementMemory(argument);
+
+    cyclesToExecute += 5;
 }
 void CPU::incrementMemory_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("INC_ZEROPAGEX");
     incrementMemory(argument);
+
+    cyclesToExecute += 6;
 }
 void CPU::incrementMemory_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("INC_ABSOLUTE");
     incrementMemory(argument);
+
+    cyclesToExecute += 6;
 }
 void CPU::incrementMemory_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("INC_ABSOLUTEX");
     incrementMemory(argument);
+
+    cyclesToExecute += 7;
 }
 
 void CPU::clearCarry() {
     cout << "CLC" << endl;
     flags.carry = 0;
+    cyclesToExecute += 2;
 }
 void CPU::setCarry() {
     cout << "SEC" << endl;
     flags.carry = 1;
+    cyclesToExecute += 2;
 }
 
-//TODO: THERE IS MORE TO THIS INSTURCTION THAN JUST SETTING THE FLAG. INTERRUPTS STOP THE CPU OR SOMETHING ON EASY6502.
 void CPU::clearInterrupt() {
     cout << "CLI" << endl;
     flags.interrupt = 0;
+
+    cyclesToExecute += 2;
 }
 void CPU::setInterrupt() {
     cout << "SEI" << endl;
     flags.interrupt = 1;
+
+    cyclesToExecute += 2;
 }
 
 void CPU::clearOverflow() {
     cout << "CLV" << endl;
     flags.overflow = 0;
+
+    cyclesToExecute += 2;
 }
+
 void CPU::clearDecimal() {
     cout << "CLD" << endl;
     flags.decimal = 0;
+
+    cyclesToExecute += 2;
 }
 void CPU::setDecimal() {
     cout << "SED" << endl;
     flags.decimal = 1;
+
+    cyclesToExecute += 2;
 }
 
 void CPU::transferAccumulatorToX() {
@@ -1178,6 +1349,8 @@ void CPU::transferAccumulatorToX() {
     //NOTE: TAX affects N and Z flags
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+
+    cyclesToExecute += 2;
 }
 void CPU::transferXToAccumulator() {
     cout << "TXA" << endl;
@@ -1187,6 +1360,8 @@ void CPU::transferXToAccumulator() {
     //NOTE: TXA affects N and Z flags
     if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
+
+    cyclesToExecute += 2;
 }
 void CPU::decrementX() {
     cout << "DEX" << endl;
@@ -1196,6 +1371,8 @@ void CPU::decrementX() {
     //NOTE: DEX affects negative flag and zero flag
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+
+    cyclesToExecute += 2;
 }
 void CPU::incrementX() {
     cout << "INX" << endl;
@@ -1205,6 +1382,8 @@ void CPU::incrementX() {
     //NOTE: INX affects negative flag and zero flag
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(xIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+
+    cyclesToExecute += 2;
 }
 void CPU::transferAccumulatorToY() {
     cout << "TAY" << endl;
@@ -1214,6 +1393,8 @@ void CPU::transferAccumulatorToY() {
     //NOTE: TAY affects N and Z flags
     if(yIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(yIndex) == false) { flags.negative = 0; } else { flags.negative = 1; }
+
+    cyclesToExecute += 2;
 }
 void CPU::transferYToAccumulator() {
     cout << "TYA" << endl;
@@ -1223,6 +1404,8 @@ void CPU::transferYToAccumulator() {
     //NOTE: TYA affects N and Z flags
     if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(accumulator) == false) { flags.negative = 0; } else { flags.negative = 1; }
+
+    cyclesToExecute += 2;
 }
 void CPU::decrementY() {
     cout << "DEY" << endl;
@@ -1232,6 +1415,8 @@ void CPU::decrementY() {
     //NOTE: DEY affects negative flag and zero flag
     if(yIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(yIndex) == false) { flags.negative = 0; } else { flags.negative = 1;}
+
+    cyclesToExecute += 2;
 }
 void CPU::incrementY() {
     cout << "INY" << endl;
@@ -1241,6 +1426,8 @@ void CPU::incrementY() {
     //NOTE: INY affects negative flag and zero flag
     if(yIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
     if(util.isNegativeByte(yIndex) == false) { flags.negative = 0; } else { flags.negative = 1;}
+
+    cyclesToExecute += 2;
 }
 
 void CPU::jump(uint16_t argument) {
@@ -1249,10 +1436,14 @@ void CPU::jump(uint16_t argument) {
 void CPU::jump_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("JMP_ABSOLUTE");
     jump(argument);
+
+    cyclesToExecute += 3;
 }
 void CPU::jump_Indirect() {
     uint16_t argument = retrieveIndirectInstruction("JMP_INDIRECT");
     jump(argument);
+
+    cyclesToExecute += 5;
 }
 
 void CPU::jumpToSubroutine_Absolute() {
@@ -1268,6 +1459,8 @@ void CPU::jumpToSubroutine_Absolute() {
     memory[256 + (stackPointer--)] = lowByte;
 
     programCounter = argument;
+
+    cyclesToExecute += 6;
 }
 
 void CPU::loadAccumulator(uint8_t argument) {
@@ -1280,41 +1473,69 @@ void CPU::loadAccumulator(uint8_t argument) {
 void CPU::loadAccumulator_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("LDA_IMM");
     loadAccumulator(argument);
+
+    cyclesToExecute += 2;
 }
 void CPU::loadAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("LDA_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     loadAccumulator(memoryValue);
+
+    cyclesToExecute += 3;
 }
 void CPU::loadAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("LDA_ZEROPAGEX");
     uint8_t memoryValue = memory[argument];
     loadAccumulator(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::loadAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("LDA_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     loadAccumulator(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::loadAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("LDA_ABSOLUTEX");
     uint8_t memoryValue = memory[argument];
     loadAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::loadAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("LDA_ABSOLUTEY");
     uint8_t memoryValue = memory[argument];
     loadAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::loadAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("LDA_INDEXED_INDIRECTX");
     uint8_t memoryValue = memory[argument];
     loadAccumulator(memoryValue);
+
+    cyclesToExecute += 6;
 }
 void CPU::loadAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("LDA_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     loadAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 6;
+    } else {
+        cyclesToExecute += 5;
+    }
 }
 
 void CPU::loadXIndex(uint8_t argument) {
@@ -1327,26 +1548,40 @@ void CPU::loadXIndex(uint8_t argument) {
 void CPU::loadXIndex_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("LDX_IMM");
     loadXIndex(argument);
+
+    cyclesToExecute += 2;
 }
 void CPU::loadXIndex_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("LDX_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     loadXIndex(memoryValue);
+
+    cyclesToExecute += 3;
 }
 void CPU::loadXIndex_ZeroPageY() {
     uint8_t argument = retrieveZeroPageYInstruction("LDX_ZEROPAGEY");
     uint8_t memoryValue = memory[argument];
     loadXIndex(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::loadXIndex_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("LDX_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     loadXIndex(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::loadXIndex_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("LDX_ABSOLUTEY");
     uint8_t memoryValue = memory[argument];
     loadXIndex(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 
 void CPU::loadYIndex(uint8_t argument) {
@@ -1359,26 +1594,40 @@ void CPU::loadYIndex(uint8_t argument) {
 void CPU::loadYIndex_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("LDY_IMM");
     loadYIndex(argument);
+
+    cyclesToExecute += 2;
 }
 void CPU::loadYIndex_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("LDY_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     loadYIndex(memoryValue);
+
+    cyclesToExecute += 3;
 }
 void CPU::loadYIndex_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("LDY_ZEROPAGEX");
     uint8_t memoryValue = memory[argument];
     loadYIndex(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::loadYIndex_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("LDY_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     loadYIndex(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::loadYIndex_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("LDY_ABSOLUTEX");
     uint8_t memoryValue = memory[argument];
     loadYIndex(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 
 void CPU::logicalShiftRight(uint16_t argument, bool useAccumulator) {
@@ -1414,29 +1663,40 @@ void CPU::logicalShiftRight_Accumulator() {
     retrieveAccumulatorInstruction("LSR_ACCUMULATOR");
     //there are compiler warnings about passing NULL here, but if accumulator is true, it will never be used
     logicalShiftRight(NULL, true);
+
+    cyclesToExecute += 2;
 }
 void CPU::logicalShiftRight_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("LSR_ZEROPAGE");
     logicalShiftRight(argument, false);
+
+    cyclesToExecute += 5;
 }
 void CPU::logicalShiftRight_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("LSR_ZEROPAGEX");
     logicalShiftRight(argument, false);
+
+    cyclesToExecute += 6;
 }
 void CPU::logicalShiftRight_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("LSR_ABSOLUTE");
     logicalShiftRight(argument, false);
+
+    cyclesToExecute += 6;
 }
 void CPU::logicalShiftRight_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("LSR_ABSOLUTEX");
     logicalShiftRight(argument, false);
+
+    cyclesToExecute += 7;
 }
 
 void CPU::noOperation() {
     cout << "NOP" << endl;
 
-    //cycles += 2;
     //affects no flags
+
+    cyclesToExecute += 2;
 }
 
 void CPU::returnFromSubroutine() {
@@ -1448,6 +1708,8 @@ void CPU::returnFromSubroutine() {
     uint16_t newProgramCounter = util.getWordFromBytes(lowByte, highByte);
     newProgramCounter++;
     programCounter = newProgramCounter;
+
+    cyclesToExecute += 6;
 }
 
 void CPU::orWithAccumulator(uint8_t argument) {
@@ -1460,41 +1722,69 @@ void CPU::orWithAccumulator(uint8_t argument) {
 void CPU::orWithAccumulator_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("ORA_IMMEDIATE");
     orWithAccumulator(argument);
+
+    cyclesToExecute += 2;
 }
 void CPU::orWithAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("ORA_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     orWithAccumulator(memoryValue);
+
+    cyclesToExecute += 2;
 }
 void CPU::orWithAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("ORA_ZEROPAGEX");
     uint8_t memoryValue = memory[argument];
     orWithAccumulator(memoryValue);
+
+    cyclesToExecute += 3;
 }
 void CPU::orWithAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("ORA_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     orWithAccumulator(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::orWithAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("ORA_ABSOLUTEX");
     uint8_t memoryValue = memory[argument];
     orWithAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::orWithAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("ORA_ABSOLUTEY");
     uint8_t memoryValue = memory[argument];
     orWithAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::orWithAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("ORA_INDEXED_INDIRECTX");
     uint8_t memoryValue = memory[argument];
     orWithAccumulator(memoryValue);
+
+    cyclesToExecute += 6;
 }
 void CPU::orWithAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("ORA_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     orWithAccumulator(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 6;
+    } else {
+        cyclesToExecute += 5;
+    }
 }
 
 void CPU::rotateLeft(uint16_t argument, bool useAccumulator) {
@@ -1542,22 +1832,32 @@ void CPU::rotateLeft(uint16_t argument, bool useAccumulator) {
 void CPU::rotateLeft_Accumulator() {
     retrieveAccumulatorInstruction("ROL_ACCUMULATOR");
     rotateLeft(NULL, true);
+
+    cyclesToExecute += 2;
 }
 void CPU::rotateLeft_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("ROL_ZEROPAGE");
     rotateLeft(argument, false);
+
+    cyclesToExecute += 5;
 }
 void CPU::rotateLeft_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("ROL_ZEROPAGEX");
     rotateLeft(argument, false);
+
+    cyclesToExecute += 6;
 }
 void CPU::rotateLeft_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("ROL_ABSOLUTE");
     rotateLeft(argument, false);
+
+    cyclesToExecute += 6;
 }
 void CPU::rotateLeft_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("ROL_ABSOLUTEX");
     rotateLeft(argument, false);
+
+    cyclesToExecute += 7;
 }
 
 void CPU::rotateRight(uint16_t argument, bool useAccumulator) {
@@ -1609,22 +1909,32 @@ void CPU::rotateRight(uint16_t argument, bool useAccumulator) {
 void CPU::rotateRight_Accumulator() {
     retrieveAccumulatorInstruction("ROR_ACCUMULATOR");
     rotateRight(NULL, true);
+
+    cyclesToExecute += 2;
 }
 void CPU::rotateRight_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("ROR_ZEROPAGE");
     rotateRight(argument, false);
+
+    cyclesToExecute += 5;
 }
 void CPU::rotateRight_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("ROR_ZEROPAGEX");
     rotateRight(argument, false);
+
+    cyclesToExecute += 6;
 }
 void CPU::rotateRight_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("ROR_ABSOLUTE");
     rotateRight(argument, false);
+
+    cyclesToExecute += 6;
 }
 void CPU::rotateRight_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("ROR_ABSOLUTEX");
     rotateRight(argument, false);
+
+    cyclesToExecute += 7;
 }
 
 void CPU::storeAccumulator(uint16_t argument) {
@@ -1634,30 +1944,44 @@ void CPU::storeAccumulator(uint16_t argument) {
 void CPU::storeAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("STA_ZEROPAGE");
     storeAccumulator(argument);
+
+    cyclesToExecute += 3;
 }
 void CPU::storeAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("STA_ZEROPAGEX");
     storeAccumulator(argument);
+
+    cyclesToExecute += 4;
 }
 void CPU::storeAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("STA_ABSOLUTE");
     storeAccumulator(argument);
+
+    cyclesToExecute += 4;
 }
 void CPU::storeAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("STA_ABSOLUTEX");
     storeAccumulator(argument);
+
+    cyclesToExecute += 5;
 }
 void CPU::storeAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("STA_ABSOLUTEY");
     storeAccumulator(argument);
+
+    cyclesToExecute += 5;
 }
 void CPU::storeAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("STA_INDEXED_INDIRECTX");
     storeAccumulator(argument);
+
+    cyclesToExecute += 6;
 }
 void CPU::storeAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("STA_INDIRECT_INDEXEDY");
     storeAccumulator(argument);
+
+    cyclesToExecute += 6;
 }
 
 void CPU::transferXToStackPointer() {
@@ -1667,6 +1991,8 @@ void CPU::transferXToStackPointer() {
 
     if(util.isNegativeByte(stackPointer)) { flags.negative = 1; } else { flags.negative = 0; }
     if(stackPointer == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+
+    cyclesToExecute += 2;
 }
 void CPU::transferStackPointerToX() {
     cout << "TSX" << endl;
@@ -1675,6 +2001,8 @@ void CPU::transferStackPointerToX() {
 
     if(util.isNegativeByte(xIndex)) { flags.negative = 1; } else { flags.negative = 0; }
     if(xIndex == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+
+    cyclesToExecute += 2;
 }
 void CPU::pushAccumulator() {
     cout << "PHA" << endl;
@@ -1684,6 +2012,8 @@ void CPU::pushAccumulator() {
     memory[256 + (stackPointer--)] = accumulator;
 
     //NOTE: PHA AFFECTS NO FLAGS
+
+    cyclesToExecute += 3;
 }
 void CPU::pullAccumulator() {
     cout << "PLA" << endl;
@@ -1692,6 +2022,8 @@ void CPU::pullAccumulator() {
 
     if(util.isNegativeByte(accumulator)) { flags.negative = 1; } else { flags.negative = 0; }
     if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
+
+    cyclesToExecute += 4;
 }
 void CPU::pushProcessorStatus() {
     cout << "PHP" << endl;
@@ -1701,6 +2033,8 @@ void CPU::pushProcessorStatus() {
     memory[256 + (stackPointer--)] = processorStatus;
 
     //NOTE: PHP AFFECTS NO FLAGS, BUT PLP DOES
+
+    cyclesToExecute += 3;
 }
 void CPU::pullProcessorStatus() {
     cout << "PLP" << endl;
@@ -1709,6 +2043,8 @@ void CPU::pullProcessorStatus() {
     setProcessorFlagsFromByte(processorStatus);
 
     //PLP AFFECTS ALL FLAGS, BUT THEY ARE SET IN setProcessorFlagsFromByte(uint8_t arg)
+
+    cyclesToExecute += 4;
 }
 
 void CPU::storeXRegister(uint16_t argument) {
@@ -1718,14 +2054,20 @@ void CPU::storeXRegister(uint16_t argument) {
 void CPU::storeXRegister_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("STX_ZEROPAGE");
     storeXRegister(argument);
+
+    cyclesToExecute += 3;
 }
 void CPU::storeXRegister_ZeroPageY() {
     uint8_t argument = retrieveZeroPageYInstruction("STX_ZEROPAGEY");
     storeXRegister(argument);
+
+    cyclesToExecute += 4;
 }
 void CPU::storeXRegister_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("STX_ABSOLUTE");
     storeXRegister(argument);
+
+    cyclesToExecute += 4;
 }
 
 void CPU::storeYRegister(uint16_t argument) {
@@ -1735,14 +2077,20 @@ void CPU::storeYRegister(uint16_t argument) {
 void CPU::storeYRegister_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("STY_ZEROPAGE");
     storeYRegister(argument);
+
+    cyclesToExecute += 3;
 }
 void CPU::storeYRegister_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("STY_ZEROPAGEX");
     storeYRegister(argument);
+
+    cyclesToExecute += 4;
 }
 void CPU::storeYRegister_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("STY_ABSOLUTE");
     storeYRegister(argument);
+
+    cyclesToExecute += 4;
 }
 
 void CPU::subtractWithBorrow(uint8_t argument) {
@@ -1764,41 +2112,69 @@ void CPU::subtractWithBorrow(uint8_t argument) {
 void CPU::subtractWithBorrow_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("SBC_IMM");
     subtractWithBorrow(argument);
+
+    cyclesToExecute += 2;
 }
 void CPU::subtractWithBorrow_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("SBC_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     subtractWithBorrow(memoryValue);
+
+    cyclesToExecute += 3;
 }
 void CPU::subtractWithBorrow_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("SBC_ZEROPAGEX");
     uint8_t memoryValue = memory[argument];
     subtractWithBorrow(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::subtractWithBorrow_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("SBC_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     subtractWithBorrow(memoryValue);
+
+    cyclesToExecute += 4;
 }
 void CPU::subtractWithBorrow_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("SBC_ABSOLUTEX");
     uint8_t memoryValue = memory[argument];
     subtractWithBorrow(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::subtractWithBorrow_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("SBC_ABSOLUTEY");
     uint8_t memoryValue = memory[argument];
     subtractWithBorrow(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 5;
+    } else {
+        cyclesToExecute += 4;
+    }
 }
 void CPU::subtractWithBorrow_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("SBC_INDEXED_INDIRECTX");
     uint8_t memoryValue = memory[argument];
     subtractWithBorrow(memoryValue);
+
+    cyclesToExecute += 6;
 }
 void CPU::subtractWithBorrow_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("SBC_INDIRECT_INDEXEDY");
     uint8_t memoryValue = memory[argument];
     subtractWithBorrow(memoryValue);
+
+    if(pageBoundaryCrossed) {
+        cyclesToExecute += 6;
+    } else {
+        cyclesToExecute += 5;
+    }
 }
 
 void CPU::retrieveAccumulatorInstruction(std::string instructionString) {

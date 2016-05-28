@@ -28,11 +28,7 @@ CPU::CPU() {
     flags.carry = 0;
 }
 
-//this will take the op codes from program memory and execute them one at a time
-void CPU::executeOpCode() {
-
-    Util util;
-
+void CPU::execute() {
     //TODO: IS THIS NECESSARY? I'm not sure that this will happen with 6502 programs that other people wrote
     //TODO: i think since programCounter is 16 bit, if it goes above 0xFFFF, it will reset to 0x0000 by itself. needs testing
     if(programCounter > 0xFFFF) {
@@ -43,689 +39,552 @@ void CPU::executeOpCode() {
     //this will have allowed the previous instruction to finish first before doing the interrupt
     if(flags.interrupt == 0 && interruptRaised) {
 
+        //handle interrupt
+
         interruptRaised = false;
     } else {
+        executeOpCode();
 
-        uint8_t opcode = memory[programCounter++];
-        //the cases have {} symbols to create a local scope within the case to declare local variables
-        switch(opcode) {
-
-            //ADC
-            case ADC_IMMEDIATE: {
-                addWithCarry_Immediate();
-                break;
-            }
-            case ADC_ZEROPAGE: {
-                addWithCarry_ZeroPage();
-                break;
-            }
-            case ADC_ZEROPAGEX: {
-                addWithCarry_ZeroPageX();
-                break;
-            }
-            case ADC_ABSOLUTE: {
-                addWithCarry_Absolute();
-                break;
-            }
-            case ADC_ABSOLUTEX: {
-                addWithCarry_AbsoluteX();
-                break;
-            }
-            case ADC_ABSOLUTEY: {
-                addWithCarry_AbsoluteY();
-                break;
-            }
-            case ADC_INDEXED_INDIRECTX: {
-                addWithCarry_IndexedIndirectX();
-                break;
-            }
-            case ADC_INDIRECT_INDEXEDY: {
-                addWithCarry_IndirectIndexedY();
-                break;
-            }
-
-                //AND
-            case AND_IMMEDIATE: {
-                andWithAccumulator_Immediate();
-                break;
-            }
-            case AND_ZEROPAGE: {
-                andWithAccumulator_ZeroPage();
-                break;
-            }
-            case AND_ZEROPAGEX: {
-                andWithAccumulator_ZeroPageX();
-                break;
-            }
-            case AND_ABSOLUTE: {
-                andWithAccumulator_Absolute();
-                break;
-            }
-            case AND_ABSOLUTEX: {
-                andWithAccumulator_AbsoluteX();
-                break;
-            }
-            case AND_ABSOLUTEY: {
-                andWithAccumulator_AbsoluteY();
-                break;
-            }
-            case AND_INDEXED_INDIRECTX: {
-                andWithAccumulator_IndexedIndirectX();
-                break;
-            }
-            case AND_INDIRECT_INDEXEDY: {
-                andWithAccumulator_IndirectIndexedY();
-                break;
-            }
-
-                //TODO: REMOVE THE BRACKETS FROM ALL THE SWITCH CASES NOW
-                //ASL
-            case ASL_ACCUMULATOR: {
-                arithmeticShiftLeft_Accumulator();
-                break;
-            }
-            case ASL_ZEROPAGE: {
-                arithmeticShiftLeft_ZeroPage();
-                break;
-            }
-            case ASL_ZEROPAGEX: {
-                arithmeticShiftLeft_ZeroPageX();
-                break;
-            }
-            case ASL_ABSOLUTE: {
-                arithmeticShiftLeft_Absolute();
-                break;
-            }
-            case ASL_ABSOLUTEX: {
-                arithmeticShiftLeft_AbsoluteX();
-                break;
-            }
-
-                //BIT
-            case BIT_ZEROPAGE: {
-                bitTest_ZeroPage();
-                break;
-            }
-            case BIT_ABSOLUTE: {
-                bitTest_Absolute();
-                break;
-            }
-
-                //BRANCH INSTRUCTIONS
-            case BPL: {
-                branchOnPlus();
-                break;
-            }
-            case BMI: {
-                branchOnMinus();
-                break;
-            }
-            case BVC: {
-                branchOnOverflowClear();
-                break;
-            }
-            case BVS: {
-                branchOnOverflowSet();
-                break;
-            }
-            case BCC: {
-                branchOnCarryClear();
-                break;
-            }
-            case BCS: {
-                branchOnCarrySet();
-                break;
-            }
-            case BNE: {
-                branchOnNotEqual();
-                break;
-            }
-            case BEQ: {
-                branchOnEqual();
-                break;
-            }
-
-                //BRK
-            case BRK: {
-                breakInstruction();
-                break;
-            }
-
-                //CMP
-            case CMP_IMMEDIATE: {
-                compareAccumulator_Immediate();
-                break;
-            }
-            case CMP_ZEROPAGE: {
-                compareAccumulator_ZeroPage();
-                break;
-            }
-            case CMP_ZEROPAGEX: {
-                compareAccumulator_ZeroPageX();
-                break;
-            }
-            case CMP_ABSOLUTE: {
-                compareAccumulator_Absolute();
-                break;
-            }
-            case CMP_ABSOLUTEX: {
-                compareAccumulator_AbsoluteX();
-                break;
-            }
-            case CMP_ABSOLUTEY: {
-                compareAccumulator_AbsoluteY();
-                break;
-            }
-            case CMP_INDEXED_INDIRECTX: {
-                compareAccumulator_IndexedIndirectX();
-                break;
-            }
-            case CMP_INDIRECT_INDEXEDY: {
-                compareAccumulator_IndirectIndexedY();
-                break;
-            }
-
-                //CPX
-            case CPX_IMMEDIATE: {
-                compareX_Immediate();
-                break;
-            }
-            case CPX_ZEROPAGE: {
-                compareX_ZeroPage();
-                break;
-            }
-            case CPX_ABSOLUTE: {
-                compareX_Absolute();
-                break;
-            }
-
-                //CPY
-            case CPY_IMMEDIATE: {
-                compareY_Immediate();
-                break;
-            }
-            case CPY_ZEROPAGE: {
-                compareY_ZeroPage();
-                break;
-            }
-            case CPY_ABSOLUTE: {
-                compareY_Absolute();
-                break;
-            }
-
-                //DEC
-            case DEC_ZEROPAGE: {
-                decrementMemory_ZeroPage();
-                break;
-            }
-            case DEC_ZEROPAGEX: {
-                decrementMemory_ZeroPageX();
-                break;
-            }
-            case DEC_ABSOLUTE: {
-                decrementMemory_Absolute();
-                break;
-            }
-            case DEC_ABSOLUTEX: {
-                decrementMemory_AbsoluteX();
-                break;
-            }
-
-                //EOR
-            case EOR_IMMEDIATE: {
-                exclusiveOrAccumulator_Immediate();
-                break;
-            }
-            case EOR_ZEROPAGE: {
-                exclusiveOrAccumulator_ZeroPage();
-                break;
-            }
-            case EOR_ZEROPAGEX: {
-                exclusiveOrAccumulator_ZeroPageX();
-                break;
-            }
-            case EOR_ABSOLUTE: {
-                exclusiveOrAccumulator_Absolute();
-                break;
-            }
-            case EOR_ABSOLUTEX: {
-                exclusiveOrAccumulator_AbsoluteX();
-                break;
-            }
-            case EOR_ABSOLUTEY: {
-                exclusiveOrAccumulator_AbsoluteY();
-                break;
-            }
-            case EOR_INDEXED_INDIRECTX: {
-                exclusiveOrAccumulator_IndexedIndirectX();
-                break;
-            }
-            case EOR_INDIRECT_INDEXEDY: {
-                exclusiveOrAccumulator_IndirectIndexedY();
-                break;
-            }
-
-                //INC
-            case INC_ZEROPAGE: {
-                incrementMemory_ZeroPage();
-                break;
-            }
-            case INC_ZEROPAGEX: {
-                incrementMemory_ZeroPageX();
-                break;
-            }
-            case INC_ABSOLUTE: {
-                incrementMemory_Absolute();
-                break;
-            }
-            case INC_ABSOLUTEX: {
-                incrementMemory_AbsoluteX();
-                break;
-            }
-
-                //Flag Instructions
-            case CLC: {
-                clearCarry();
-                break;
-            }
-            case SEC: {
-                setCarry();
-                break;
-            }
-            case CLI: {
-                clearInterrupt();
-                break;
-            }
-            case SEI: {
-                setInterrupt();
-                break;
-            }
-            case CLV: {
-                clearOverflow();
-                break;
-            }
-            case CLD: {
-                clearDecimal();
-                break;
-            }
-            case SED: {
-                setDecimal();
-                break;
-            }
-
-                //Register Instructions
-            case TAX: {
-                transferAccumulatorToX();
-                break;
-            }
-            case TXA: {
-                transferXToAccumulator();
-                break;
-            }
-            case DEX: {
-                decrementX();
-                break;
-            }
-            case INX: {
-                incrementX();
-                break;
-            }
-            case TAY: {
-                transferAccumulatorToY();
-                break;
-            }
-            case TYA: {
-                transferYToAccumulator();
-                break;
-            }
-            case DEY: {
-                decrementY();
-                break;
-            }
-            case INY: {
-                incrementY();
-                break;
-            }
-
-                //JMP
-            case JMP_ABSOLUTE: {
-                jump_Absolute();
-                break;
-            }
-            case JMP_INDIRECT: {
-                jump_Indirect();
-                break;
-            }
-
-                //JSR
-            case JSR_ABSOLUTE: {
-                jumpToSubroutine_Absolute();
-                break;
-            }
-
-                //LDA
-            case LDA_IMMEDIATE: {
-                loadAccumulator_Immediate();
-                break;
-            }
-            case LDA_ZEROPAGE: {
-                loadAccumulator_ZeroPage();
-                break;
-            }
-            case LDA_ZEROPAGEX: {
-                loadAccumulator_ZeroPageX();
-                break;
-            }
-            case LDA_ABSOLUTE: {
-                loadAccumulator_Absolute();
-                break;
-            }
-            case LDA_ABSOLUTEX: {
-                loadAccumulator_AbsoluteX();
-                break;
-            }
-            case LDA_ABSOLUTEY: {
-                loadAccumulator_AbsoluteY();
-                break;
-            }
-            case LDA_INDEXED_INDIRECTX: {
-                loadAccumulator_IndexedIndirectX();
-                break;
-            }
-            case LDA_INDIRECT_INDEXEDY: {
-                loadAccumulator_IndirectIndexedY();
-                break;
-            }
-
-                //LDX
-            case LDX_IMMEDIATE: {
-                loadXIndex_Immediate();
-                break;
-            }
-            case LDX_ZEROPAGE: {
-                loadXIndex_ZeroPage();
-                break;
-            }
-            case LDX_ZEROPAGEY: {
-                loadXIndex_ZeroPageY();
-                break;
-            }
-            case LDX_ABSOLUTE: {
-                loadXIndex_Absolute();
-                break;
-            }
-            case LDX_ABSOLUTEY: {
-                loadXIndex_AbsoluteY();
-                break;
-            }
-
-                //LDY
-            case LDY_IMMEDIATE: {
-                loadYIndex_Immediate();
-                break;
-            }
-            case LDY_ZEROPAGE: {
-                loadYIndex_ZeroPage();
-                break;
-            }
-            case LDY_ZEROPAGEX: {
-                loadYIndex_ZeroPageX();
-                break;
-            }
-            case LDY_ABSOLUTE: {
-                loadYIndex_Absolute();
-                break;
-            }
-            case LDY_ABSOLUTEX: {
-                loadYIndex_AbsoluteX();
-                break;
-            }
-
-                //LSR
-            case LSR_ACCUMULATOR: {
-                logicalShiftRight_Accumulator();
-                break;
-            }
-            case LSR_ZEROPAGE: {
-                logicalShiftRight_ZeroPage();
-                break;
-            }
-            case LSR_ZEROPAGEX: {
-                logicalShiftRight_ZeroPageX();
-                break;
-            }
-            case LSR_ABSOLUTE: {
-                logicalShiftRight_Absolute();
-                break;
-            }
-            case LSR_ABSOLUTEX: {
-                logicalShiftRight_AbsoluteX();
-                break;
-            }
-
-                //NOP
-            case NOP: {
-                noOperation();
-                break;
-            }
-
-                //RTS
-            case RTS: {
-                returnFromSubroutine();
-                break;
-            }
-
-                //ORA
-            case ORA_IMMEDIATE: {
-                orWithAccumulator_Immediate();
-                break;
-            }
-            case ORA_ZEROPAGE: {
-                orWithAccumulator_ZeroPage();
-                break;
-            }
-            case ORA_ZEROPAGEX: {
-                orWithAccumulator_ZeroPageX();
-                break;
-            }
-            case ORA_ABSOLUTE: {
-                orWithAccumulator_Absolute();
-                break;
-            }
-            case ORA_ABSOLUTEX: {
-                orWithAccumulator_AbsoluteX();
-                break;
-            }
-            case ORA_ABSOLUTEY: {
-                orWithAccumulator_AbsoluteY();
-                break;
-            }
-            case ORA_INDEXED_INDIRECTX: {
-                orWithAccumulator_IndexedIndirectX();
-                break;
-            }
-            case ORA_INDIRECT_INDEXEDY: {
-                orWithAccumulator_IndirectIndexedY();
-                break;
-            }
-
-                //ROL
-            case ROL_ACCUMULATOR: {
-                rotateLeft_Accumulator();
-                break;
-            }
-            case ROL_ZEROPAGE: {
-                rotateLeft_ZeroPage();
-                break;
-            }
-            case ROL_ZEROPAGEX: {
-                rotateLeft_ZeroPageX();
-                break;
-            }
-            case ROL_ABSOLUTE: {
-                rotateLeft_Absolute();
-                break;
-            }
-            case ROL_ABSOLUTEX: {
-                rotateLeft_AbsoluteX();
-                break;
-            }
-
-                //ROR
-            case ROR_ACCUMULATOR: {
-                rotateRight_Accumulator();
-                break;
-            }
-            case ROR_ZEROPAGE: {
-                rotateRight_ZeroPage();
-                break;
-            }
-            case ROR_ZEROPAGEX: {
-                rotateRight_ZeroPageX();
-                break;
-            }
-            case ROR_ABSOLUTE: {
-                rotateRight_Absolute();
-                break;
-            }
-            case ROR_ABSOLUTEX: {
-                rotateRight_AbsoluteX();
-                break;
-            }
-
-                //SBC
-            case SBC_IMMEDIATE: {
-                subtractWithBorrow_Immediate();
-                break;
-            }
-            case SBC_ZEROPAGE: {
-                subtractWithBorrow_ZeroPage();
-                break;
-            }
-            case SBC_ZEROPAGEX: {
-                subtractWithBorrow_ZeroPageX();
-                break;
-            }
-            case SBC_ABSOLUTE: {
-                subtractWithBorrow_Absolute();
-                break;
-            }
-            case SBC_ABSOLUTEX: {
-                subtractWithBorrow_AbsoluteX();
-                break;
-            }
-            case SBC_ABSOLUTEY: {
-                subtractWithBorrow_AbsoluteY();
-                break;
-            }
-            case SBC_INDEXED_INDIRECTX: {
-                subtractWithBorrow_IndexedIndirectX();
-                break;
-            }
-            case SBC_INDIRECT_INDEXEDY: {
-                subtractWithBorrow_IndirectIndexedY();
-                break;
-            }
-
-                //STA
-            case STA_ZEROPAGE: {
-                storeAccumulator_ZeroPage();
-                break;
-            }
-            case STA_ZEROPAGEX: {
-                storeAccumulator_ZeroPageX();
-                break;
-            }
-            case STA_ABSOLUTE: {
-                storeAccumulator_Absolute();
-                break;
-            }
-            case STA_ABSOLUTEX: {
-                storeAccumulator_AbsoluteX();
-                break;
-            }
-            case STA_ABSOLUTEY: {
-                storeAccumulator_AbsoluteY();
-                break;
-            }
-            case STA_INDEXED_INDIRECTX: {
-                storeAccumulator_IndexedIndirectX();
-                break;
-            }
-            case STA_INDIRECT_INDEXEDY: {
-                storeAccumulator_IndirectIndexedY();
-                break;
-            }
-
-                //Stack Instructions
-            case TXS: {
-                transferXToStackPointer();
-                break;
-            }
-            case TSX: {
-                transferStackPointerToX();
-                break;
-            }
-            case PHA: {
-                pushAccumulator();
-                break;
-            }
-            case PLA: {
-                pullAccumulator();
-                break;
-            }
-            case PHP: {
-                pushProcessorStatus();
-                break;
-            }
-            case PLP: {
-                pullProcessorStatus();
-                break;
-            }
-
-                //STX
-            case STX_ZEROPAGE: {
-                storeXRegister_ZeroPage();
-                break;
-            }
-            case STX_ZEROPAGEY: {
-                storeXRegister_ZeroPageY();
-                break;
-            }
-            case STX_ABSOLUTE: {
-                storeXRegister_Absolute();
-                break;
-            }
-
-                //STY
-            case STY_ZEROPAGE: {
-                storeYRegister_ZeroPage();
-                break;
-            }
-            case STY_ZEROPAGEX: {
-                storeYRegister_ZeroPageX();
-                break;
-            }
-            case STY_ABSOLUTE: {
-                storeYRegister_Absolute();
-                break;
-            }
-
-            default:
-                cout << "Invalid op code encountered" << endl;
-                //to force quit
-                memory[programCounter] = 0x00;
-                break;
+        //count cycles
+        cycleGoal += cyclesToExecute;
+        while(cyclesToExecute > 0) {
+            //wait
+            cyclesToExecute -= 1;
         }
 
-        //this won't ever be needed after an instruction is executed, but will screw something up if left at true
+        //this won't ever be needed after an instruction is executed, but will screw something up if left at true for the next one
         pageBoundaryCrossed = false;
     }
 }
 
-void CPU::addWithCarry(uint8_t argument) {
-    //TODO: should I implement Decimal flag behavior? Not sure if NES uses it
+//this will take the op codes from program memory and execute them one at a time
+void CPU::executeOpCode() {
 
+    uint8_t opcode = memory[programCounter++];
+    //the cases have {} symbols to create a local scope within the case to declare local variables
+    switch(opcode) {
+
+        //ADC
+        case ADC_IMMEDIATE:
+            addWithCarry_Immediate();
+            break;
+        case ADC_ZEROPAGE:
+            addWithCarry_ZeroPage();
+            break;
+        case ADC_ZEROPAGEX:
+            addWithCarry_ZeroPageX();
+            break;
+        case ADC_ABSOLUTE:
+            addWithCarry_Absolute();
+            break;
+        case ADC_ABSOLUTEX:
+            addWithCarry_AbsoluteX();
+            break;
+        case ADC_ABSOLUTEY:
+            addWithCarry_AbsoluteY();
+            break;
+        case ADC_INDEXED_INDIRECTX:
+            addWithCarry_IndexedIndirectX();
+            break;
+        case ADC_INDIRECT_INDEXEDY:
+            addWithCarry_IndirectIndexedY();
+            break;
+
+        //AND
+        case AND_IMMEDIATE:
+            andWithAccumulator_Immediate();
+            break;
+        case AND_ZEROPAGE:
+            andWithAccumulator_ZeroPage();
+            break;
+        case AND_ZEROPAGEX:
+            andWithAccumulator_ZeroPageX();
+            break;
+        case AND_ABSOLUTE:
+            andWithAccumulator_Absolute();
+            break;
+        case AND_ABSOLUTEX:
+            andWithAccumulator_AbsoluteX();
+            break;
+        case AND_ABSOLUTEY:
+            andWithAccumulator_AbsoluteY();
+            break;
+        case AND_INDEXED_INDIRECTX:
+            andWithAccumulator_IndexedIndirectX();
+            break;
+        case AND_INDIRECT_INDEXEDY:
+            andWithAccumulator_IndirectIndexedY();
+            break;
+
+        //ASL
+        case ASL_ACCUMULATOR:
+            arithmeticShiftLeft_Accumulator();
+            break;
+        case ASL_ZEROPAGE:
+            arithmeticShiftLeft_ZeroPage();
+            break;
+        case ASL_ZEROPAGEX:
+            arithmeticShiftLeft_ZeroPageX();
+            break;
+        case ASL_ABSOLUTE:
+            arithmeticShiftLeft_Absolute();
+            break;
+        case ASL_ABSOLUTEX:
+            arithmeticShiftLeft_AbsoluteX();
+            break;
+
+        //BIT
+        case BIT_ZEROPAGE:
+            bitTest_ZeroPage();
+            break;
+        case BIT_ABSOLUTE:
+            bitTest_Absolute();
+            break;
+
+        //BRANCH INSTRUCTIONS
+        case BPL:
+            branchOnPlus();
+            break;
+        case BMI:
+            branchOnMinus();
+            break;
+        case BVC:
+            branchOnOverflowClear();
+            break;
+        case BVS:
+            branchOnOverflowSet();
+            break;
+        case BCC:
+            branchOnCarryClear();
+            break;
+        case BCS:
+            branchOnCarrySet();
+            break;
+        case BNE:
+            branchOnNotEqual();
+            break;
+        case BEQ:
+            branchOnEqual();
+            break;
+
+        //BRK
+        case BRK:
+            breakInstruction();
+            break;
+
+        //CMP
+        case CMP_IMMEDIATE:
+            compareAccumulator_Immediate();
+            break;
+        case CMP_ZEROPAGE:
+            compareAccumulator_ZeroPage();
+            break;
+        case CMP_ZEROPAGEX:
+            compareAccumulator_ZeroPageX();
+            break;
+        case CMP_ABSOLUTE:
+            compareAccumulator_Absolute();
+            break;
+        case CMP_ABSOLUTEX:
+            compareAccumulator_AbsoluteX();
+            break;
+        case CMP_ABSOLUTEY:
+            compareAccumulator_AbsoluteY();
+            break;
+        case CMP_INDEXED_INDIRECTX:
+            compareAccumulator_IndexedIndirectX();
+            break;
+        case CMP_INDIRECT_INDEXEDY:
+            compareAccumulator_IndirectIndexedY();
+            break;
+
+        //CPX
+        case CPX_IMMEDIATE:
+            compareX_Immediate();
+            break;
+        case CPX_ZEROPAGE:
+            compareX_ZeroPage();
+            break;
+        case CPX_ABSOLUTE:
+            compareX_Absolute();
+            break;
+
+        //CPY
+        case CPY_IMMEDIATE:
+            compareY_Immediate();
+            break;
+        case CPY_ZEROPAGE:
+            compareY_ZeroPage();
+            break;
+        case CPY_ABSOLUTE:
+            compareY_Absolute();
+            break;
+
+        //DEC
+        case DEC_ZEROPAGE:
+            decrementMemory_ZeroPage();
+            break;
+        case DEC_ZEROPAGEX:
+            decrementMemory_ZeroPageX();
+            break;
+        case DEC_ABSOLUTE:
+            decrementMemory_Absolute();
+            break;
+        case DEC_ABSOLUTEX:
+            decrementMemory_AbsoluteX();
+            break;
+
+        //EOR
+        case EOR_IMMEDIATE:
+            exclusiveOrAccumulator_Immediate();
+            break;
+        case EOR_ZEROPAGE:
+            exclusiveOrAccumulator_ZeroPage();
+            break;
+        case EOR_ZEROPAGEX:
+            exclusiveOrAccumulator_ZeroPageX();
+            break;
+        case EOR_ABSOLUTE:
+            exclusiveOrAccumulator_Absolute();
+            break;
+        case EOR_ABSOLUTEX:
+            exclusiveOrAccumulator_AbsoluteX();
+            break;
+        case EOR_ABSOLUTEY:
+            exclusiveOrAccumulator_AbsoluteY();
+            break;
+        case EOR_INDEXED_INDIRECTX:
+            exclusiveOrAccumulator_IndexedIndirectX();
+            break;
+        case EOR_INDIRECT_INDEXEDY:
+            exclusiveOrAccumulator_IndirectIndexedY();
+            break;
+
+        //INC
+        case INC_ZEROPAGE:
+            incrementMemory_ZeroPage();
+            break;
+        case INC_ZEROPAGEX:
+            incrementMemory_ZeroPageX();
+            break;
+        case INC_ABSOLUTE:
+            incrementMemory_Absolute();
+            break;
+        case INC_ABSOLUTEX:
+            incrementMemory_AbsoluteX();
+            break;
+
+        //Flag Instructions
+        case CLC:
+            clearCarry();
+            break;
+        case SEC:
+            setCarry();
+            break;
+        case CLI:
+            clearInterrupt();
+            break;
+        case SEI:
+            setInterrupt();
+            break;
+        case CLV:
+            clearOverflow();
+            break;
+        case CLD:
+            clearDecimal();
+            break;
+        case SED:
+            setDecimal();
+            break;
+
+        //Register Instructions
+        case TAX:
+            transferAccumulatorToX();
+            break;
+        case TXA:
+            transferXToAccumulator();
+            break;
+        case DEX:
+            decrementX();
+            break;
+        case INX:
+            incrementX();
+            break;
+        case TAY:
+            transferAccumulatorToY();
+            break;
+        case TYA:
+            transferYToAccumulator();
+            break;
+        case DEY:
+            decrementY();
+            break;
+        case INY:
+            incrementY();
+            break;
+
+        //JMP
+        case JMP_ABSOLUTE:
+            jump_Absolute();
+            break;
+        case JMP_INDIRECT:
+            jump_Indirect();
+            break;
+
+        //JSR
+        case JSR_ABSOLUTE:
+            jumpToSubroutine_Absolute();
+            break;
+
+        //LDA
+        case LDA_IMMEDIATE:
+            loadAccumulator_Immediate();
+            break;
+        case LDA_ZEROPAGE:
+            loadAccumulator_ZeroPage();
+            break;
+        case LDA_ZEROPAGEX:
+            loadAccumulator_ZeroPageX();
+            break;
+        case LDA_ABSOLUTE:
+            loadAccumulator_Absolute();
+            break;
+        case LDA_ABSOLUTEX:
+            loadAccumulator_AbsoluteX();
+            break;
+        case LDA_ABSOLUTEY:
+            loadAccumulator_AbsoluteY();
+            break;
+        case LDA_INDEXED_INDIRECTX:
+            loadAccumulator_IndexedIndirectX();
+            break;
+        case LDA_INDIRECT_INDEXEDY:
+            loadAccumulator_IndirectIndexedY();
+            break;
+
+        //LDX
+        case LDX_IMMEDIATE:
+            loadXIndex_Immediate();
+            break;
+        case LDX_ZEROPAGE:
+            loadXIndex_ZeroPage();
+            break;
+        case LDX_ZEROPAGEY:
+            loadXIndex_ZeroPageY();
+            break;
+        case LDX_ABSOLUTE:
+            loadXIndex_Absolute();
+            break;
+        case LDX_ABSOLUTEY:
+            loadXIndex_AbsoluteY();
+            break;
+
+        //LDY
+        case LDY_IMMEDIATE:
+            loadYIndex_Immediate();
+            break;
+        case LDY_ZEROPAGE:
+            loadYIndex_ZeroPage();
+            break;
+        case LDY_ZEROPAGEX:
+            loadYIndex_ZeroPageX();
+            break;
+        case LDY_ABSOLUTE:
+            loadYIndex_Absolute();
+            break;
+        case LDY_ABSOLUTEX:
+            loadYIndex_AbsoluteX();
+            break;
+
+        //LSR
+        case LSR_ACCUMULATOR:
+            logicalShiftRight_Accumulator();
+            break;
+        case LSR_ZEROPAGE:
+            logicalShiftRight_ZeroPage();
+            break;
+        case LSR_ZEROPAGEX:
+            logicalShiftRight_ZeroPageX();
+            break;
+        case LSR_ABSOLUTE:
+            logicalShiftRight_Absolute();
+            break;
+        case LSR_ABSOLUTEX:
+            logicalShiftRight_AbsoluteX();
+            break;
+
+        //NOP
+        case NOP:
+            noOperation();
+            break;
+
+        //RTS
+        case RTS:
+            returnFromSubroutine();
+            break;
+
+        //ORA
+        case ORA_IMMEDIATE:
+            orWithAccumulator_Immediate();
+            break;
+        case ORA_ZEROPAGE:
+            orWithAccumulator_ZeroPage();
+            break;
+        case ORA_ZEROPAGEX:
+            orWithAccumulator_ZeroPageX();
+            break;
+        case ORA_ABSOLUTE:
+            orWithAccumulator_Absolute();
+            break;
+        case ORA_ABSOLUTEX:
+            orWithAccumulator_AbsoluteX();
+            break;
+        case ORA_ABSOLUTEY:
+            orWithAccumulator_AbsoluteY();
+            break;
+        case ORA_INDEXED_INDIRECTX:
+            orWithAccumulator_IndexedIndirectX();
+            break;
+        case ORA_INDIRECT_INDEXEDY:
+            orWithAccumulator_IndirectIndexedY();
+            break;
+
+        //ROL
+        case ROL_ACCUMULATOR:
+            rotateLeft_Accumulator();
+            break;
+        case ROL_ZEROPAGE:
+            rotateLeft_ZeroPage();
+            break;
+        case ROL_ZEROPAGEX:
+            rotateLeft_ZeroPageX();
+            break;
+        case ROL_ABSOLUTE:
+            rotateLeft_Absolute();
+            break;
+        case ROL_ABSOLUTEX:
+            rotateLeft_AbsoluteX();
+            break;
+
+        //ROR
+        case ROR_ACCUMULATOR:
+            rotateRight_Accumulator();
+            break;
+        case ROR_ZEROPAGE:
+            rotateRight_ZeroPage();
+            break;
+        case ROR_ZEROPAGEX:
+            rotateRight_ZeroPageX();
+            break;
+        case ROR_ABSOLUTE:
+            rotateRight_Absolute();
+            break;
+        case ROR_ABSOLUTEX:
+            rotateRight_AbsoluteX();
+            break;
+
+        //SBC
+        case SBC_IMMEDIATE:
+            subtractWithBorrow_Immediate();
+            break;
+        case SBC_ZEROPAGE:
+            subtractWithBorrow_ZeroPage();
+            break;
+        case SBC_ZEROPAGEX:
+            subtractWithBorrow_ZeroPageX();
+            break;
+        case SBC_ABSOLUTE:
+            subtractWithBorrow_Absolute();
+            break;
+        case SBC_ABSOLUTEX:
+            subtractWithBorrow_AbsoluteX();
+            break;
+        case SBC_ABSOLUTEY:
+            subtractWithBorrow_AbsoluteY();
+            break;
+        case SBC_INDEXED_INDIRECTX:
+            subtractWithBorrow_IndexedIndirectX();
+            break;
+        case SBC_INDIRECT_INDEXEDY:
+            subtractWithBorrow_IndirectIndexedY();
+            break;
+
+        //STA
+        case STA_ZEROPAGE:
+            storeAccumulator_ZeroPage();
+            break;
+        case STA_ZEROPAGEX:
+            storeAccumulator_ZeroPageX();
+            break;
+        case STA_ABSOLUTE:
+            storeAccumulator_Absolute();
+            break;
+        case STA_ABSOLUTEX:
+            storeAccumulator_AbsoluteX();
+            break;
+        case STA_ABSOLUTEY:
+            storeAccumulator_AbsoluteY();
+            break;
+        case STA_INDEXED_INDIRECTX:
+            storeAccumulator_IndexedIndirectX();
+            break;
+        case STA_INDIRECT_INDEXEDY:
+            storeAccumulator_IndirectIndexedY();
+            break;
+
+        //Stack Instructions
+        case TXS:
+            transferXToStackPointer();
+            break;
+        case TSX:
+            transferStackPointerToX();
+            break;
+        case PHA:
+            pushAccumulator();
+            break;
+        case PLA:
+            pullAccumulator();
+            break;
+        case PHP:
+            pushProcessorStatus();
+            break;
+        case PLP:
+            pullProcessorStatus();
+            break;
+
+        //STX
+        case STX_ZEROPAGE:
+            storeXRegister_ZeroPage();
+            break;
+        case STX_ZEROPAGEY:
+            storeXRegister_ZeroPageY();
+            break;
+        case STX_ABSOLUTE:
+            storeXRegister_Absolute();
+            break;
+
+        //STY
+        case STY_ZEROPAGE:
+            storeYRegister_ZeroPage();
+            break;
+        case STY_ZEROPAGEX:
+            storeYRegister_ZeroPageX();
+            break;
+        case STY_ABSOLUTE:
+            storeYRegister_Absolute();
+            break;
+
+        default:
+            cout << "Invalid op code encountered: " + opcode << endl;
+            //to force quit
+            memory[programCounter] = 0x00;
+            noOperation();  //TODO: is this needed
+            break;
+    }
+
+}
+
+void CPU::addWithCarry(uint8_t argument) {
     uint8_t carry = 0;
     if(flags.carry == 1) {
         carry = 1;
@@ -779,28 +638,28 @@ void CPU::addWithCarry_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("ADC_IMM");
     addWithCarry(argument);
 
-    cycleCount += 2;
+    cyclesToExecute += 2;
 }
 void CPU::addWithCarry_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("ADC_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 
-    cycleCount += 3;
+    cyclesToExecute += 3;
 }
 void CPU::addWithCarry_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("ADC_ZEROPAGEX");
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 
-    cycleCount += 4;
+    cyclesToExecute += 4;
 }
 void CPU::addWithCarry_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("ADC_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 
-    cycleCount += 4;
+    cyclesToExecute += 4;
 }
 void CPU::addWithCarry_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("ADC_ABSOLUTEX");
@@ -808,9 +667,9 @@ void CPU::addWithCarry_AbsoluteX() {
     addWithCarry(memoryValue);
 
     if(pageBoundaryCrossed) {
-        cycleCount += 5;
+        cyclesToExecute += 5;
     } else {
-        cycleCount += 4;
+        cyclesToExecute += 4;
     }
 }
 void CPU::addWithCarry_AbsoluteY() {
@@ -819,9 +678,9 @@ void CPU::addWithCarry_AbsoluteY() {
     addWithCarry(memoryValue);
 
     if(pageBoundaryCrossed) {
-        cycleCount += 5;
+        cyclesToExecute += 5;
     } else {
-        cycleCount += 4;
+        cyclesToExecute += 4;
     }
 }
 void CPU::addWithCarry_IndexedIndirectX() {
@@ -829,7 +688,7 @@ void CPU::addWithCarry_IndexedIndirectX() {
     uint8_t memoryValue = memory[argument];
     addWithCarry(memoryValue);
 
-    cycleCount += 6;
+    cyclesToExecute += 6;
 }
 void CPU::addWithCarry_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("ADC_INDIRECT_INDEXEDY");
@@ -837,9 +696,9 @@ void CPU::addWithCarry_IndirectIndexedY() {
     addWithCarry(memoryValue);
 
     if(pageBoundaryCrossed) {
-        cycleCount += 6;
+        cyclesToExecute += 6;
     } else {
-        cycleCount += 5;
+        cyclesToExecute += 5;
     }
 }
 
@@ -854,28 +713,28 @@ void CPU::andWithAccumulator_Immediate() {
     uint8_t argument = retrieveImmediateInstruction("AND_IMM");
     andWithAccumulator(argument);
 
-    cycleCount += 2;
+    cyclesToExecute += 2;
 }
 void CPU::andWithAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("AND_ZEROPAGE");
     uint8_t memoryValue = memory[argument];
     andWithAccumulator(memoryValue);
 
-    cycleCount += 2;
+    cyclesToExecute += 2;
 }
 void CPU::andWithAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("AND_ZEROPAGEX");
     uint8_t memoryValue = memory[argument];
     andWithAccumulator(memoryValue);
 
-    cycleCount += 3;
+    cyclesToExecute += 3;
 }
 void CPU::andWithAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteXInstruction("AND_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     andWithAccumulator(memoryValue);
 
-    cycleCount += 4;
+    cyclesToExecute += 4;
 }
 void CPU::andWithAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("AND_ABSOLUTEX");
@@ -883,9 +742,9 @@ void CPU::andWithAccumulator_AbsoluteX() {
     andWithAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
-        cycleCount += 5;
+        cyclesToExecute += 5;
     } else {
-        cycleCount += 4;
+        cyclesToExecute += 4;
     }
 }
 void CPU::andWithAccumulator_AbsoluteY() {
@@ -894,9 +753,9 @@ void CPU::andWithAccumulator_AbsoluteY() {
     andWithAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
-        cycleCount += 5;
+        cyclesToExecute += 5;
     } else {
-        cycleCount += 4;
+        cyclesToExecute += 4;
     }
 }
 void CPU::andWithAccumulator_IndexedIndirectX() {
@@ -904,7 +763,7 @@ void CPU::andWithAccumulator_IndexedIndirectX() {
     uint8_t memoryValue = memory[argument];
     andWithAccumulator(memoryValue);
 
-    cycleCount += 6;
+    cyclesToExecute += 6;
 }
 void CPU::andWithAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("AND_INDIRECT_INDEXEDY");
@@ -912,9 +771,9 @@ void CPU::andWithAccumulator_IndirectIndexedY() {
     andWithAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
-        cycleCount += 6;
+        cyclesToExecute += 6;
     } else {
-        cycleCount += 5;
+        cyclesToExecute += 5;
     }
 }
 
@@ -945,31 +804,31 @@ void CPU::arithmeticShiftLeft_Accumulator() {
     //there are compiler warnings about passing NULL here, but if accumulator is true, it will never be used
     arithmeticShiftLeft(NULL, true);
 
-    cycleCount += 2;
+    cyclesToExecute += 2;
 }
 void CPU::arithmeticShiftLeft_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("ASL_ZEROPAGE");
     arithmeticShiftLeft(argument, false);
 
-    cycleCount += 5;
+    cyclesToExecute += 5;
 }
 void CPU::arithmeticShiftLeft_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("ASL_ZEROPAGEX");
     arithmeticShiftLeft(argument, false);
 
-    cycleCount += 6;
+    cyclesToExecute += 6;
 }
 void CPU::arithmeticShiftLeft_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("ASL_ABSOLUTE");
     arithmeticShiftLeft(argument, false);
 
-    cycleCount += 6;
+    cyclesToExecute += 6;
 }
 void CPU::arithmeticShiftLeft_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("ASL_ABSOLUTEX");
     arithmeticShiftLeft(argument, false);
 
-    cycleCount += 7;
+    cyclesToExecute += 7;
 }
 
 void CPU::bitTest(uint8_t argument) {
@@ -987,14 +846,14 @@ void CPU::bitTest_ZeroPage() {
     uint8_t memoryValue = memory[argument];
     bitTest(memoryValue);
 
-    cycleCount += 3;
+    cyclesToExecute += 3;
 }
 void CPU::bitTest_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("BIT_ABSOLUTE");
     uint8_t memoryValue = memory[argument];
     bitTest(memoryValue);
 
-    cycleCount += 4;
+    cyclesToExecute += 4;
 }
 
 void CPU::branch(uint8_t argument) {
@@ -1025,9 +884,9 @@ void CPU::branchOnPlus() {
 
         //if a page boundary was crossed
         if((oldProgramCounter & 0xFF00) != (programCounter & 0xFF00)) {
-            cycleCount += 2; //increase cycle count for branch + penalty for page boundary crossing
+            cyclesToExecute += 2; //increase cycle count for branch + penalty for page boundary crossing
         } else {
-            cycleCount += 1; //otherwise increase cycle count for the branch happening only
+            cyclesToExecute += 1; //otherwise increase cycle count for the branch happening only
         }
     }
 }
@@ -1040,9 +899,9 @@ void CPU::branchOnMinus() {
 
         //if a page boundary was crossed
         if((oldProgramCounter & 0xFF00) != (programCounter & 0xFF00)) {
-            cycleCount += 2;
+            cyclesToExecute += 2;
         } else {
-            cycleCount += 1;
+            cyclesToExecute += 1;
         }
     }
 }
@@ -1586,7 +1445,7 @@ void CPU::returnFromSubroutine() {
     uint8_t lowByte = memory[256 + (++stackPointer)];
     uint8_t highByte = memory[256 + (++stackPointer)];
 
-    uint16_t newProgramCounter = getWordFromBytes(lowByte, highByte);
+    uint16_t newProgramCounter = util.getWordFromBytes(lowByte, highByte);
     newProgramCounter++;
     programCounter = newProgramCounter;
 }
@@ -1887,8 +1746,6 @@ void CPU::storeYRegister_Absolute() {
 }
 
 void CPU::subtractWithBorrow(uint8_t argument) {
-    //TODO: should I implement Decimal flag behavior? Not sure if NES uses it
-
     /**
      * ELSE
         t = A - M - !P.C
@@ -1945,37 +1802,37 @@ void CPU::subtractWithBorrow_IndirectIndexedY() {
 }
 
 void CPU::retrieveAccumulatorInstruction(std::string instructionString) {
-    printExecutedAccumulatorInstruction(instructionString);
+    util.printExecutedAccumulatorInstruction(instructionString);
 }
 uint8_t CPU::retrieveRelativeInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
-    printExecutedByteInstruction(instructionString, argument);
+    util.printExecutedByteInstruction(instructionString, argument);
 
     return argument;
 }
 uint8_t CPU::retrieveImmediateInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
-    printExecutedByteInstruction(instructionString, argument);
+    util.printExecutedByteInstruction(instructionString, argument);
 
     return argument;
 }
 uint8_t CPU::retrieveZeroPageInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
-    printExecutedByteInstruction(instructionString, argument);
+    util.printExecutedByteInstruction(instructionString, argument);
 
     return argument;
 }
 uint8_t CPU::retrieveZeroPageXInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
     argument += xIndex;
-    printExecutedByteInstruction(instructionString, argument);
+    util.printExecutedByteInstruction(instructionString, argument);
 
     return argument;
 }
 uint8_t CPU::retrieveZeroPageYInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
     argument += yIndex;
-    printExecutedByteInstruction(instructionString, argument);
+    util.printExecutedByteInstruction(instructionString, argument);
 
     return argument;
 }
@@ -1984,9 +1841,9 @@ uint16_t CPU::retrieveAbsoluteInstruction(string instructionString) {
     uint8_t byteHigh = memory[programCounter++];
     uint16_t argument;
 
-    argument = getWordFromBytes(byteLow, byteHigh);
+    argument = util.getWordFromBytes(byteLow, byteHigh);
 
-    printExecutedWordInstruction(instructionString, argument);
+    util.printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
 uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
@@ -1995,7 +1852,7 @@ uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
     uint8_t byteHigh = memory[programCounter++];
     uint16_t argument;
 
-    argument = getWordFromBytes(byteLow, byteHigh);
+    argument = util.getWordFromBytes(byteLow, byteHigh);
     startPage = argument & 0xFF00;  //get the high byte (the page)
     argument += xIndex;
 
@@ -2004,7 +1861,7 @@ uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
         pageBoundaryCrossed = true;
     }
 
-    printExecutedWordInstruction(instructionString, argument);
+    util.printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
 uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
@@ -2013,7 +1870,7 @@ uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
     uint8_t byteHigh = memory[programCounter++];
     uint16_t argument;
 
-    argument = getWordFromBytes(byteLow, byteHigh);
+    argument = util.getWordFromBytes(byteLow, byteHigh);
     startPage = argument & 0xFF00;  //get the high byte (the page)
     argument += yIndex;
 
@@ -2022,7 +1879,7 @@ uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
         pageBoundaryCrossed = true;
     }
 
-    printExecutedWordInstruction(instructionString, argument);
+    util.printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
 uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
@@ -2034,8 +1891,8 @@ uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
     uint8_t highByte = memory[zeroPageLocation];
 
     //get the 16 bit value at zeroPageLocation in memory
-    uint16_t argument = getWordFromBytes(lowByte, highByte);
-    printExecutedWordInstruction(instructionString, argument);
+    uint16_t argument = util.getWordFromBytes(lowByte, highByte);
+    util.printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
 uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
@@ -2045,7 +1902,7 @@ uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
     uint8_t lowByte = memory[zeroPageLocation++];
     uint8_t highByte = memory[zeroPageLocation];
 
-    uint16_t argument = getWordFromBytes(lowByte, highByte);
+    uint16_t argument = util.getWordFromBytes(lowByte, highByte);
     startPage = argument & 0xFF00; //get the high byte (the page)
     argument += yIndex;
 
@@ -2054,7 +1911,7 @@ uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
         pageBoundaryCrossed = true;
     }
 
-    printExecutedWordInstruction(instructionString, argument);
+    util.printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
 uint16_t CPU::retrieveIndirectInstruction(string instructionString) {
@@ -2062,18 +1919,18 @@ uint16_t CPU::retrieveIndirectInstruction(string instructionString) {
     uint8_t indirectByteHigh = memory[programCounter++];
     uint16_t indirectAddress;
 
-    //TODO: 6502 PAGE-BOUNDARY WRAPAROUND BUG, DO RESEARCH
-    indirectAddress = getWordFromBytes(indirectByteLow, indirectByteHigh);
+    indirectAddress = util.getWordFromBytes(indirectByteLow, indirectByteHigh);
     uint8_t byteLow = memory[indirectAddress++];
     uint8_t byteHigh = memory[indirectAddress];
     uint16_t argument;
 
-    argument = getWordFromBytes(byteLow, byteHigh);
-    printExecutedWordInstruction(instructionString, argument);
+    argument = util.getWordFromBytes(byteLow, byteHigh);
+    util.printExecutedWordInstruction(instructionString, argument);
     return argument;
 }
 
-
+//TODO: THESE NEED TO BE CHANGED TO REFLECT MEMORY LOCATIONS THAT MIRROR OTHER MEMORY LOCATIONS
+//TODO: ALSO THESE NEED TO BE USED WHEREVER MEMORY IS BEING AFFECTED BY ANYTHING WHATSOEVER
 void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
     memory[location] = byte;
 }
@@ -2108,23 +1965,4 @@ void CPU::setProcessorFlagsFromByte(uint8_t processorStatus) {
     if((processorStatus & 4) != 0) { flags.interrupt = 1; } else { flags.interrupt = 0; }
     if((processorStatus & 2) != 0) { flags.zero = 1; } else { flags.zero = 0; }
     if((processorStatus & 1) != 0) { flags.carry = 1; } else { flags.carry = 0; }
-}
-
-//TODO: move to Util
-uint16_t CPU::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
-
-    //This works because:
-    //(0x0002 << 8) | 0x01 = 0x0200 | 0x0001 = 0x0201
-    uint16_t word = ((uint16_t)byteHigh << 8) | byteLow;
-
-    return word;
-}
-void CPU::printExecutedByteInstruction(string instruction, uint8_t argument) {
-    cout << instruction << " "; util.printByte(argument); cout << endl;
-}
-void CPU::printExecutedWordInstruction(string instruction, uint16_t argument) {
-    cout << instruction << " "; util.printWord(argument); cout << endl;
-}
-void CPU::printExecutedAccumulatorInstruction(std::string instruction) {
-    cout << instruction << " " << "A" << endl;
 }

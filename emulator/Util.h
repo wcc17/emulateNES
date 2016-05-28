@@ -18,6 +18,11 @@ public:
     bool isNegativeWord(uint16_t c);
     uint8_t convertTwosComplement(uint8_t argument);
     bool checkLeastSignificantBit(uint8_t c);
+    uint16_t convertStringToWord(std::string argument);
+    uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
+    void printExecutedByteInstruction(std::string instruction, uint8_t argument);
+    void printExecutedWordInstruction(std::string instruction, uint16_t argument);
+    void printExecutedAccumulatorInstruction(std::string instruction);
 };
 
 

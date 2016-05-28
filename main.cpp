@@ -35,6 +35,31 @@ void printStack(CPU* cpu) {
     }
 }
 
+void readBinaryFile(CPU* cpu, std::string fileName) {
+    ifstream file;
+    vector<uint8_t> bytes;   //just going to let bytes vector increase by itself rather tahn trying to reserve space for this one off allocation
+    Util util;
+
+    file.open(fileName);
+
+    if(!file.is_open()) {
+        return;
+    }
+
+    uint8_t byte;
+    while (file >> std::hex >> byte) {
+        bytes.push_back(byte);
+    }
+
+    uint16_t programLocation = 0x0600;
+    for(int i = 0; i < bytes.size(); i++) {
+        byte = bytes[i];
+        cpu->memory[programLocation++] = byte;
+    }
+
+    file.close();
+}
+
 void printDebugInformation(CPU* cpu) {
     Util util;
 
@@ -76,10 +101,14 @@ int main() {
 //    cpuTest.runAllTests();
 
     CPU *cpu = new CPU();
-    Assembler assembler(cpu);
 
-    string fileName = "sample_programs/testSBC.asm";
+    Assembler assembler(cpu);
+    string fileName = "sample_programs/testSubroutines2.asm";
     assembler.readFile(fileName.c_str());
+
+    //TODO: VERY UNFINISHED
+//    string fileName = "sample_programs/zelda.nes";
+//    readBinaryFile(cpu, fileName);
 
     printMemory(0x0600, 0x0700, cpu);
 
@@ -94,7 +123,7 @@ int main() {
             printDebugInformation(cpu);
         }
 
-        cpu->executeOpCode();
+        cpu->execute();
     }
 
     cpu->programCounter++;

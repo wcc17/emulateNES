@@ -112,7 +112,6 @@ private:
     for clarity. **/
     bool isBranchInstruction(string instruction);
 
-    uint16_t convertStringToWord(string argument);
     string convertWordToString(uint16_t word);
     uint8_t getLowByte(uint16_t word);
     uint8_t getHighByte(uint16_t word);

@@ -2,6 +2,7 @@
 // Created by Christian Curry on 3/5/16.
 //
 
+#include <sstream>
 #include "Util.h"
 
 using namespace std;
@@ -34,4 +35,39 @@ uint8_t Util::convertTwosComplement(uint8_t argument) {
 bool Util::checkLeastSignificantBit(uint8_t c) {
     bool isSet = (c >> 0) & 1;
     return isSet;
+}
+
+uint16_t Util::convertStringToWord(string argument) {
+    uint16_t x;
+
+    stringstream ss;
+    ss << setfill('0') << setw(4) << hex << argument;
+    ss >> x;
+
+    return x;
+}
+
+uint16_t Util::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
+
+    //This works because:
+    //(0x0002 << 8) | 0x01 = 0x0200 | 0x0001 = 0x0201
+    uint16_t word = ((uint16_t)byteHigh << 8) | byteLow;
+
+    return word;
+}
+
+void Util::printExecutedByteInstruction(string instruction, uint8_t argument) {
+    cout << instruction << " ";
+    printByte(argument);
+    cout << endl;
+}
+
+void Util::printExecutedWordInstruction(string instruction, uint16_t argument) {
+    cout << instruction << " ";
+    printWord(argument);
+    cout << endl;
+}
+
+void Util::printExecutedAccumulatorInstruction(std::string instruction) {
+    cout << instruction << " " << "A" << endl;
 }

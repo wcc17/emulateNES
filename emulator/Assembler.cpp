@@ -315,6 +315,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
     //initializing this with null so that it doesn't initialize to the first value in addressingmodes enum
     //this is so i can pick it up later if for some reason we don't have an addressing mode
     AddressingMode addressingMode = NULL_ADDRESSING_MODE;
+    Util util;
 
     if(isBranchInstruction(instruction)) {
         addressingMode = RELATIVE;
@@ -323,7 +324,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
     }
     argument = trimArgument(argument);
 
-    uint16_t arg = convertStringToWord(argument);
+    uint16_t arg = util.convertStringToWord(argument);
 
     OpCodes opcode = BRK;
     switch(addressingMode) {
@@ -806,16 +807,6 @@ string Assembler::trimArgument(string argument) {
 }
 
 //TODO: MOVE THESE TO UTIL. THEY COULD BE USEFUL ELSEWHERE.
-uint16_t Assembler::convertStringToWord(string argument) {
-    uint16_t x;
-
-    stringstream ss;
-    ss << setfill('0') << setw(4) << hex << argument;
-    ss >> x;
-
-    return x;
-}
-
 string Assembler::convertWordToString(uint16_t word) {
     string s;
 

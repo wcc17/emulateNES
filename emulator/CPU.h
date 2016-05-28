@@ -38,10 +38,12 @@ public:
     //will be used if a device raises an interrupt. this is not final, just now starting implementation of interrupts
     bool interruptRaised = false;
 
-    int cycleCount = 0;
+    int cyclesToExecute = 0;
+    int cycleGoal = 0;
     bool pageBoundaryCrossed = false;
 
     CPU();
+    void execute();
     void executeOpCode();
     void storeByteInMemory(uint8_t byte, uint16_t location);
     void storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location);
@@ -254,14 +256,8 @@ public:
     void storeYRegister_Absolute();
 
 private:
-    void printExecutedByteInstruction(std::string instruction, uint8_t argument);
-    void printExecutedWordInstruction(std::string instruction, uint16_t argument);
-    void printExecutedAccumulatorInstruction(std::string instruction);
-
     uint8_t getProcessorFlagsAsByte();
     void setProcessorFlagsFromByte(uint8_t processorStatus);
-
-    uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
 
     void retrieveAccumulatorInstruction(std::string instructionString);
     uint8_t retrieveRelativeInstruction(std::string instructionString);

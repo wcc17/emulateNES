@@ -92,6 +92,14 @@ uint8_t Util::getHighByte(uint16_t word) {
     return byte;
 }
 
+void printAsBinary(uint8_t a)
+{
+    uint8_t i;
+
+    for(i=0x80;i!=0;i>>=1)
+        printf("%c",(a&i)?'1':'0');
+}
+
 //implied instructions
 void Util::printStatus_Implied(uint16_t programCounter, uint8_t opcode, std::string instruction,
                                    uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles) {
@@ -117,14 +125,16 @@ void Util::printStatus_Implied(uint16_t programCounter, uint8_t opcode, std::str
     cout << " ";
 
     cout << "P:";
-    printByte(flags);
+    printAsBinary(flags);
     cout << " ";
 
     cout << "SP:";
     printByte(stackPointer);
     cout << " ";
 
-    cout << "Cycles:" << cycles << " " << endl;
+    cout << "Cycles:" << dec << cycles << " " << endl;
+    //switch back to hex so i don't screw anything else up
+    cout << hex;
 }
 
 //accumulator instructions
@@ -152,14 +162,16 @@ void Util::printStatus_Accumulator(uint16_t programCounter, uint8_t opcode, std:
     cout << " ";
 
     cout << "P:";
-    printByte(flags);
+    printAsBinary(flags);
     cout << " ";
 
     cout << "SP:";
     printByte(stackPointer);
     cout << " ";
 
-    cout << "Cycles:" << cycles << " " << endl;
+    cout << "Cycles:" << dec << cycles << " " << endl;
+    //switch back to hex so i don't screw anything else up
+    cout << hex;
 }
 
 //instructions with one argument
@@ -190,14 +202,16 @@ void Util::printStatus(uint16_t programCounter, uint8_t opcode, uint8_t argument
     cout << " ";
 
     cout << "P:";
-    printByte(flags);
+    printAsBinary(flags);
     cout << " ";
 
     cout << "SP:";
     printByte(stackPointer);
     cout << " ";
 
-    cout << "Cycles:" << cycles << " " << endl;
+    cout << "Cycles:" << dec << cycles << " " << endl;
+    //switch back to hex so i don't screw anything else up
+    cout << hex;
 }
 
 //instructions with two arguments
@@ -234,28 +248,28 @@ void Util::printStatus(uint16_t programCounter, uint8_t opcode, uint16_t argumen
     cout << " ";
 
     cout << "P:";
-    printByte(flags);
+    printAsBinary(flags);
     cout << " ";
 
     cout << "SP:";
     printByte(stackPointer);
     cout << " ";
 
-    cout << "Cycles:" << cycles << " " << endl;
+    cout << "Cycles:" << dec << cycles << " " << endl;
+    //switch back to hex so i don't screw anything else up
+    cout << hex;
 }
 
 void Util::printExecutedByteInstruction(string instruction, uint8_t argument) {
     cout << instruction << " ";
     printByte(argument);
-//    cout << endl;
 }
 
 void Util::printExecutedWordInstruction(string instruction, uint16_t argument) {
     cout << instruction << " ";
     printWord(argument);
-//    cout << endl;
 }
 
 void Util::printExecutedAccumulatorInstruction(std::string instruction) {
-    cout << instruction << " " << "A" << endl;
+    cout << instruction << " " << "A";
 }

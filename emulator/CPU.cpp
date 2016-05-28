@@ -580,9 +580,6 @@ void CPU::executeOpCode() {
             cout << "INVALID OP CODE ENCOUNTERED: ";
             util.printByte(opcode);
             cout << endl;
-            //to force quit
-//            memory[programCounter] = 0x00;
-//            noOperation();  //TODO: is this needed
             break;
     }
 

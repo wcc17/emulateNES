@@ -61,7 +61,8 @@ void CPU::execute() {
 //this will take the op codes from program memory and execute them one at a time
 void CPU::executeOpCode() {
 
-    uint8_t opcode = memory[programCounter++];
+    oldPC = programCounter;
+    opcode = memory[programCounter++];
     //the cases have {} symbols to create a local scope within the case to declare local variables
     switch(opcode) {
 
@@ -576,13 +577,29 @@ void CPU::executeOpCode() {
             break;
 
         default:
-            cout << "Invalid op code encountered: " + opcode << endl;
+            cout << "INVALID OP CODE ENCOUNTERED: ";
+            util.printByte(opcode);
+            cout << endl;
             //to force quit
-            memory[programCounter] = 0x00;
-            noOperation();  //TODO: is this needed
+//            memory[programCounter] = 0x00;
+//            noOperation();  //TODO: is this needed
             break;
     }
 
+    if(this->impliedAddressingMode) {
+        util.printStatus_Implied(oldPC, opcode, instructionString, accumulator, xIndex, yIndex,
+                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+    }
+    else if(this->accumulatorAddressingMode) {
+        util.printStatus_Accumulator(oldPC, opcode, instructionString, accumulator, xIndex, yIndex,
+                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+    } else if(this->addressingMode_8) {
+        util.printStatus(oldPC, opcode, arg_8, instructionString, accumulator, xIndex, yIndex,
+                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+    } else if(this->addressingMode_16) {
+        util.printStatus(oldPC, opcode, arg_16, instructionString, accumulator, xIndex, yIndex,
+                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+    }
 }
 
 void CPU::addWithCarry(uint8_t argument) {
@@ -1023,9 +1040,11 @@ void CPU::branchOnEqual() {
 
 //TODO: AM NOT DONE WITH THIS INSTRUCTION YET
 void CPU::breakInstruction() {
+    retrieveImpliedInstruction("BRK");
+
     cyclesToExecute += 7;
 
-    programCounter++;
+//    programCounter++; pretty sure this shouldn't happen but im not 100% sure
     flags.breakFlag = 1;
 }
 
@@ -1298,51 +1317,51 @@ void CPU::incrementMemory_AbsoluteX() {
 }
 
 void CPU::clearCarry() {
-    cout << "CLC" << endl;
+    retrieveImpliedInstruction("CLC");
     flags.carry = 0;
     cyclesToExecute += 2;
 }
 void CPU::setCarry() {
-    cout << "SEC" << endl;
+    retrieveImpliedInstruction("SEC");
     flags.carry = 1;
     cyclesToExecute += 2;
 }
 
 void CPU::clearInterrupt() {
-    cout << "CLI" << endl;
+    retrieveImpliedInstruction("CLI");
     flags.interrupt = 0;
 
     cyclesToExecute += 2;
 }
 void CPU::setInterrupt() {
-    cout << "SEI" << endl;
+    retrieveImpliedInstruction("SEI");
     flags.interrupt = 1;
 
     cyclesToExecute += 2;
 }
 
 void CPU::clearOverflow() {
-    cout << "CLV" << endl;
+    retrieveImpliedInstruction("CLV");
     flags.overflow = 0;
 
     cyclesToExecute += 2;
 }
 
 void CPU::clearDecimal() {
-    cout << "CLD" << endl;
+    retrieveImpliedInstruction("CLD");
     flags.decimal = 0;
 
     cyclesToExecute += 2;
 }
 void CPU::setDecimal() {
-    cout << "SED" << endl;
+    retrieveImpliedInstruction("SED");
     flags.decimal = 1;
 
     cyclesToExecute += 2;
 }
 
 void CPU::transferAccumulatorToX() {
-    cout << "TAX" << endl;
+    retrieveImpliedInstruction("TAX");
 
     xIndex = accumulator;
 
@@ -1353,7 +1372,7 @@ void CPU::transferAccumulatorToX() {
     cyclesToExecute += 2;
 }
 void CPU::transferXToAccumulator() {
-    cout << "TXA" << endl;
+    retrieveImpliedInstruction("TXA");
 
     accumulator = xIndex;
 
@@ -1364,7 +1383,7 @@ void CPU::transferXToAccumulator() {
     cyclesToExecute += 2;
 }
 void CPU::decrementX() {
-    cout << "DEX" << endl;
+    retrieveImpliedInstruction("DEX");
 
     xIndex -= 1;
 
@@ -1375,7 +1394,7 @@ void CPU::decrementX() {
     cyclesToExecute += 2;
 }
 void CPU::incrementX() {
-    cout << "INX" << endl;
+    retrieveImpliedInstruction("INX");
 
     xIndex += 1;
 
@@ -1386,7 +1405,7 @@ void CPU::incrementX() {
     cyclesToExecute += 2;
 }
 void CPU::transferAccumulatorToY() {
-    cout << "TAY" << endl;
+    retrieveImpliedInstruction("TAY");
 
     yIndex = accumulator;
 
@@ -1397,7 +1416,7 @@ void CPU::transferAccumulatorToY() {
     cyclesToExecute += 2;
 }
 void CPU::transferYToAccumulator() {
-    cout << "TYA" << endl;
+    retrieveImpliedInstruction("TYA");
 
     accumulator = yIndex;
 
@@ -1408,7 +1427,7 @@ void CPU::transferYToAccumulator() {
     cyclesToExecute += 2;
 }
 void CPU::decrementY() {
-    cout << "DEY" << endl;
+    retrieveImpliedInstruction("DEY");
 
     yIndex -= 1;
 
@@ -1419,7 +1438,7 @@ void CPU::decrementY() {
     cyclesToExecute += 2;
 }
 void CPU::incrementY() {
-    cout << "INY" << endl;
+    retrieveImpliedInstruction("INY");
 
     yIndex += 1;
 
@@ -1692,7 +1711,7 @@ void CPU::logicalShiftRight_AbsoluteX() {
 }
 
 void CPU::noOperation() {
-    cout << "NOP" << endl;
+    retrieveImpliedInstruction("NOP");
 
     //affects no flags
 
@@ -1700,7 +1719,7 @@ void CPU::noOperation() {
 }
 
 void CPU::returnFromSubroutine() {
-    cout << "RTS" << endl;
+    retrieveImpliedInstruction("RTS");
 
     uint8_t lowByte = memory[256 + (++stackPointer)];
     uint8_t highByte = memory[256 + (++stackPointer)];
@@ -1985,7 +2004,7 @@ void CPU::storeAccumulator_IndirectIndexedY() {
 }
 
 void CPU::transferXToStackPointer() {
-    cout << "TXS" << endl;
+    retrieveImpliedInstruction("TXS");
 
     stackPointer = xIndex;
 
@@ -1995,7 +2014,7 @@ void CPU::transferXToStackPointer() {
     cyclesToExecute += 2;
 }
 void CPU::transferStackPointerToX() {
-    cout << "TSX" << endl;
+    retrieveImpliedInstruction("TSX");
 
     xIndex = stackPointer;
 
@@ -2005,7 +2024,7 @@ void CPU::transferStackPointerToX() {
     cyclesToExecute += 2;
 }
 void CPU::pushAccumulator() {
-    cout << "PHA" << endl;
+    retrieveImpliedInstruction("PHA");
 
     //stack pointer = 0xff but actually lives at 0x01ff
     //0xff + 256(0x0100) = 0x1ff
@@ -2016,7 +2035,7 @@ void CPU::pushAccumulator() {
     cyclesToExecute += 3;
 }
 void CPU::pullAccumulator() {
-    cout << "PLA" << endl;
+    retrieveImpliedInstruction("PLA");
 
     accumulator = memory[256 + (++stackPointer)];
 
@@ -2026,7 +2045,7 @@ void CPU::pullAccumulator() {
     cyclesToExecute += 4;
 }
 void CPU::pushProcessorStatus() {
-    cout << "PHP" << endl;
+    retrieveImpliedInstruction("PHP");
 
     //the binary value for the flags need to be pushed onto stack
     uint8_t processorStatus = getProcessorFlagsAsByte();
@@ -2037,7 +2056,7 @@ void CPU::pushProcessorStatus() {
     cyclesToExecute += 3;
 }
 void CPU::pullProcessorStatus() {
-    cout << "PLP" << endl;
+    retrieveImpliedInstruction("PLP");
 
     uint8_t processorStatus = memory[256 + (++stackPointer)];
     setProcessorFlagsFromByte(processorStatus);
@@ -2177,38 +2196,86 @@ void CPU::subtractWithBorrow_IndirectIndexedY() {
     }
 }
 
+void CPU::retrieveImpliedInstruction(std::string instructionString) {
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->impliedAddressingMode = true;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = false;
+    this->addressingMode_16 = false;
+}
 void CPU::retrieveAccumulatorInstruction(std::string instructionString) {
-    util.printExecutedAccumulatorInstruction(instructionString);
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = true;
+    this->addressingMode_8 = false;
+    this->addressingMode_16 = false;
 }
 uint8_t CPU::retrieveRelativeInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
-    util.printExecutedByteInstruction(instructionString, argument);
+
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_8 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = true;
+    this->addressingMode_16 = false;
 
     return argument;
 }
 uint8_t CPU::retrieveImmediateInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
-    util.printExecutedByteInstruction(instructionString, argument);
+
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_8 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = true;
+    this->addressingMode_16 = false;
 
     return argument;
 }
 uint8_t CPU::retrieveZeroPageInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
-    util.printExecutedByteInstruction(instructionString, argument);
+
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_8 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = true;
+    this->addressingMode_16 = false;
 
     return argument;
 }
 uint8_t CPU::retrieveZeroPageXInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
     argument += xIndex;
-    util.printExecutedByteInstruction(instructionString, argument);
+
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_8 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = true;
+    this->addressingMode_16 = false;
 
     return argument;
 }
 uint8_t CPU::retrieveZeroPageYInstruction(string instructionString) {
     uint8_t argument = memory[programCounter++];
     argument += yIndex;
-    util.printExecutedByteInstruction(instructionString, argument);
+
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_8 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = true;
+    this->addressingMode_16 = false;
 
     return argument;
 }
@@ -2219,7 +2286,14 @@ uint16_t CPU::retrieveAbsoluteInstruction(string instructionString) {
 
     argument = util.getWordFromBytes(byteLow, byteHigh);
 
-    util.printExecutedWordInstruction(instructionString, argument);
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_16 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = false;
+    this->addressingMode_16 = true;
+
     return argument;
 }
 uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
@@ -2237,7 +2311,14 @@ uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
         pageBoundaryCrossed = true;
     }
 
-    util.printExecutedWordInstruction(instructionString, argument);
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_16 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = false;
+    this->addressingMode_16 = true;
+
     return argument;
 }
 uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
@@ -2255,7 +2336,14 @@ uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
         pageBoundaryCrossed = true;
     }
 
-    util.printExecutedWordInstruction(instructionString, argument);
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_16 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = false;
+    this->addressingMode_16 = true;
+
     return argument;
 }
 uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
@@ -2268,7 +2356,15 @@ uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
 
     //get the 16 bit value at zeroPageLocation in memory
     uint16_t argument = util.getWordFromBytes(lowByte, highByte);
-    util.printExecutedWordInstruction(instructionString, argument);
+
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_16 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = false;
+    this->addressingMode_16 = true;
+
     return argument;
 }
 uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
@@ -2287,7 +2383,14 @@ uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
         pageBoundaryCrossed = true;
     }
 
-    util.printExecutedWordInstruction(instructionString, argument);
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_16 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = false;
+    this->addressingMode_16 = true;
+
     return argument;
 }
 uint16_t CPU::retrieveIndirectInstruction(string instructionString) {
@@ -2301,7 +2404,15 @@ uint16_t CPU::retrieveIndirectInstruction(string instructionString) {
     uint16_t argument;
 
     argument = util.getWordFromBytes(byteLow, byteHigh);
-    util.printExecutedWordInstruction(instructionString, argument);
+
+    //DEBUG INFO
+    this->instructionString = instructionString;
+    this->arg_16 = argument;
+    this->impliedAddressingMode = false;
+    this->accumulatorAddressingMode = false;
+    this->addressingMode_8 = false;
+    this->addressingMode_16 = true;
+
     return argument;
 }
 

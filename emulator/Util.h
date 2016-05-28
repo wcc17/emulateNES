@@ -20,9 +20,22 @@ public:
     bool checkLeastSignificantBit(uint8_t c);
     uint16_t convertStringToWord(std::string argument);
     uint16_t getWordFromBytes(uint8_t byteLow, uint8_t byteHigh);
+    std::string convertWordToString(uint16_t word);
+    uint8_t getLowByte(uint16_t word);
+    uint8_t getHighByte(uint16_t word);
+
     void printExecutedByteInstruction(std::string instruction, uint8_t argument);
     void printExecutedWordInstruction(std::string instruction, uint16_t argument);
     void printExecutedAccumulatorInstruction(std::string instruction);
+
+    void printStatus_Implied(uint16_t programCounter, uint8_t opcode, std::string instruction,
+                                 uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles);
+    void printStatus_Accumulator(uint16_t programCounter, uint8_t opcode, std::string instruction,
+                     uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles);
+    void printStatus(uint16_t programCounter, uint8_t opcode, uint8_t argument, std::string instruction,
+                        uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles);
+    void printStatus(uint16_t programCounter, uint8_t opcode, uint16_t argument, std::string instruction,
+                        uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles);
 };
 
 

@@ -20,6 +20,8 @@ void printMemory(uint16_t start, uint16_t end, CPU* cpu) {
         }
 
     }
+
+    cout << endl;
 }
 
 void printStack(CPU* cpu) {
@@ -51,8 +53,8 @@ void readBinaryFile(CPU* cpu, std::string fileName) {
         bytes.push_back(byte);
     }
 
-    uint16_t programLocation = 0x0600;
-    for(int i = 0; i < bytes.size(); i++) {
+    uint16_t programLocation = 0xC000;
+    for(int i = 16; i < bytes.size(); i++) {
         byte = bytes[i];
         cpu->memory[programLocation++] = byte;
     }
@@ -89,7 +91,7 @@ void printDebugInformation(CPU* cpu) {
     printf("%d %d %d %d %d %d %d %d\n", cpu->flags.negative, cpu->flags.overflow, cpu->flags.ignored, cpu->flags.breakFlag, cpu->flags.decimal, cpu->flags.interrupt, cpu->flags.zero, cpu->flags.carry);
 
     cout << "Stack: " << endl;
-    //printStack(cpu);
+    printStack(cpu);
     cout << endl;
 
     cout << "Next instruction results to be printed: " << endl << endl;
@@ -103,14 +105,14 @@ int main() {
     CPU *cpu = new CPU();
 
     Assembler assembler(cpu);
-    string fileName = "sample_programs/testSubroutines2.asm";
+    string fileName = "sample_programs/testSBC.asm";
     assembler.readFile(fileName.c_str());
 
     //TODO: VERY UNFINISHED
-//    string fileName = "sample_programs/zelda.nes";
+//    string fileName = "sample_programs/nestest.nes";
 //    readBinaryFile(cpu, fileName);
 
-    printMemory(0x0600, 0x0700, cpu);
+    printMemory(0x0600, 0x0fff, cpu);
 
     bool debug = true;
     cpu->programCounter = cpu->programStart;
@@ -120,7 +122,7 @@ int main() {
             //this forces the user to press enter to step through the code
             cin.ignore();
 
-            printDebugInformation(cpu);
+//            printDebugInformation(cpu);
         }
 
         cpu->execute();
@@ -129,9 +131,9 @@ int main() {
     cpu->programCounter++;
 
     //print one last time to see the results of the last instruction
-    cout << endl;
-    printDebugInformation(cpu);
-    cout << endl << endl;
+//    cout << endl;
+//    printDebugInformation(cpu);
+//    cout << endl << endl;
 
     printMemory(0x0000, 0x02FF, cpu);
 

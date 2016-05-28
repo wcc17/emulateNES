@@ -79,12 +79,12 @@ void Assembler::readFile(string fileName) {
                 //using 8 bit offset first so that negative numbers are converted correctly
                 uint8_t offset = labelMemoryLocation - (programLocation + 2);
                 uint16_t wordOffset = offset;
-                argument = convertWordToString(wordOffset);
+                argument = util.convertWordToString(wordOffset);
                 storeProgramInMemory(instruction, argument, programLocation);
             } else {
                 //need entire address of existing label
                 uint16_t labelMemoryLocation = labels[argument];
-                argument = convertWordToString(labelMemoryLocation);
+                argument = util.convertWordToString(labelMemoryLocation);
 
                 while (argument.length() < 4) {
                     argument.insert(0, "0");
@@ -315,7 +315,6 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
     //initializing this with null so that it doesn't initialize to the first value in addressingmodes enum
     //this is so i can pick it up later if for some reason we don't have an addressing mode
     AddressingMode addressingMode = NULL_ADDRESSING_MODE;
-    Util util;
 
     if(isBranchInstruction(instruction)) {
         addressingMode = RELATIVE;
@@ -364,7 +363,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            cpu->storeByteInMemory(util.getLowByte(arg), programLocation++);
             break;
         case IMPLIED:
             if(instruction == "CLC") {
@@ -444,7 +443,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            cpu->storeByteInMemory(util.getLowByte(arg), programLocation++);
 
             break;
         case ZERO_PAGE:
@@ -493,7 +492,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            cpu->storeByteInMemory(util.getLowByte(arg), programLocation++);
 
             break;
         case ZERO_PAGEX:
@@ -532,7 +531,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            cpu->storeByteInMemory(util.getLowByte(arg), programLocation++);
 
             break;
         case ZERO_PAGEY:
@@ -543,7 +542,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            cpu->storeByteInMemory(util.getLowByte(arg), programLocation++);
             break;
         case ABSOLUTE :
             if(instruction == "ADC") {
@@ -595,7 +594,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+            cpu->storeWordInMemory(util.getLowByte(arg), util.getHighByte(arg), programLocation);
             programLocation += 2; //because we move two spots in storeWordInMemory
 
             break;
@@ -633,7 +632,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+            cpu->storeWordInMemory(util.getLowByte(arg), util.getHighByte(arg), programLocation);
             programLocation += 2;
             break;
         case ABSOLUTEY:
@@ -658,7 +657,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+            cpu->storeWordInMemory(util.getLowByte(arg), util.getHighByte(arg), programLocation);
             programLocation += 2;
             break;
         case INDEXED_INDIRECTX:
@@ -681,7 +680,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            cpu->storeByteInMemory(util.getLowByte(arg), programLocation++);
             break;
         case INDIRECT_INDEXEDY:
             if(instruction == "ADC") {
@@ -703,7 +702,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeByteInMemory(getLowByte(arg), programLocation++);
+            cpu->storeByteInMemory(util.getLowByte(arg), programLocation++);
             break;
         case INDIRECT:
             if(instruction == "JMP") {
@@ -711,7 +710,7 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
             }
 
             cpu->storeByteInMemory(opcode, programLocation++);
-            cpu->storeWordInMemory(getLowByte(arg), getHighByte(arg), programLocation);
+            cpu->storeWordInMemory(util.getLowByte(arg), util.getHighByte(arg), programLocation);
             programLocation += 2;
     }
 }
@@ -804,43 +803,6 @@ string Assembler::trimArgument(string argument) {
     }
 
     return argument;
-}
-
-//TODO: MOVE THESE TO UTIL. THEY COULD BE USEFUL ELSEWHERE.
-string Assembler::convertWordToString(uint16_t word) {
-    string s;
-
-    stringstream ss;
-    ss << hex << word;
-    s = ss.str();
-
-    return s;
-}
-
-//You can cast it to kill the upper-byte of the 16-bit variable:
-//uint16_t A = 120;
-//uint8_t B;
-//
-//B = (uint8_t)A; // Get lower byte of 16-bit var
-//If you need the upper byte, shift and cast instead:
-//uint16_t A = 120;
-//uint8_t B;
-//
-//B = (uint8_t)(A >> 8); // Get upper byte of 16-bit var
-uint8_t Assembler::getLowByte(uint16_t word) {
-    uint8_t byte;
-
-    byte = (uint8_t)word;
-
-    return byte;
-}
-
-uint8_t Assembler::getHighByte(uint16_t word) {
-    uint8_t byte;
-
-    byte = (uint8_t)(word >> 8);
-
-    return byte;
 }
 
 

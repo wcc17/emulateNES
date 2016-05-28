@@ -84,6 +84,7 @@ class Assembler {
 public:
     Assembler(CPU* cpu);
     void readFile(string filename);
+    Util util;
 
 private:
     void storeProgramInMemory(string instruction, string argument, uint16_t &programLocation);
@@ -111,10 +112,6 @@ private:
     if so, the addressing mode will be relative. Even though zeropage and relative behave almost exactly alike, this is better
     for clarity. **/
     bool isBranchInstruction(string instruction);
-
-    string convertWordToString(uint16_t word);
-    uint8_t getLowByte(uint16_t word);
-    uint8_t getHighByte(uint16_t word);
 
 protected:
 

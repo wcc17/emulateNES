@@ -47,6 +47,16 @@ uint16_t Util::convertStringToWord(string argument) {
     return x;
 }
 
+string Util::convertWordToString(uint16_t word) {
+    string s;
+
+    stringstream ss;
+    ss << hex << word;
+    s = ss.str();
+
+    return s;
+}
+
 uint16_t Util::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
 
     //This works because:
@@ -56,16 +66,194 @@ uint16_t Util::getWordFromBytes(uint8_t byteLow, uint8_t byteHigh) {
     return word;
 }
 
+//You can cast it to kill the upper-byte of the 16-bit variable:
+//uint16_t A = 120;
+//uint8_t B;
+//
+//B = (uint8_t)A; // Get lower byte of 16-bit var
+//If you need the upper byte, shift and cast instead:
+//uint16_t A = 120;
+//uint8_t B;
+//
+//B = (uint8_t)(A >> 8); // Get upper byte of 16-bit var
+uint8_t Util::getLowByte(uint16_t word) {
+    uint8_t byte;
+
+    byte = (uint8_t)word;
+
+    return byte;
+}
+
+uint8_t Util::getHighByte(uint16_t word) {
+    uint8_t byte;
+
+    byte = (uint8_t)(word >> 8);
+
+    return byte;
+}
+
+//implied instructions
+void Util::printStatus_Implied(uint16_t programCounter, uint8_t opcode, std::string instruction,
+                                   uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles) {
+    printWord(programCounter);
+    cout << "   ";
+
+    printByte(opcode);
+    cout << "          ";
+
+    cout << instruction;
+    cout << "                                         ";
+
+    cout << "A:";
+    printByte(accumulator);
+    cout << " ";
+
+    cout << "X:";
+    printByte(xIndex);
+    cout << " ";
+
+    cout << "Y:";
+    printByte(yIndex);
+    cout << " ";
+
+    cout << "P:";
+    printByte(flags);
+    cout << " ";
+
+    cout << "SP:";
+    printByte(stackPointer);
+    cout << " ";
+
+    cout << "Cycles:" << cycles << " " << endl;
+}
+
+//accumulator instructions
+void Util::printStatus_Accumulator(uint16_t programCounter, uint8_t opcode, std::string instruction,
+                       uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles) {
+    printWord(programCounter);
+    cout << "   ";
+
+    printByte(opcode);
+    cout << " ";
+
+    printExecutedAccumulatorInstruction(instruction);
+    cout << "     ";
+
+    cout << "A:";
+    printByte(accumulator);
+    cout << " ";
+
+    cout << "X:";
+    printByte(xIndex);
+    cout << " ";
+
+    cout << "Y:";
+    printByte(yIndex);
+    cout << " ";
+
+    cout << "P:";
+    printByte(flags);
+    cout << " ";
+
+    cout << "SP:";
+    printByte(stackPointer);
+    cout << " ";
+
+    cout << "Cycles:" << cycles << " " << endl;
+}
+
+//instructions with one argument
+void Util::printStatus(uint16_t programCounter, uint8_t opcode, uint8_t argument, std::string instruction,
+                       uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles) {
+    printWord(programCounter);
+    cout << "   ";
+
+    printByte(opcode);
+    cout << " ";
+
+    printByte(argument);
+    cout << "      ";
+
+    printExecutedByteInstruction(instruction, argument);
+    cout << "                                     ";
+
+    cout << "A:";
+    printByte(accumulator);
+    cout << " ";
+
+    cout << "X:";
+    printByte(xIndex);
+    cout << " ";
+
+    cout << "Y:";
+    printByte(yIndex);
+    cout << " ";
+
+    cout << "P:";
+    printByte(flags);
+    cout << " ";
+
+    cout << "SP:";
+    printByte(stackPointer);
+    cout << " ";
+
+    cout << "Cycles:" << cycles << " " << endl;
+}
+
+//instructions with two arguments
+void Util::printStatus(uint16_t programCounter, uint8_t opcode, uint16_t argument, std::string instruction,
+                       uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles) {
+    uint8_t arg1 = getHighByte(argument);
+    uint8_t arg2 = getLowByte(argument);
+
+    printWord(programCounter);
+    cout << "   ";
+
+    printByte(opcode);
+    cout << " ";
+
+    printByte(arg1);
+    cout << " ";
+
+    printByte(arg2);
+    cout << "  ";
+
+    printExecutedWordInstruction(instruction, argument);
+    cout << "                          ";
+
+    cout << "A:";
+    printByte(accumulator);
+    cout << " ";
+
+    cout << "X:";
+    printByte(xIndex);
+    cout << " ";
+
+    cout << "Y:";
+    printByte(yIndex);
+    cout << " ";
+
+    cout << "P:";
+    printByte(flags);
+    cout << " ";
+
+    cout << "SP:";
+    printByte(stackPointer);
+    cout << " ";
+
+    cout << "Cycles:" << cycles << " " << endl;
+}
+
 void Util::printExecutedByteInstruction(string instruction, uint8_t argument) {
     cout << instruction << " ";
     printByte(argument);
-    cout << endl;
+//    cout << endl;
 }
 
 void Util::printExecutedWordInstruction(string instruction, uint16_t argument) {
     cout << instruction << " ";
     printWord(argument);
-    cout << endl;
+//    cout << endl;
 }
 
 void Util::printExecutedAccumulatorInstruction(std::string instruction) {

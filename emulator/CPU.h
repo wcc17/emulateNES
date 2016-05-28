@@ -42,6 +42,17 @@ public:
     int cycleGoal = 0;
     bool pageBoundaryCrossed = false;
 
+    //DEBUG STUFF
+    uint8_t opcode;
+    std::string instructionString;
+    uint8_t arg_8;
+    uint16_t arg_16;
+    bool impliedAddressingMode = false;
+    bool accumulatorAddressingMode = false;
+    bool addressingMode_8 = false;
+    bool addressingMode_16 = false;
+    uint16_t oldPC;
+
     CPU();
     void execute();
     void executeOpCode();
@@ -259,6 +270,7 @@ private:
     uint8_t getProcessorFlagsAsByte();
     void setProcessorFlagsFromByte(uint8_t processorStatus);
 
+    void retrieveImpliedInstruction(std::string instructionString);
     void retrieveAccumulatorInstruction(std::string instructionString);
     uint8_t retrieveRelativeInstruction(std::string instructionString);
     uint8_t retrieveImmediateInstruction(std::string instructionString);

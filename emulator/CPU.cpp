@@ -4,7 +4,6 @@
 
 #include "CPU.h"
 #include "opcodes.h"
-#include <bitset>
 
 using namespace std;
 
@@ -62,7 +61,7 @@ void CPU::execute() {
 void CPU::executeOpCode() {
 
     oldPC = programCounter;
-    opcode = memory[programCounter++];
+    opcode = readMemoryLocation(programCounter++);
     //the cases have {} symbols to create a local scope within the case to declare local variables
     switch(opcode) {
 
@@ -584,20 +583,20 @@ void CPU::executeOpCode() {
             break;
     }
 
-    if(this->impliedAddressingMode) {
-        util.printStatus_Implied(oldPC, opcode, instructionString, accumulator, xIndex, yIndex,
-                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
-    }
-    else if(this->accumulatorAddressingMode) {
-        util.printStatus_Accumulator(oldPC, opcode, instructionString, accumulator, xIndex, yIndex,
-                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
-    } else if(this->addressingMode_8) {
-        util.printStatus(oldPC, opcode, arg_8, instructionString, accumulator, xIndex, yIndex,
-                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
-    } else if(this->addressingMode_16) {
-        util.printStatus(oldPC, opcode, arg_16, instructionString, accumulator, xIndex, yIndex,
-                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
-    }
+//    if(this->impliedAddressingMode) {
+//        util.printStatus_Implied(oldPC, opcode, instructionString, accumulator, xIndex, yIndex,
+//                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+//    }
+//    else if(this->accumulatorAddressingMode) {
+//        util.printStatus_Accumulator(oldPC, opcode, instructionString, accumulator, xIndex, yIndex,
+//                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+//    } else if(this->addressingMode_8) {
+//        util.printStatus(oldPC, opcode, arg_8, instructionString, accumulator, xIndex, yIndex,
+//                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+//    } else if(this->addressingMode_16) {
+//        util.printStatus(oldPC, opcode, arg_16, instructionString, accumulator, xIndex, yIndex,
+//                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+//    }
 }
 
 void CPU::addWithCarry(uint8_t argument) {
@@ -658,28 +657,28 @@ void CPU::addWithCarry_Immediate() {
 }
 void CPU::addWithCarry_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("ADC_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     addWithCarry(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::addWithCarry_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("ADC_ZEROPAGEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     addWithCarry(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::addWithCarry_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("ADC_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     addWithCarry(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::addWithCarry_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("ADC_ABSOLUTEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     addWithCarry(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -690,7 +689,7 @@ void CPU::addWithCarry_AbsoluteX() {
 }
 void CPU::addWithCarry_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("ADC_ABSOLUTEY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     addWithCarry(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -701,14 +700,14 @@ void CPU::addWithCarry_AbsoluteY() {
 }
 void CPU::addWithCarry_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("ADC_INDEXED_INDIRECTX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     addWithCarry(memoryValue);
 
     cyclesToExecute += 6;
 }
 void CPU::addWithCarry_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("ADC_INDIRECT_INDEXEDY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     addWithCarry(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -733,28 +732,28 @@ void CPU::andWithAccumulator_Immediate() {
 }
 void CPU::andWithAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("AND_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     andWithAccumulator(memoryValue);
 
     cyclesToExecute += 2;
 }
 void CPU::andWithAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("AND_ZEROPAGEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     andWithAccumulator(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::andWithAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteXInstruction("AND_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     andWithAccumulator(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::andWithAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("AND_ABSOLUTEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     andWithAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -765,7 +764,7 @@ void CPU::andWithAccumulator_AbsoluteX() {
 }
 void CPU::andWithAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("AND_ABSOLUTEY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     andWithAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -776,14 +775,14 @@ void CPU::andWithAccumulator_AbsoluteY() {
 }
 void CPU::andWithAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("AND_INDEXED_INDIRECTX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     andWithAccumulator(memoryValue);
 
     cyclesToExecute += 6;
 }
 void CPU::andWithAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("AND_INDIRECT_INDEXEDY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     andWithAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -802,12 +801,12 @@ void CPU::arithmeticShiftLeft(uint16_t argument, bool useAccumulator) {
         accumulator = accumulator << 1;
         finalValue = accumulator;
     } else {
-        uint8_t memoryValue = memory[argument];
+        uint8_t memoryValue = readMemoryLocation(argument);
         initialValue = memoryValue;
 
         memoryValue = memoryValue << 1;
-        memory[argument] = memoryValue;
-        finalValue = memory[argument];
+        writeMemoryLocation(argument, memoryValue);
+        finalValue = readMemoryLocation(argument);
     }
 
     //NOTE: ASL AFFECTS SIGN, ZERO, AND CARRY FLAGS
@@ -859,14 +858,14 @@ void CPU::bitTest(uint8_t argument) {
 }
 void CPU::bitTest_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("BIT_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     bitTest(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::bitTest_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("BIT_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     bitTest(memoryValue);
 
     cyclesToExecute += 4;
@@ -1065,28 +1064,28 @@ void CPU::compareAccumulator_Immediate() {
 }
 void CPU::compareAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("CMP_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareAccumulator(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::compareAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("CMP_ZEROPAGEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareAccumulator(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::compareAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("CMP_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareAccumulator(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::compareAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("CMP_ABSOLUTEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1097,7 +1096,7 @@ void CPU::compareAccumulator_AbsoluteX() {
 }
 void CPU::compareAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("CMP_ABSOLUTEY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1108,14 +1107,14 @@ void CPU::compareAccumulator_AbsoluteY() {
 }
 void CPU::compareAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("CMP_INDEXED_INDIRECTX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareAccumulator(memoryValue);
 
     cyclesToExecute += 6;
 }
 void CPU::compareAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("CMP_INDIRECT_INDEXEDY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1140,14 +1139,14 @@ void CPU::compareX_Immediate() {
 }
 void CPU::compareX_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("CPX_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareX(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::compareX_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("CPX_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareX(memoryValue);
 
     cyclesToExecute += 4;
@@ -1168,14 +1167,14 @@ void CPU::compareY_Immediate() {
 }
 void CPU::compareY_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("CPY_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareY(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::compareY_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("CPY_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     compareY(memoryValue);
 
     cyclesToExecute += 4;
@@ -1184,8 +1183,8 @@ void CPU::compareY_Absolute() {
 void CPU::decrementMemory(uint16_t argument) {
     memory[argument]--;
 
-    if(util.isNegativeByte(memory[argument]) == false) { flags.negative = 0; } else { flags.negative = 1; }
-    if(memory[argument] == 0) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(readMemoryLocation(argument)) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(readMemoryLocation(argument) == 0) { flags.zero = 1; } else { flags.zero = 0; }
 }
 void CPU::decrementMemory_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("DEC_ZEROPAGE");
@@ -1227,28 +1226,28 @@ void CPU::exclusiveOrAccumulator_Immediate() {
 }
 void CPU::exclusiveOrAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("EOR_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     exclusiveOrAccumulator(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::exclusiveOrAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("EOR_ZEROPAGEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     exclusiveOrAccumulator(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::exclusiveOrAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("EOR_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     exclusiveOrAccumulator(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::exclusiveOrAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("EOR_ABSOLUTEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     exclusiveOrAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1259,7 +1258,7 @@ void CPU::exclusiveOrAccumulator_AbsoluteX() {
 }
 void CPU::exclusiveOrAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("EOR_ABSOLUTEY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     exclusiveOrAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1270,14 +1269,14 @@ void CPU::exclusiveOrAccumulator_AbsoluteY() {
 }
 void CPU::exclusiveOrAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("EOR_INDEXED_INDIRECTX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     exclusiveOrAccumulator(memoryValue);
 
     cyclesToExecute += 6;
 }
 void CPU::exclusiveOrAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("EOR_INDIRECT_INDEXEDY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     exclusiveOrAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1290,8 +1289,8 @@ void CPU::exclusiveOrAccumulator_IndirectIndexedY() {
 void CPU::incrementMemory(uint16_t argument) {
     memory[argument]++;
 
-    if(util.isNegativeByte(memory[argument]) == false) { flags.negative = 0; } else { flags.negative = 1; }
-    if(memory[argument] == 0) { flags.zero = 1; } else { flags.zero = 0; }
+    if(util.isNegativeByte(readMemoryLocation(argument)) == false) { flags.negative = 0; } else { flags.negative = 1; }
+    if(readMemoryLocation(argument) == 0) { flags.zero = 1; } else { flags.zero = 0; }
 }
 void CPU::incrementMemory_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("INC_ZEROPAGE");
@@ -1476,8 +1475,8 @@ void CPU::jumpToSubroutine_Absolute() {
     uint8_t highByte = h >> 8;
     uint8_t lowByte = t & 0xFF;
 
-    memory[256 + (stackPointer--)] = highByte;
-    memory[256 + (stackPointer--)] = lowByte;
+    pushByte(highByte);
+    pushByte(lowByte);
 
     programCounter = argument;
 
@@ -1499,28 +1498,28 @@ void CPU::loadAccumulator_Immediate() {
 }
 void CPU::loadAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("LDA_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadAccumulator(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::loadAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("LDA_ZEROPAGEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadAccumulator(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::loadAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("LDA_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadAccumulator(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::loadAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("LDA_ABSOLUTEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1531,7 +1530,7 @@ void CPU::loadAccumulator_AbsoluteX() {
 }
 void CPU::loadAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("LDA_ABSOLUTEY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1542,14 +1541,14 @@ void CPU::loadAccumulator_AbsoluteY() {
 }
 void CPU::loadAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("LDA_INDEXED_INDIRECTX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadAccumulator(memoryValue);
 
     cyclesToExecute += 6;
 }
 void CPU::loadAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("LDA_INDIRECT_INDEXEDY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1574,28 +1573,28 @@ void CPU::loadXIndex_Immediate() {
 }
 void CPU::loadXIndex_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("LDX_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadXIndex(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::loadXIndex_ZeroPageY() {
     uint8_t argument = retrieveZeroPageYInstruction("LDX_ZEROPAGEY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadXIndex(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::loadXIndex_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("LDX_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadXIndex(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::loadXIndex_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("LDX_ABSOLUTEY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadXIndex(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1620,28 +1619,28 @@ void CPU::loadYIndex_Immediate() {
 }
 void CPU::loadYIndex_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("LDY_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadYIndex(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::loadYIndex_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("LDY_ZEROPAGEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadYIndex(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::loadYIndex_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("LDY_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadYIndex(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::loadYIndex_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("LDY_ABSOLUTEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     loadYIndex(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1660,13 +1659,12 @@ void CPU::logicalShiftRight(uint16_t argument, bool useAccumulator) {
         accumulator = accumulator >> 1;
         finalValue = accumulator;
     } else {
-        uint8_t memoryValue = memory[argument];
+        uint8_t memoryValue = readMemoryLocation(argument);
         initialValue = memoryValue;
 
-        //TODO: THIS NEEDS TO BE TESTED AGAIN
         memoryValue = memoryValue >> 1;
-        memory[argument] = memoryValue;
-        finalValue = memory[argument];
+        writeMemoryLocation(argument, memoryValue);
+        finalValue = readMemoryLocation(argument);
     }
 
     //NOTE: LSR AFFECTS SIGN, ZERO, AND CARRY FLAGS
@@ -1723,8 +1721,8 @@ void CPU::noOperation() {
 void CPU::returnFromSubroutine() {
     retrieveImpliedInstruction("RTS");
 
-    uint8_t lowByte = memory[256 + (++stackPointer)];
-    uint8_t highByte = memory[256 + (++stackPointer)];
+    uint8_t lowByte = pullByte();
+    uint8_t highByte = pullByte();
 
     uint16_t newProgramCounter = util.getWordFromBytes(lowByte, highByte);
     newProgramCounter++;
@@ -1748,28 +1746,28 @@ void CPU::orWithAccumulator_Immediate() {
 }
 void CPU::orWithAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("ORA_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     orWithAccumulator(memoryValue);
 
     cyclesToExecute += 2;
 }
 void CPU::orWithAccumulator_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("ORA_ZEROPAGEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     orWithAccumulator(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::orWithAccumulator_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("ORA_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     orWithAccumulator(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::orWithAccumulator_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("ORA_ABSOLUTEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     orWithAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1780,7 +1778,7 @@ void CPU::orWithAccumulator_AbsoluteX() {
 }
 void CPU::orWithAccumulator_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("ORA_ABSOLUTEY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     orWithAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1791,14 +1789,14 @@ void CPU::orWithAccumulator_AbsoluteY() {
 }
 void CPU::orWithAccumulator_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("ORA_INDEXED_INDIRECTX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     orWithAccumulator(memoryValue);
 
     cyclesToExecute += 6;
 }
 void CPU::orWithAccumulator_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("ORA_INDIRECT_INDEXEDY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     orWithAccumulator(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -1820,7 +1818,7 @@ void CPU::rotateLeft(uint16_t argument, bool useAccumulator) {
     if(useAccumulator) {
         initialValue = accumulator;
     } else {
-        initialValue = memory[argument];
+        initialValue = readMemoryLocation(argument);
     }
 
     //if the 7th bit is set (if value is negative) set carry to 1, otherwise set to 0
@@ -1846,7 +1844,7 @@ void CPU::rotateLeft(uint16_t argument, bool useAccumulator) {
     if(useAccumulator) {
         accumulator = finalValue;
     } else {
-        memory[argument] = finalValue;
+        writeMemoryLocation(argument, finalValue);
     }
 
 }
@@ -1894,7 +1892,7 @@ void CPU::rotateRight(uint16_t argument, bool useAccumulator) {
     if(useAccumulator) {
         initialValue = accumulator;
     } else {
-        initialValue = memory[argument];
+        initialValue = readMemoryLocation(argument);
     }
 
     //if the least significant bit is set, set carry to 1 later, or 0 if otherwise
@@ -1924,7 +1922,7 @@ void CPU::rotateRight(uint16_t argument, bool useAccumulator) {
     if(useAccumulator) {
         accumulator = finalValue;
     } else {
-        memory[argument] = finalValue;
+        writeMemoryLocation(argument, finalValue);
     }
 }
 void CPU::rotateRight_Accumulator() {
@@ -1960,7 +1958,7 @@ void CPU::rotateRight_AbsoluteX() {
 
 void CPU::storeAccumulator(uint16_t argument) {
     //NOTE: STA affects no flags
-    memory[argument] = accumulator;
+    writeMemoryLocation(argument, accumulator);
 }
 void CPU::storeAccumulator_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("STA_ZEROPAGE");
@@ -2030,7 +2028,7 @@ void CPU::pushAccumulator() {
 
     //stack pointer = 0xff but actually lives at 0x01ff
     //0xff + 256(0x0100) = 0x1ff
-    memory[256 + (stackPointer--)] = accumulator;
+    pushByte(accumulator);
 
     //NOTE: PHA AFFECTS NO FLAGS
 
@@ -2039,7 +2037,7 @@ void CPU::pushAccumulator() {
 void CPU::pullAccumulator() {
     retrieveImpliedInstruction("PLA");
 
-    accumulator = memory[256 + (++stackPointer)];
+    accumulator = pullByte();
 
     if(util.isNegativeByte(accumulator)) { flags.negative = 1; } else { flags.negative = 0; }
     if(accumulator == ZERO) { flags.zero = 1; } else { flags.zero = 0; }
@@ -2051,7 +2049,7 @@ void CPU::pushProcessorStatus() {
 
     //the binary value for the flags need to be pushed onto stack
     uint8_t processorStatus = getProcessorFlagsAsByte();
-    memory[256 + (stackPointer--)] = processorStatus;
+    pushByte(processorStatus);
 
     //NOTE: PHP AFFECTS NO FLAGS, BUT PLP DOES
 
@@ -2060,7 +2058,7 @@ void CPU::pushProcessorStatus() {
 void CPU::pullProcessorStatus() {
     retrieveImpliedInstruction("PLP");
 
-    uint8_t processorStatus = memory[256 + (++stackPointer)];
+    uint8_t processorStatus = pullByte();
     setProcessorFlagsFromByte(processorStatus);
 
     //PLP AFFECTS ALL FLAGS, BUT THEY ARE SET IN setProcessorFlagsFromByte(uint8_t arg)
@@ -2070,7 +2068,7 @@ void CPU::pullProcessorStatus() {
 
 void CPU::storeXRegister(uint16_t argument) {
     //NOTE: STX affects no flags
-    memory[argument] = xIndex;
+    writeMemoryLocation(argument, xIndex);
 }
 void CPU::storeXRegister_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("STX_ZEROPAGE");
@@ -2093,7 +2091,7 @@ void CPU::storeXRegister_Absolute() {
 
 void CPU::storeYRegister(uint16_t argument) {
     //NOTE: STY affects no flags
-    memory[argument] = yIndex;
+    writeMemoryLocation(argument, yIndex);
 }
 void CPU::storeYRegister_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("STY_ZEROPAGE");
@@ -2138,28 +2136,28 @@ void CPU::subtractWithBorrow_Immediate() {
 }
 void CPU::subtractWithBorrow_ZeroPage() {
     uint8_t argument = retrieveZeroPageInstruction("SBC_ZEROPAGE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     subtractWithBorrow(memoryValue);
 
     cyclesToExecute += 3;
 }
 void CPU::subtractWithBorrow_ZeroPageX() {
     uint8_t argument = retrieveZeroPageXInstruction("SBC_ZEROPAGEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     subtractWithBorrow(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::subtractWithBorrow_Absolute() {
     uint16_t argument = retrieveAbsoluteInstruction("SBC_ABSOLUTE");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     subtractWithBorrow(memoryValue);
 
     cyclesToExecute += 4;
 }
 void CPU::subtractWithBorrow_AbsoluteX() {
     uint16_t argument = retrieveAbsoluteXInstruction("SBC_ABSOLUTEX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     subtractWithBorrow(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -2170,7 +2168,7 @@ void CPU::subtractWithBorrow_AbsoluteX() {
 }
 void CPU::subtractWithBorrow_AbsoluteY() {
     uint16_t argument = retrieveAbsoluteYInstruction("SBC_ABSOLUTEY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     subtractWithBorrow(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -2181,14 +2179,14 @@ void CPU::subtractWithBorrow_AbsoluteY() {
 }
 void CPU::subtractWithBorrow_IndexedIndirectX() {
     uint16_t argument = retrieveIndexedIndirectXInstruction("SBC_INDEXED_INDIRECTX");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     subtractWithBorrow(memoryValue);
 
     cyclesToExecute += 6;
 }
 void CPU::subtractWithBorrow_IndirectIndexedY() {
     uint16_t argument = retrieveIndirectIndexedYInstruction("SBC_INDIRECT_INDEXEDY");
-    uint8_t memoryValue = memory[argument];
+    uint8_t memoryValue = readMemoryLocation(argument);
     subtractWithBorrow(memoryValue);
 
     if(pageBoundaryCrossed) {
@@ -2215,7 +2213,7 @@ void CPU::retrieveAccumulatorInstruction(std::string instructionString) {
     this->addressingMode_16 = false;
 }
 uint8_t CPU::retrieveRelativeInstruction(string instructionString) {
-    uint8_t argument = memory[programCounter++];
+    uint8_t argument = readMemoryLocation(programCounter++);
 
     //DEBUG INFO
     this->instructionString = instructionString;
@@ -2228,7 +2226,7 @@ uint8_t CPU::retrieveRelativeInstruction(string instructionString) {
     return argument;
 }
 uint8_t CPU::retrieveImmediateInstruction(string instructionString) {
-    uint8_t argument = memory[programCounter++];
+    uint8_t argument = readMemoryLocation(programCounter++);
 
     //DEBUG INFO
     this->instructionString = instructionString;
@@ -2241,7 +2239,7 @@ uint8_t CPU::retrieveImmediateInstruction(string instructionString) {
     return argument;
 }
 uint8_t CPU::retrieveZeroPageInstruction(string instructionString) {
-    uint8_t argument = memory[programCounter++];
+    uint8_t argument = readMemoryLocation(programCounter++);
 
     //DEBUG INFO
     this->instructionString = instructionString;
@@ -2254,7 +2252,7 @@ uint8_t CPU::retrieveZeroPageInstruction(string instructionString) {
     return argument;
 }
 uint8_t CPU::retrieveZeroPageXInstruction(string instructionString) {
-    uint8_t argument = memory[programCounter++];
+    uint8_t argument = readMemoryLocation(programCounter++);
     argument += xIndex;
 
     //DEBUG INFO
@@ -2268,7 +2266,7 @@ uint8_t CPU::retrieveZeroPageXInstruction(string instructionString) {
     return argument;
 }
 uint8_t CPU::retrieveZeroPageYInstruction(string instructionString) {
-    uint8_t argument = memory[programCounter++];
+    uint8_t argument = readMemoryLocation(programCounter++);
     argument += yIndex;
 
     //DEBUG INFO
@@ -2282,8 +2280,8 @@ uint8_t CPU::retrieveZeroPageYInstruction(string instructionString) {
     return argument;
 }
 uint16_t CPU::retrieveAbsoluteInstruction(string instructionString) {
-    uint8_t byteLow = memory[programCounter++];
-    uint8_t byteHigh = memory[programCounter++];
+    uint8_t byteLow = readMemoryLocation(programCounter++);
+    uint8_t byteHigh = readMemoryLocation(programCounter++);
     uint16_t argument;
 
     argument = util.getWordFromBytes(byteLow, byteHigh);
@@ -2300,8 +2298,8 @@ uint16_t CPU::retrieveAbsoluteInstruction(string instructionString) {
 }
 uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
     uint16_t startPage;
-    uint8_t byteLow = memory[programCounter++];
-    uint8_t byteHigh = memory[programCounter++];
+    uint8_t byteLow = readMemoryLocation(programCounter++);
+    uint8_t byteHigh = readMemoryLocation(programCounter++);
     uint16_t argument;
 
     argument = util.getWordFromBytes(byteLow, byteHigh);
@@ -2325,8 +2323,8 @@ uint16_t CPU::retrieveAbsoluteXInstruction(string instructionString) {
 }
 uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
     uint16_t startPage;
-    uint8_t byteLow = memory[programCounter++];
-    uint8_t byteHigh = memory[programCounter++];
+    uint8_t byteLow = readMemoryLocation(programCounter++);
+    uint8_t byteHigh = readMemoryLocation(programCounter++);
     uint16_t argument;
 
     argument = util.getWordFromBytes(byteLow, byteHigh);
@@ -2349,12 +2347,12 @@ uint16_t CPU::retrieveAbsoluteYInstruction(string instructionString) {
     return argument;
 }
 uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
-    uint8_t zeroPageLocation = memory[programCounter++];
+    uint8_t zeroPageLocation = readMemoryLocation(programCounter++);
 
     zeroPageLocation += xIndex;
 
-    uint8_t lowByte = memory[zeroPageLocation++];
-    uint8_t highByte = memory[zeroPageLocation];
+    uint8_t lowByte = readMemoryLocation(zeroPageLocation++);
+    uint8_t highByte = readMemoryLocation(zeroPageLocation);
 
     //get the 16 bit value at zeroPageLocation in memory
     uint16_t argument = util.getWordFromBytes(lowByte, highByte);
@@ -2371,10 +2369,10 @@ uint16_t CPU::retrieveIndexedIndirectXInstruction(string instructionString) {
 }
 uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
     uint16_t startPage;
-    uint8_t zeroPageLocation = memory[programCounter++];
+    uint8_t zeroPageLocation = readMemoryLocation(programCounter++);
 
-    uint8_t lowByte = memory[zeroPageLocation++];
-    uint8_t highByte = memory[zeroPageLocation];
+    uint8_t lowByte = readMemoryLocation(zeroPageLocation++);
+    uint8_t highByte = readMemoryLocation(zeroPageLocation);
 
     uint16_t argument = util.getWordFromBytes(lowByte, highByte);
     startPage = argument & 0xFF00; //get the high byte (the page)
@@ -2396,13 +2394,13 @@ uint16_t CPU::retrieveIndirectIndexedYInstruction(string instructionString) {
     return argument;
 }
 uint16_t CPU::retrieveIndirectInstruction(string instructionString) {
-    uint8_t indirectByteLow = memory[programCounter++];
-    uint8_t indirectByteHigh = memory[programCounter++];
+    uint8_t indirectByteLow = readMemoryLocation(programCounter++);
+    uint8_t indirectByteHigh = readMemoryLocation(programCounter++);
     uint16_t indirectAddress;
 
     indirectAddress = util.getWordFromBytes(indirectByteLow, indirectByteHigh);
-    uint8_t byteLow = memory[indirectAddress++];
-    uint8_t byteHigh = memory[indirectAddress];
+    uint8_t byteLow = readMemoryLocation(indirectAddress++);;
+    uint8_t byteHigh = readMemoryLocation(indirectAddress);;
     uint16_t argument;
 
     argument = util.getWordFromBytes(byteLow, byteHigh);
@@ -2416,16 +2414,6 @@ uint16_t CPU::retrieveIndirectInstruction(string instructionString) {
     this->addressingMode_16 = true;
 
     return argument;
-}
-
-//TODO: THESE NEED TO BE CHANGED TO REFLECT MEMORY LOCATIONS THAT MIRROR OTHER MEMORY LOCATIONS
-//TODO: ALSO THESE NEED TO BE USED WHEREVER MEMORY IS BEING AFFECTED BY ANYTHING WHATSOEVER
-void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
-    memory[location] = byte;
-}
-void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
-    memory[location++] = lowByte;
-    memory[location] = highByte;
 }
 
 uint8_t CPU::getProcessorFlagsAsByte() {
@@ -2454,4 +2442,52 @@ void CPU::setProcessorFlagsFromByte(uint8_t processorStatus) {
     if((processorStatus & 4) != 0) { flags.interrupt = 1; } else { flags.interrupt = 0; }
     if((processorStatus & 2) != 0) { flags.zero = 1; } else { flags.zero = 0; }
     if((processorStatus & 1) != 0) { flags.carry = 1; } else { flags.carry = 0; }
+}
+
+//TODO: REWRITE THESE USING NES 6502 BEHAVIOR, WITH MEMORY MIRRORING AND ALL THAT
+void CPU::writeMemoryLocation(uint16_t address, uint8_t value) {
+//    memory[address] = value;
+    writeMemoryLocationDefault(address, value);
+}
+uint8_t CPU::readMemoryLocation(uint16_t address) {
+//    return memory[address];
+    return readMemoryLocationDefault(address);
+}
+
+//DEFAULT 6502 BEHAVIOR
+void CPU::writeMemoryLocationDefault(uint16_t address, uint8_t value) {
+    memory[address] = value;
+}
+uint8_t CPU::readMemoryLocationDefault(uint16_t address) {
+    return memory[address];
+}
+
+//stack utility functions
+void CPU::pushByte(uint8_t byteToPush) {
+    writeMemoryLocation(BASE_STACK_LOCATION + stackPointer--, byteToPush);
+}
+uint8_t CPU::pullByte() {
+    return (readMemoryLocation(BASE_STACK_LOCATION + (++stackPointer)));
+}
+void CPU::pushWord(uint16_t wordToPush) {
+    writeMemoryLocation(BASE_STACK_LOCATION + stackPointer, (wordToPush >> 8) & 0xFF);
+    writeMemoryLocation(BASE_STACK_LOCATION + ((stackPointer - 1) & 0xFF), wordToPush & 0xFF);
+    stackPointer -= 2;
+}
+uint16_t CPU::pullWord() {
+    uint16_t temp16;
+    temp16 = readMemoryLocation(BASE_STACK_LOCATION + ((stackPointer + 1) & 0xFF))
+                | ((uint16_t)readMemoryLocation(BASE_STACK_LOCATION + ((stackPointer + 2) & 0xFF)) << 8);
+    stackPointer += 2;
+    return(temp16);
+}
+
+
+//ONLY used by the assembler, won't use for instructions
+void CPU::storeByteInMemory(uint8_t byte, uint16_t location) {
+    writeMemoryLocation(location, byte);
+}
+void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location) {
+    writeMemoryLocation(location++, lowByte);
+    writeMemoryLocation(location, highByte);
 }

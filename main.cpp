@@ -8,6 +8,7 @@ using namespace std;
 
 void printMemory(uint16_t start, uint16_t end, CPU* cpu) {
     int x = 0;
+    printf("%04x:  ", start);
 
     //printf("%04x:  ", start);
     for(int i = start; i <= end; i++) {
@@ -16,7 +17,7 @@ void printMemory(uint16_t start, uint16_t end, CPU* cpu) {
         x++;
         if(x % 16 == 0) {
             printf("\n");
-            //printf("%04x:  ", i);
+            printf("%04x:  ", i+1);
         }
 
     }
@@ -104,42 +105,42 @@ int main() {
 
     CPU *cpu = new CPU();
 
-//    Assembler assembler(cpu);
-//    string fileName = "sample_programs/testSBC.asm";
-//    assembler.readFile(fileName.c_str());
+    Assembler assembler(cpu);
+    string fileName = "sample_programs/testSubroutines.asm";
+    assembler.readFile(fileName.c_str());
 
-    //TODO: VERY UNFINISHED
-    string fileName = "sample_programs/nestest.nes";
-    readBinaryFile(cpu, fileName);
+//    //TODO: VERY UNFINISHED
+//    string fileName = "sample_programs/nestest.nes";
+//    readBinaryFile(cpu, fileName);
 
-//    printMemory(0x0600, 0x0fff, cpu);
+    printMemory(0x0500, 0x05FF, cpu);
 
     bool debug = true;
-//    cpu->programCounter = cpu->programStart;
-    cpu->programCounter = 0xC000;
-    int i = 0;
-    while (i < 100) {
-//    while(cpu->memory[cpu->programCounter] != 0) {
+    cpu->programCounter = cpu->programStart;
+//    cpu->programCounter = 0xC000;
+//    int i = 0;
+//    while (i < 100) {
+    while(cpu->memory[cpu->programCounter] != 0) {
 
         if(debug) {
             //this forces the user to press enter to step through the code
-//            cin.ignore();
+            cin.ignore();
 
-//            printDebugInformation(cpu);
+            printDebugInformation(cpu);
         }
 
         cpu->execute();
-        i++;
+//        i++;
     }
 
     cpu->programCounter++;
 
     //print one last time to see the results of the last instruction
 //    cout << endl;
-//    printDebugInformation(cpu);
+    printDebugInformation(cpu);
 //    cout << endl << endl;
 
-//    printMemory(0x0000, 0x02FF, cpu);
+    printMemory(0x0500, 0x05FF, cpu);
 
     return 0;
 }

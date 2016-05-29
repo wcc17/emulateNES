@@ -15,6 +15,7 @@ class CPU {
 public:
     //TODO: maybe move this to Util?
     static const uint8_t ZERO = 0x00;
+    static const uint16_t BASE_STACK_LOCATION = 0x100;
 
     uint8_t* memory;
     uint16_t programCounter;
@@ -59,8 +60,15 @@ public:
     void storeByteInMemory(uint8_t byte, uint16_t location);
     void storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location);
 
-//    extern uint8_t readMemoryLocation(uint16_t address);
-//    extern void writeMemoryLocation(uint16_t address, uint8_t value);
+    void writeMemoryLocation(uint16_t address, uint8_t value);
+    uint8_t readMemoryLocation(uint16_t address);
+    void writeMemoryLocationDefault(uint16_t address, uint8_t value);
+    uint8_t readMemoryLocationDefault(uint16_t address);
+
+    void pushWord(uint16_t wordToPush);
+    void pushByte(uint8_t byteToPush);
+    uint16_t pullWord();
+    uint8_t pullByte();
 
     Util util;
 

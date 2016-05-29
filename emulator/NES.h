@@ -6,7 +6,13 @@
 #define EMULATE6502_NES_H
 
 
+#include "CPU.h"
+
 class NES {
+
+public:
+
+    NES(CPU* cpu);
 
 };
 

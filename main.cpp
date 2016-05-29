@@ -126,7 +126,7 @@ int main() {
             //this forces the user to press enter to step through the code
             cin.ignore();
 
-            printDebugInformation(cpu);
+//            printDebugInformation(cpu);
         }
 
         cpu->execute();
@@ -137,10 +137,15 @@ int main() {
 
     //print one last time to see the results of the last instruction
 //    cout << endl;
-    printDebugInformation(cpu);
+//    printDebugInformation(cpu);
 //    cout << endl << endl;
 
+    cout << endl;
+    cout << "Final PC: " << hex << setw(4) << cpu->programCounter << endl << endl;
     printMemory(0x0500, 0x05FF, cpu);
+    cout << endl;
+    printStack(cpu);
+
 
     return 0;
 }

@@ -71,6 +71,8 @@ public:
     uint8_t pullByte();
 
     Util util;
+    bool debug = true;
+    void printCPUStatus();
 
     void addWithCarry(uint8_t argument);
     void addWithCarry_Immediate();

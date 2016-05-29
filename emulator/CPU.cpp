@@ -577,9 +577,10 @@ void CPU::executeOpCode() {
             break;
 
         default:
+            cout << endl;
             cout << "INVALID OP CODE ENCOUNTERED: ";
             util.printByte(opcode);
-            cout << endl;
+            cout << endl << endl;
             break;
     }
 
@@ -1039,10 +1040,14 @@ void CPU::branchOnEqual() {
 void CPU::breakInstruction() {
     retrieveImpliedInstruction("BRK");
 
+    programCounter++;
+
+    //the actual breakFlag is not set, so we'll reset it after this
+    flags.breakFlag = 1;
+
+
     cyclesToExecute += 7;
 
-//    programCounter++; pretty sure this shouldn't happen but im not 100% sure
-    flags.breakFlag = 1;
 }
 
 void CPU::compareAccumulator(uint8_t argument) {

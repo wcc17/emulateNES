@@ -88,7 +88,8 @@ void printDebugInformation(CPU* cpu) {
     cout << endl;
 
     cout << "N V - B D I Z C" << endl;
-    printf("%d %d %d %d %d %d %d %d\n", cpu->flags.negative, cpu->flags.overflow, cpu->flags.ignored, cpu->flags.breakFlag, cpu->flags.decimal, cpu->flags.interrupt, cpu->flags.zero, cpu->flags.carry);
+    printf("%d %d %d %d %d %d %d %d\n", cpu->flags.negative, cpu->flags.overflow, cpu->flags.ignored,
+           cpu->flags.breakFlag, cpu->flags.decimal, cpu->flags.interrupt, cpu->flags.zero, cpu->flags.carry);
 
     cout << "Stack: " << endl;
     printStack(cpu);
@@ -98,34 +99,37 @@ void printDebugInformation(CPU* cpu) {
 }
 
 int main() {
-    //in hindsight, adding google testing wasn't really a good idea for me
 //    CPUTest cpuTest;
 //    cpuTest.runAllTests();
 
     CPU *cpu = new CPU();
 
-    Assembler assembler(cpu);
-    string fileName = "sample_programs/testSBC.asm";
-    assembler.readFile(fileName.c_str());
+//    Assembler assembler(cpu);
+//    string fileName = "sample_programs/testSBC.asm";
+//    assembler.readFile(fileName.c_str());
 
     //TODO: VERY UNFINISHED
-//    string fileName = "sample_programs/nestest.nes";
-//    readBinaryFile(cpu, fileName);
+    string fileName = "sample_programs/nestest.nes";
+    readBinaryFile(cpu, fileName);
 
-    printMemory(0x0600, 0x0fff, cpu);
+//    printMemory(0x0600, 0x0fff, cpu);
 
     bool debug = true;
-    cpu->programCounter = cpu->programStart;
-    while(cpu->memory[cpu->programCounter] != 0) {
+//    cpu->programCounter = cpu->programStart;
+    cpu->programCounter = 0xC000;
+    int i = 0;
+    while (i < 100) {
+//    while(cpu->memory[cpu->programCounter] != 0) {
 
         if(debug) {
             //this forces the user to press enter to step through the code
-            cin.ignore();
+//            cin.ignore();
 
 //            printDebugInformation(cpu);
         }
 
         cpu->execute();
+        i++;
     }
 
     cpu->programCounter++;
@@ -135,7 +139,7 @@ int main() {
 //    printDebugInformation(cpu);
 //    cout << endl << endl;
 
-    printMemory(0x0000, 0x02FF, cpu);
+//    printMemory(0x0000, 0x02FF, cpu);
 
     return 0;
 }

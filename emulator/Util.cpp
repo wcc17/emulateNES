@@ -209,7 +209,7 @@ void Util::printStatus(uint16_t programCounter, uint8_t opcode, uint8_t argument
     printByte(stackPointer);
     cout << " ";
 
-    cout << "Cycles:" << dec << cycles << " " << endl;
+    cout << "Cycles:" << dec << cycles << endl;
     //switch back to hex so i don't screw anything else up
     cout << hex;
 }
@@ -233,7 +233,7 @@ void Util::printStatus(uint16_t programCounter, uint8_t opcode, uint16_t argumen
     cout << "  ";
 
     printExecutedWordInstruction(instruction, argument);
-    cout << "                          ";
+    cout << "                                   ";
 
     cout << "A:";
     printByte(accumulator);
@@ -261,11 +261,17 @@ void Util::printStatus(uint16_t programCounter, uint8_t opcode, uint16_t argumen
 }
 
 void Util::printExecutedByteInstruction(string instruction, uint8_t argument) {
+    //NOTE: REMOVING THE ADDRESSING MODE FROM THE INSTRUCTION TO MAKE PRINTING EASIER
+    //CAN EASILY RESTORE LATER
+    instruction = instruction.substr(0, 3);
     cout << instruction << " ";
     printByte(argument);
 }
 
 void Util::printExecutedWordInstruction(string instruction, uint16_t argument) {
+    //NOTE: REMOVING THE ADDRESSING MODE FROM THE INSTRUCTION TO MAKE PRINTING EASIER
+    //CAN EASILY RESTORE LATER
+    instruction = instruction.substr(0, 3);
     cout << instruction << " ";
     printWord(argument);
 }

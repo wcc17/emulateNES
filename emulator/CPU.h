@@ -59,7 +59,9 @@ public:
     void storeByteInMemory(uint8_t byte, uint16_t location);
     void storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location);
 
-//private: i would like for these to be private but im not sure of a way around it with testing
+//    extern uint8_t readMemoryLocation(uint16_t address);
+//    extern void writeMemoryLocation(uint16_t address, uint8_t value);
+
     Util util;
 
     void addWithCarry(uint8_t argument);

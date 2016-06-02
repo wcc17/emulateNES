@@ -394,6 +394,8 @@ void Assembler::storeProgramInMemory(string instruction, string argument, uint16
                 opcode = PLP;
             } else if(instruction == "RTS") {
                 opcode = RTS;
+            } else if(instruction == "RTI") {
+                opcode = RTI;
             } else if(instruction == "SEC") {
                 opcode = SEC;
             } else if(instruction == "SED") {

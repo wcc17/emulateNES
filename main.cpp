@@ -96,7 +96,7 @@ void printDebugInformation(CPU* cpu) {
     printStack(cpu);
     cout << endl;
 
-    cout << "Next instruction results to be printed: " << endl << endl;
+//    cout << "Next instruction results to be printed: " << endl << endl;
 }
 
 int main() {
@@ -104,23 +104,40 @@ int main() {
 //    cpuTest.runAllTests();
 
     CPU *cpu = new CPU();
+    cpu->debug = true;
 
     Assembler assembler(cpu);
-    string fileName = "sample_programs/testSubroutines.asm";
+    string fileName = "sample_programs/testRTI.asm";
     assembler.readFile(fileName.c_str());
 
 //    //TODO: VERY UNFINISHED
 //    string fileName = "sample_programs/nestest.nes";
 //    readBinaryFile(cpu, fileName);
 
-    printMemory(0x0500, 0x05FF, cpu);
+    printMemory(0x0600, 0x6ff, cpu);
+//    printMemory(0x0000, 0x0FFFF, cpu);
+//
+//    cpu->memory[0x0000] = 0xa9;
+//    cpu->memory[0x0001] = 0x02;
+//    cpu->memory[0x0002] = 0x8d;
+//    cpu->memory[0x0003] = 0xfe;
+//    cpu->memory[0x0004] = 0xff;
+//    cpu->memory[0x0005] = 0xa9;
+//    cpu->memory[0x0006] = 0x03;
+//    cpu->memory[0x0007] = 0x8d;
+//    cpu->memory[0x0008] = 0xff;
+//    cpu->memory[0x0009] = 0xff;
+//    cpu->memory[0x000a] = 0x00;
+//
+//    cpu->memory[0x0302] = 0xa9;
+//    cpu->memory[0x0303] = 0x01;
+//    cpu->memory[0x0304] = 0xaa;
+//    cpu->memory[0x0305] = 0x40;
 
     bool debug = true;
     cpu->programCounter = cpu->programStart;
-//    cpu->programCounter = 0xC000;
-//    int i = 0;
-//    while (i < 100) {
-    while(cpu->memory[cpu->programCounter] != 0) {
+//    cpu->programCounter = 0x0000;
+    while(true) {
 
         if(debug) {
             //this forces the user to press enter to step through the code

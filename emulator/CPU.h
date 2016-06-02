@@ -71,7 +71,7 @@ public:
     uint8_t pullByte();
 
     Util util;
-    bool debug = true;
+    bool debug = false;
     void printCPUStatus();
 
     void addWithCarry(uint8_t argument);
@@ -217,6 +217,7 @@ public:
     void noOperation();
 
     void returnFromSubroutine();
+    void returnFromInterrupt();
 
     void orWithAccumulator(uint8_t argument);
     void orWithAccumulator_Immediate();

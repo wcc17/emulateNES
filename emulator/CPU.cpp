@@ -22,7 +22,7 @@ CPU::CPU() {
     flags.negative = 0;
     flags.overflow = 0;
     flags.ignored = 1;
-    flags.breakFlag = 1;
+    flags.breakFlag = 0;
     flags.decimal = 0;
     flags.interrupt = 0;
     flags.zero = 0;
@@ -420,9 +420,12 @@ void CPU::executeOpCode() {
             noOperation();
             break;
 
-        //RTS
+        //RTS+RTI
         case RTS:
             returnFromSubroutine();
+            break;
+        case RTI:
+            returnFromInterrupt();
             break;
 
         //ORA

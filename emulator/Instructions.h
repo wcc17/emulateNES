@@ -450,9 +450,14 @@ void CPU::breakInstruction() {
 
     programCounter++;
 
-    //the actual breakFlag is not set, so we'll reset it after this
-    flags.breakFlag = 1;
+    //push the incremented programCounter on to the stack
+    pushWord(programCounter);
 
+    //push the status flags on to the stack
+    uint8_t statusFlags = getProcessorFlagsAsByte();
+    pushByte(statusFlags | 0x10);
+
+    programCounter = (uint16_t)readMemoryLocation(0xFFFE) | ((uint16_t)readMemoryLocation(0xFFFF) << 8);
 
     cyclesToExecute += 7;
 
@@ -1139,6 +1144,16 @@ void CPU::returnFromSubroutine() {
 
     cyclesToExecute += 6;
 }
+void CPU::returnFromInterrupt() {
+    retrieveImpliedInstruction("RTI");
+
+    //the documentation was not right about this
+    //it was subtracting from the SP when you need to be adding
+    setProcessorFlagsFromByte(pullByte());
+    programCounter = pullWord();
+
+    cyclesToExecute += 6;
+}
 
 void CPU::orWithAccumulator(uint8_t argument) {
     accumulator = accumulator | argument;
@@ -1458,7 +1473,7 @@ void CPU::pushProcessorStatus() {
 
     //the binary value for the flags need to be pushed onto stack
     uint8_t processorStatus = getProcessorFlagsAsByte();
-    pushByte(processorStatus);
+    pushByte(processorStatus | 0x10); //THE BRK FLAG IS SET BEFORE BEING PUSHED ON TO THE STACK
 
     //NOTE: PHP AFFECTS NO FLAGS, BUT PLP DOES
 

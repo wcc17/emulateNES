@@ -1,0 +1,8 @@
+LDA #$02
+PHA
+LDA #$03
+PHA
+LDA #$00
+PHA
+PHP
+RTI

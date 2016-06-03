@@ -1,3 +1,8 @@
+LDA #$0A
+STA $FFFE
+LDA #$06
+STA $FFFF
+
 LDA #$02
 PHA
 LDA #$03

@@ -107,7 +107,7 @@ int main() {
     cpu->debug = true;
 
     Assembler assembler(cpu);
-    string fileName = "sample_programs/testRTI.asm";
+    string fileName = "sample_programs/testSubroutines2.asm";
     assembler.readFile(fileName.c_str());
 
 //    //TODO: VERY UNFINISHED

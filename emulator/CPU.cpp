@@ -830,25 +830,53 @@ uint8_t CPU::getProcessorFlagsAsByte() {
 }
 void CPU::setProcessorFlagsFromByte(uint8_t processorStatus) {
 
-    uint8_t whatever = processorStatus & 128;
-
     if((processorStatus & 128) != 0) { flags.negative = 1; } else { flags.negative = 0; }
     if((processorStatus & 64) != 0) { flags.overflow = 1; } else { flags.overflow = 0; }
-    //break and ignored are not affected. skip 32 and 16
+    //break and ignored are not affected. skip 32
+    if((processorStatus & 16) != 0) { flags.breakFlag = 1; } else { flags.breakFlag = 0; }
     if((processorStatus & 8) != 0) { flags.decimal = 1; } else { flags.decimal = 0; }
     if((processorStatus & 4) != 0) { flags.interrupt = 1; } else { flags.interrupt = 0; }
     if((processorStatus & 2) != 0) { flags.zero = 1; } else { flags.zero = 0; }
     if((processorStatus & 1) != 0) { flags.carry = 1; } else { flags.carry = 0; }
+
+    //these needs to always be set
+    flags.ignored = 1;
 }
 
-//TODO: REWRITE THESE USING NES 6502 BEHAVIOR, WITH MEMORY MIRRORING AND ALL THAT
+//uncomment writeMemoryLocationDefault and comment everything else out to get default CPU behavior. will need a better solution later
 void CPU::writeMemoryLocation(uint16_t address, uint8_t value) {
-//    memory[address] = value;
-    writeMemoryLocationDefault(address, value);
+//    writeMemoryLocationDefault(address, value);
+
+
+    //memory locations $0000 - $07FF are mirrored 3 times at $0800-$1FFF in the NES
+    //  07FF =   0000 0111 1111 1111
+    //& 0801 =   0000 1000 0000 0001
+    //       =   0000 0000 0000 0001
+
+    //  07FF =   0000 0111 1111 1111
+    //& 1800 =   0001 1000 0000 0000
+    //       =   0000 0000 0000 0000
+    //so writing to 0801 is the same as writing to 0001
+    //writing to 1800 is the same as writing to 0000
+    //so we'll just always write to 0000-07FFF whenever the address is lower than 1FFF
+    //by anding the address with 0x07FF
+    if(address <= 0x1FFF) {
+        uint16_t mirroredAddress = address & 0x07FF;
+        memory[mirroredAddress] = value;
+    } else {
+        memory[address] = value;
+    }
 }
 uint8_t CPU::readMemoryLocation(uint16_t address) {
-//    return memory[address];
-    return readMemoryLocationDefault(address);
+//    return readMemoryLocationDefault(address);
+
+    //see writeMemoryLocation for logic behind & 0x07FF
+    if(address <= 0x1FFF) {
+        uint16_t mirroredAddress = address & 0x07FF;
+        return memory[mirroredAddress];
+    } else {
+        return memory[address];
+    }
 }
 
 //DEFAULT 6502 BEHAVIOR

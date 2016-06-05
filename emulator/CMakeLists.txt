@@ -16,6 +16,6 @@ set(SOURCE_FILES
         Assembler.cpp
         CPU.cpp
         NES.cpp
-        Util.cpp Instructions.h)
+        Util.cpp Instructions.h ROM.cpp ROM.h Mapper.h Memory.cpp Memory.h PPU.cpp PPU.h)
 
 add_library(emulator STATIC ${SOURCE_FILES} ${HEADER_FILES})

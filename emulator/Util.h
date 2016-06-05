@@ -24,6 +24,9 @@ public:
     uint8_t getLowByte(uint16_t word);
     uint8_t getHighByte(uint16_t word);
 
+    //0 is the least significant bit
+    bool checkBit(uint8_t argument, int bit);
+
     void printExecutedByteInstruction(std::string instruction, uint8_t argument);
     void printExecutedWordInstruction(std::string instruction, uint16_t argument);
     void printExecutedAccumulatorInstruction(std::string instruction);

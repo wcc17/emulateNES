@@ -1152,7 +1152,7 @@ void CPU::returnFromInterrupt() {
     setProcessorFlagsFromByte(pullByte());
     programCounter = pullWord();
 
-    programCounter++;
+//    programCounter++;
 
     cyclesToExecute += 6;
 }

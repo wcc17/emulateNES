@@ -5,8 +5,6 @@
 #ifndef EMULATE6502_OPCODES_H
 #define EMULATE6502_OPCODES_H
 
-#include <string>
-
 enum OpCodes {
 
     ADC_IMMEDIATE = 0x69,

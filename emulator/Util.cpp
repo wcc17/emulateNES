@@ -37,6 +37,40 @@ bool Util::checkLeastSignificantBit(uint8_t c) {
     return isSet;
 }
 
+//0 checks the least significant bit
+bool Util::checkBit(uint8_t argument, int bit) {
+    bool isSet = false;
+
+    switch(bit) {
+        case 0:
+            isSet = argument & 1;
+            break;
+        case 1:
+            isSet = argument & 2;
+            break;
+        case 2:
+            isSet = argument & 4;
+            break;
+        case 3:
+            isSet = argument & 8;
+            break;
+        case 4:
+            isSet = argument & 16;
+            break;
+        case 5:
+            isSet = argument & 32;
+            break;
+        case 6:
+            isSet = argument & 64;
+            break;
+        case 7:
+            isSet = argument & 128;
+            break;
+    }
+
+    return isSet;
+}
+
 uint16_t Util::convertStringToWord(string argument) {
     uint16_t x;
 

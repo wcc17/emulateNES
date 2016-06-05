@@ -1,8 +1,7 @@
 #include <iostream>
+#include "ROM.h"
+#include <NES.h>
 #include "emulator/Assembler.h"
-#include "emulator/Util.h"
-#include "emulator/CPU.h"
-#include "test_emulator/cpu_tests/CPUTest.h"
 
 using namespace std;
 
@@ -36,31 +35,6 @@ void printStack(CPU* cpu) {
             printf("\n");
         }
     }
-}
-
-void readBinaryFile(CPU* cpu, std::string fileName) {
-    ifstream file;
-    vector<uint8_t> bytes;   //just going to let bytes vector increase by itself rather tahn trying to reserve space for this one off allocation
-    Util util;
-
-    file.open(fileName);
-
-    if(!file.is_open()) {
-        return;
-    }
-
-    uint8_t byte;
-    while (file >> std::hex >> byte) {
-        bytes.push_back(byte);
-    }
-
-    uint16_t programLocation = 0xC000;
-    for(int i = 16; i < bytes.size(); i++) {
-        byte = bytes[i];
-        cpu->memory[programLocation++] = byte;
-    }
-
-    file.close();
 }
 
 void printDebugInformation(CPU* cpu) {
@@ -100,69 +74,42 @@ void printDebugInformation(CPU* cpu) {
 }
 
 int main() {
-//    CPUTest cpuTest;
-//    cpuTest.runAllTests();
+    //    Assembler assembler(cpu);
+//    string fileName = "sample_programs/testSubroutines2.asm";
+//    assembler.readFile(fileName.c_str());
 
     CPU *cpu = new CPU();
     cpu->debug = true;
 
-    Assembler assembler(cpu);
-    string fileName = "sample_programs/testSubroutines2.asm";
-    assembler.readFile(fileName.c_str());
+    Rom *rom = new Rom();
+    rom->readRom("sample_programs/nestest.nes");
 
-//    //TODO: VERY UNFINISHED
-//    string fileName = "sample_programs/nestest.nes";
-//    readBinaryFile(cpu, fileName);
+    NES *nes = new NES(cpu, rom);
+    bool romLoaded = nes->loadRom();
 
-    printMemory(0x0600, 0x6ff, cpu);
-//    printMemory(0x0000, 0x0FFFF, cpu);
-//
-//    cpu->memory[0x0000] = 0xa9;
-//    cpu->memory[0x0001] = 0x02;
-//    cpu->memory[0x0002] = 0x8d;
-//    cpu->memory[0x0003] = 0xfe;
-//    cpu->memory[0x0004] = 0xff;
-//    cpu->memory[0x0005] = 0xa9;
-//    cpu->memory[0x0006] = 0x03;
-//    cpu->memory[0x0007] = 0x8d;
-//    cpu->memory[0x0008] = 0xff;
-//    cpu->memory[0x0009] = 0xff;
-//    cpu->memory[0x000a] = 0x00;
-//
-//    cpu->memory[0x0302] = 0xa9;
-//    cpu->memory[0x0303] = 0x01;
-//    cpu->memory[0x0304] = 0xaa;
-//    cpu->memory[0x0305] = 0x40;
+    printMemory(0x0000, 0xFFFF, cpu);
 
-    bool debug = true;
-    cpu->programCounter = cpu->programStart;
-//    cpu->programCounter = 0x0000;
-    while(true) {
+    if(romLoaded) {
+        bool debug = false;
+        cpu->programCounter = 0xc000;
 
-        if(debug) {
-            //this forces the user to press enter to step through the code
-            cin.ignore();
+        int i = 0;
+        while(i < 9000) {
 
-//            printDebugInformation(cpu);
+            if(debug) {
+                cin.ignore();
+            }
+
+            cpu->execute();
+            i++;
         }
 
-        cpu->execute();
-//        i++;
+        cout << endl;
+        cout << "Final PC: " << hex << setw(4) << cpu->programCounter << endl << endl;
+        printMemory(0x0000, 0xFFFF, cpu);
+        cout << endl;
+        printStack(cpu);
     }
-
-    cpu->programCounter++;
-
-    //print one last time to see the results of the last instruction
-//    cout << endl;
-//    printDebugInformation(cpu);
-//    cout << endl << endl;
-
-    cout << endl;
-    cout << "Final PC: " << hex << setw(4) << cpu->programCounter << endl << endl;
-    printMemory(0x0500, 0x05FF, cpu);
-    cout << endl;
-    printStack(cpu);
-
 
     return 0;
 }

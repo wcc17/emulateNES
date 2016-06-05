@@ -7,13 +7,22 @@
 
 
 #include "CPU.h"
+#include "ROM.h"
+#include "Mapper.h"
 
 class NES {
 
 public:
+    Mapper mapper;
 
-    NES(CPU* cpu);
+    Rom* rom;
+    CPU* cpu;
+    NES(CPU* cpu, Rom* rom);
 
+    bool loadRom();
+    void determineMapper(int mapperNumber);
+    void initializeMapping();
+    void initializeNROM();
 };
 
 

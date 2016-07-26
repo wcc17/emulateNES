@@ -9,35 +9,73 @@
 #include <_types/_uint16_t.h>
 
 class PPU {
-    //these registers should only be written to
-    const uint8_t PPU_CONTROL_REGISTER_1 = 0x2000;
-    const uint8_t PPU_CONTROL_REGISTER_2 = 0x2001;
-    const uint8_t PPU_STATUS_REGISTER = 0x2002;
 
-    //ppus registers mostly located in I/O registers section of CPU memory at $2000-$2007 and $4014
-    //any address above $3FFF is wrapped around, making $4000-$FFFF a mirror of $0000-$3FFF
-    //reading/writing PPU can be done using $2006/$2007 in CPU memory. usually done during V-blank at the end of a frame
-    //ppu memory uses 16-bit addresses, so two writes to $2006 are required to set teh address required
-    //data can be read from or written to $2007. The first read from $2007 is invalid and data will be buffered and returned on the next read. does not apply to color palletes
-    uint8_t ppu_videoRAM[0x4000];
+    //TODO: $2000-$2007 ARE MIRRORED EVERY 8 BYTES $2008 THROUGH $3FFF
 
-    //PPU also has a seperate 256 byte area of memory, SPR-RAM to store the sprite attributes. the sprites themselves can be found in the pattern tables
-    uint8_t ppu_spriteRAM[0x100];
+    //VPHB SINN
+    /**
+     * NMI enable (V)
+     * PPU master/slave (P)
+     * sprite height (H)
+     * background Tile select (B)
+     * sprite tile select (S)
+     * increment mode (I)
+     * nametable select (NN)
+     */
+    const uint8_t PPU_CTRL = 0x2000;
 
-    //bit 7 of $2000 can be used to disabled NMIs. Clear the bit
-    //NES supports both 8x8 and 8x16 sprites. setting bit 5 of $2000 will switch to 8x16 sprites
+    //BGRs bMmG
+    /**
+     * color emphasis (BGR)
+     * sprite enable (s)
+     * background enable (b)
+     * sprite left column enable (M)
+     * background left column enable (m)
+     * greyscale (G)
+     */
+    const uint8_t PPU_MASK = 0x2001;
 
-    //the next address in PPU memory to read or write from will be incremented after each I/O occurs.
-    //the value to incrememnet by is adjusted by setting the value of bit 2 of $2000. If clear, the address is incremented by 1(horizontal, if set 32(vertical)
+    //VSO- ----
+    /**
+     * vblank (v)
+     * sprite 0 hit (S)
+     * sprite overflow (O)
+     * read resets write pair for $2005/$2006
+     */
+    const uint8_t PPU_STATUS = 0x2002;
 
-    //using $2001, the background can be hidden by clearing bit 3 and sprites can be hidden by clearing bit 4
+    //Object attribute memory
+    //aaaa aaaa
+    //OAM read/write address
+    const uint8_t OAM_ADDR = 0x2003;
 
-    //$2002 is read only (status register). CPU uses to check PPU status.
-    //Bit 7 is set by the PPU to indicate that vblank is occuring
-    //bit (5 and 6?) relate to sprites.
-    //bit 4 indicates whether the PPU is willing to accept writes to VRAM, it clear then writes are ignored
-    //when a read from $2002 occurs, bit 7 is reset to 0 as are $2005 and $2006
+    //Object attribute data
+    //dddd dddd
+    //OAM data read/write
+    const uint8_t OAM_DATA = 0x2004;
 
+    //xxxx xxxx
+    //fine scroll position (two writes: X, Y)
+    const uint8_t PPU_SCROLL = 0x2005;
+
+    //aaaa aaaa
+    //PPU read/write address (two writes, MSB, LSB)
+    const uint8_t PPU_ADDR = 0x2006;
+
+    //dddd dddd
+    //PPU data read/write
+    const uint8_t PPU_DATA = 0x2007;
+
+    //aaaa aaaa
+    //OAM DMA high address
+    const uint8_t OAM_DMA = 0x4014;
+
+    int ppuClockCycle = 0; //0 - 340 (341 clock cycles per 113.667 cpu clock cycles) each clock cycle renders 1 pixel (342 pixels on screen?
+    int scanline = 0; //0 - 261 (262 scan lines per frame (each scanline lasts 341 clock cycles)
+
+    //functions
+    void render();
+    void renderScanLine();
 };
 
 

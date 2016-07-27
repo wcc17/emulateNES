@@ -14,7 +14,6 @@ bool Emulator::onInit() {
         return false;
     }
 
-    //adding 200 to the width of the window to fit the buttons
     window = SDL_CreateWindow("Tile Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 
     if(window == NULL) {
@@ -73,7 +72,7 @@ void Emulator::onRender() {
     //clear screen
     SDL_RenderClear(renderer);
 
-    //set the color that the renderer will draw shapes with (our tile outlines specifically)
+    //set the color that the renderer will draw shapes with
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 
     //render stuff

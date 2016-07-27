@@ -3,7 +3,6 @@
 //
 
 #include "NES.h"
-#include "ROM.h"
 
 NES::NES(CPU* cpu, Rom* rom) {
     this->cpu = cpu;

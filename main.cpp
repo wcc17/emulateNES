@@ -2,6 +2,7 @@
 #include "ROM.h"
 #include <NES.h>
 #include "emulator/Assembler.h"
+#include "Emulator.h"
 
 using namespace std;
 
@@ -78,38 +79,40 @@ int main() {
 //    string fileName = "sample_programs/testSubroutines2.asm";
 //    assembler.readFile(fileName.c_str());
 
-    CPU *cpu = new CPU();
-    cpu->debug = true;
+//    CPU *cpu = new CPU();
+//    cpu->debug = true;
+//
+//    Rom *rom = new Rom();
+//    rom->readRom("sample_programs/nestest.nes");
+//
+//    NES *nes = new NES(cpu, rom);
+//    bool romLoaded = nes->loadRom();
+//
+//    printMemory(0x0000, 0xFFFF, cpu);
+//
+//    if(romLoaded) {
+//        bool debug = false;
+//        cpu->programCounter = 0xc000;
+//
+//        int i = 0;
+//        while(i < 9000) {
+//
+//            if(debug) {
+//                cin.ignore();
+//            }
+//
+//            cpu->execute();
+//            i++;
+//        }
+//
+//        cout << endl;
+//        cout << "Final PC: " << hex << setw(4) << cpu->programCounter << endl << endl;
+//        printMemory(0x0000, 0xFFFF, cpu);
+//        cout << endl;
+//        printStack(cpu);
+//    }
 
-    Rom *rom = new Rom();
-    rom->readRom("sample_programs/nestest.nes");
+    Emulator emulator;
 
-    NES *nes = new NES(cpu, rom);
-    bool romLoaded = nes->loadRom();
-
-    printMemory(0x0000, 0xFFFF, cpu);
-
-    if(romLoaded) {
-        bool debug = false;
-        cpu->programCounter = 0xc000;
-
-        int i = 0;
-        while(i < 9000) {
-
-            if(debug) {
-                cin.ignore();
-            }
-
-            cpu->execute();
-            i++;
-        }
-
-        cout << endl;
-        cout << "Final PC: " << hex << setw(4) << cpu->programCounter << endl << endl;
-        printMemory(0x0000, 0xFFFF, cpu);
-        cout << endl;
-        printStack(cpu);
-    }
-
-    return 0;
+    return emulator.onExecute();
 }

@@ -10,12 +10,12 @@ set(HEADER_FILES
         NES.h
         opcodes.h
         Util.h
-        )
+        Mapper.h)
 
 set(SOURCE_FILES
         Assembler.cpp
         CPU.cpp
         NES.cpp
-        Util.cpp Instructions.h ROM.cpp ROM.h Mapper.h Memory.cpp Memory.h PPU.cpp PPU.h)
+        Util.cpp Instructions.h ROM.cpp ROM.h Mapper.h PPU.cpp PPU.h)
 
 add_library(emulator STATIC ${SOURCE_FILES} ${HEADER_FILES})

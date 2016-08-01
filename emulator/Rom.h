@@ -14,6 +14,7 @@ class Rom {
 
 public:
 
+    //this is only used to hold the rom when its first loaded. eventually will be loaded into CPU/PPU memory
     uint8_t memory[0x100000];
 
     //iNES 2.0 header info:

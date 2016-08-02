@@ -8,8 +8,9 @@
 
 using namespace std;
 
-CPU::CPU() {
-    memory = new uint8_t[65535];
+CPU::CPU(RAM* ram) {
+    this->ram = ram;
+
     programCounter = 0x0600;
     programStart = 0x0600;
 
@@ -906,39 +907,16 @@ void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location
 
 //uncomment writeMemoryLocationDefault and comment everything else out to get default CPU behavior. will need a better solution later
 void CPU::writeMemoryLocation(uint16_t address, uint8_t value) {
-//    writeMemoryLocationDefault(address, value);
-
-    if(address <= 0x1FFF) {
-        //RAM
-        uint16_t mirroredAddress = address & 0x07FF;
-        memory[mirroredAddress] = value;
-    } else if(address >= 0x2008 && address <= 0x3FFF) {
-        //IO REGISTERS
-        uint16_t mirroredAddress = 0x2000 + (address + 0x07);
-        memory[mirroredAddress] = value;
-    } else {
-        //ANYTHING ELSE
-        memory[address] = value;
-    }
+    ram->writeMemoryLocation(address, value);
 }
 uint8_t CPU::readMemoryLocation(uint16_t address) {
-//    return readMemoryLocationDefault(address);
-
-    if(address <= 0x1FFF) {
-        uint16_t mirroredAddress = address & 0x07FF;
-        return memory[mirroredAddress];
-    } else if(address >= 0x2008 && address <= 0x3FFF) {
-        uint16_t mirroredAddress = 0x2000 + (address + 0x07);
-        return memory[mirroredAddress];
-    } else {
-        return memory[address];
-    }
+    return ram->readMemoryLocation(address);
 }
 
 //DEFAULT 6502 BEHAVIOR
-void CPU::writeMemoryLocationDefault(uint16_t address, uint8_t value) {
-    memory[address] = value;
-}
-uint8_t CPU::readMemoryLocationDefault(uint16_t address) {
-    return memory[address];
-}
+//void CPU::writeMemoryLocationDefault(uint16_t address, uint8_t value) {
+//    memory[address] = value;
+//}
+//uint8_t CPU::readMemoryLocationDefault(uint16_t address) {
+//    return memory[address];
+//}

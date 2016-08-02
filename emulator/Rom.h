@@ -10,7 +10,7 @@
 #include <iostream>
 
 
-class Rom {
+class ROM {
 
 public:
 

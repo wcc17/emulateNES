@@ -7,7 +7,7 @@
 #include "ROM.h"
 #include "Util.h"
 
-void Rom::readRom(std::string fileName) {
+void ROM::readRom(std::string fileName) {
     std::fstream file(fileName, std::fstream::in);
 
     char ch;
@@ -30,7 +30,7 @@ void Rom::readRom(std::string fileName) {
     file.close();
 }
 
-bool Rom::validateRom() {
+bool ROM::validateRom() {
     memcpy(&header, memory, sizeof(header));
 
     if(memcmp(header.signature, "NES\x1A", 4)) {
@@ -40,7 +40,7 @@ bool Rom::validateRom() {
     return true;
 }
 
-void Rom::getRomInformation() {
+void ROM::getRomInformation() {
     Util util;
 
     //see the declaration in Rom.h for what all of these mean

@@ -76,7 +76,7 @@ void Emulator::onRender() {
     SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
 
     //render stuff
-    screen->pixels
+//    screen->pixels
 
     //update screen
     SDL_RenderPresent(renderer);

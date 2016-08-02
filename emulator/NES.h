@@ -15,9 +15,10 @@ class NES {
 public:
     Mapper mapper;
 
-    Rom* rom;
+    ROM* rom;
     CPU* cpu;
-    NES(CPU* cpu, Rom* rom);
+    RAM* ram;
+    NES(CPU* cpu, ROM* rom, RAM* ram);
 
     bool loadRom();
     void determineMapper(int mapperNumber);

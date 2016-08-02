@@ -9,6 +9,7 @@
 #include <_types/_uint8_t.h>
 #include <_types/_uint16_t.h>
 #include "Util.h"
+#include "RAM.h"
 
 class CPU {
 
@@ -17,7 +18,8 @@ public:
     static const uint8_t ZERO = 0x00;
     static const uint16_t BASE_STACK_LOCATION = 0x100;
 
-    uint8_t* memory;
+    RAM* ram;
+
     uint16_t programCounter;
     uint8_t accumulator;
     uint8_t xIndex;
@@ -54,7 +56,7 @@ public:
     bool addressingMode_16 = false;
     uint16_t oldPC;
 
-    CPU();
+    CPU(RAM* ram);
     void execute();
     void executeOpCode();
     void storeByteInMemory(uint8_t byte, uint16_t location);

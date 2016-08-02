@@ -595,7 +595,7 @@ void CPU::compareY_Absolute() {
 }
 
 void CPU::decrementMemory(uint16_t argument) {
-    memory[argument]--;
+    ram->memory[argument]--;
 
     if(util.isNegativeByte(readMemoryLocation(argument)) == false) { flags.negative = 0; } else { flags.negative = 1; }
     if(readMemoryLocation(argument) == 0) { flags.zero = 1; } else { flags.zero = 0; }
@@ -701,7 +701,7 @@ void CPU::exclusiveOrAccumulator_IndirectIndexedY() {
 }
 
 void CPU::incrementMemory(uint16_t argument) {
-    memory[argument]++;
+    ram->memory[argument]++;
 
     if(util.isNegativeByte(readMemoryLocation(argument)) == false) { flags.negative = 0; } else { flags.negative = 1; }
     if(readMemoryLocation(argument) == 0) { flags.zero = 1; } else { flags.zero = 0; }

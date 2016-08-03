@@ -70,12 +70,20 @@ class PPU {
     //OAM DMA high address
     const uint8_t OAM_DMA = 0x4014;
 
+    //16kb ram. 0 - FFFF, but 4000-FFFF is a mirror of $0000-$3FFF
+    uint8_t videoRAM[8000];
+
+    //for sprites. 64 sprites at 4 bytes each
+    uint8_t objectAttributeMemory[256];
+
     int ppuClockCycle = 0; //0 - 340 (341 clock cycles per 113.667 cpu clock cycles) each clock cycle renders 1 pixel (342 pixels on screen?
     int scanline = 0; //0 - 261 (262 scan lines per frame (each scanline lasts 341 clock cycles)
 
     //functions
     void render();
     void renderScanLine();
+    uint8_t readVRAM(uint16_t address);
+    void writeVRAM(uint16_t address, uint8_t value);
 };
 
 

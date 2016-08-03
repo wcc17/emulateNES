@@ -18,7 +18,7 @@ void PPU::render() {
         }
 
         if(scanline >= 0 && scanline <= 239) {
-            //these are the visible scanelines which contain the graphics to be dispalyed on the screen
+            //these are the visible scanlines which contain the graphics to be dispalyed on the screen
             //includes rendering of both the background and the sprites
             //during these scanlines, the PPU is busy fetching data, so the program should not access PPU memory, unless rendering is off
         }
@@ -35,7 +35,33 @@ void PPU::renderScanLine() {
         }
 
         if(ppuClockCycle >= 1 && ppuClockCycle >= 256) {
+            //each memory access takes 2 PPU cycles and 4 must be performed per tile
+
+            //retrieve Nametable byte
+            ppuClockCycle += 2;
+
+            //retrieve attribute table byte
+            ppuClockCycle += 2;
+
 
         }
     }
 };
+
+void PPU::writeVRAM(uint16_t address, uint8_t value) {
+    //simulate ppu vram mirroring. see videoRAM declaration in header file
+    if(address > 0x3FFF) {
+        address -= 0x4000;
+    }
+
+    videoRAM[address] = value;
+};
+
+uint8_t PPU::readVRAM(uint16_t address) {
+    //simluate ppu vram mirroring. see videoRAM declaration in header file
+    if(address > 0x3FFF) {
+        address -= 0x4000;
+    }
+
+    return videoRAM[address];
+}

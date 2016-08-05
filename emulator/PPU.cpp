@@ -3,6 +3,12 @@
 //
 
 #include "PPU.h"
+#include "RAM.h"
+
+PPU::PPU(RAM* ram, ROM* rom) {
+    this->ram = ram;
+    this->rom = rom;
+}
 
 void PPU::render() {
 
@@ -38,6 +44,8 @@ void PPU::renderScanLine() {
             //each memory access takes 2 PPU cycles and 4 must be performed per tile
 
             //retrieve Nametable byte
+            uint8_t nameTableSelection = getNameTableSelection();
+            uint16_t nameTableAddress = getNameTableAddress(nameTableSelection);
             ppuClockCycle += 2;
 
             //retrieve attribute table byte
@@ -47,6 +55,72 @@ void PPU::renderScanLine() {
         }
     }
 };
+
+uint16_t PPU::getNameTableAddress(uint8_t nameTableSelection) {
+    if(rom->horizontalMirroring) {
+        //$2000 equals $2400 and $2800 equals $2C00
+        switch(nameTableSelection) {
+            case 0x00:
+                return 0x2000;
+            case 0x01:
+                return 0x2000;
+            case 0x02:
+                return 0x2800;
+            case 0x03:
+                return 0x2800;
+            default:
+                printf("This is a problem\n");
+        }
+    } else if(rom->verticalMirroring) {
+        //$2000 equals $2800 and $2400 equals $2c00
+        switch(nameTableSelection) {
+            case 0x00:
+                return 0x2000;
+            case 0x01:
+                return 0x2400;
+            case 0x02:
+                return 0x2000;
+            case 0x03:
+                return 0x2400;
+            default:
+                printf("This is a problem\n");
+        }
+    } else {
+        switch(nameTableSelection) {
+            case 0x00:
+                return 0x2000;
+            case 0x01:
+                return 0x2400;
+            case 0x02:
+                return 0x2800;
+            case 0x03:
+                return 0x2c00;
+            default:
+                printf("This is a problem\n");
+        }
+    }
+
+}
+
+uint8_t PPU::getNameTableSelection() {
+
+    //last two bits of PPU_CTRL are the name table select.
+    //00000011 AND whatever8bitvalue will give the selection we want
+    uint8_t selection = 0x03 & ram->readMemoryLocation(PPU_CTRL);
+
+    //TODO: remove this come on now
+    if(selection > 0x03) {
+        printf("THIS IS A PROBLEM\n");
+        printf("THIS IS A PROBLEM\n");
+        printf("THIS IS A PROBLEM\n");
+        printf("THIS IS A PROBLEM\n");
+        printf("THIS IS A PROBLEM\n");
+        printf("THIS IS A PROBLEM\n");
+        printf("THIS IS A PROBLEM\n");
+    }
+
+    return selection;
+}
 
 void PPU::writeVRAM(uint16_t address, uint8_t value) {
     //simulate ppu vram mirroring. see videoRAM declaration in header file

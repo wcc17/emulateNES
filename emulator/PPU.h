@@ -7,10 +7,14 @@
 
 #include <_types/_uint8_t.h>
 #include <_types/_uint16_t.h>
+#include "ROM.h"
+#include "RAM.h"
 
 class PPU {
 
-    //TODO: $2000-$2007 ARE MIRRORED EVERY 8 BYTES $2008 THROUGH $3FFF
+    PPU(RAM* ram, ROM* rom);
+    RAM* ram;
+    ROM* rom;
 
     //VPHB SINN
     /**
@@ -74,7 +78,9 @@ class PPU {
     uint8_t videoRAM[8000];
 
     //for sprites. 64 sprites at 4 bytes each
-    uint8_t objectAttributeMemory[256];
+    uint8_t primaryOAM[256];
+
+    uint8_t secondaryOAM[32];
 
     int ppuClockCycle = 0; //0 - 340 (341 clock cycles per 113.667 cpu clock cycles) each clock cycle renders 1 pixel (342 pixels on screen?
     int scanline = 0; //0 - 261 (262 scan lines per frame (each scanline lasts 341 clock cycles)
@@ -82,6 +88,8 @@ class PPU {
     //functions
     void render();
     void renderScanLine();
+    uint8_t getNameTableSelection();
+    uint16_t getNameTableAddress(uint8_t nameTableSelection);
     uint8_t readVRAM(uint16_t address);
     void writeVRAM(uint16_t address, uint8_t value);
 };

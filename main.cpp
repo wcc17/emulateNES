@@ -1,5 +1,6 @@
 #include <iostream>
 #include "ROM.h"
+#include "PPU.h"
 #include <NES.h>
 #include "emulator/Assembler.h"
 #include "Emulator.h"
@@ -87,7 +88,9 @@ int main() {
     ROM *rom = new ROM();
     rom->readRom("sample_programs/nestest.nes");
 
-    NES *nes = new NES(cpu, rom, ram);
+    PPU *ppu = new PPU(ram, rom);
+
+    NES *nes = new NES(cpu, rom, ram, ppu);
     bool romLoaded = nes->loadRom();
 
     printMemory(0x0000, 0xFFFF, cpu);

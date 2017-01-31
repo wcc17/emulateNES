@@ -57,6 +57,8 @@ public:
     uint16_t oldPC;
 
     CPU(RAM* ram);
+    void onPowerUp();
+    void onReset();
     void execute();
     void executeOpCode();
     void storeByteInMemory(uint8_t byte, uint16_t location);

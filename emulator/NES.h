@@ -8,6 +8,7 @@
 
 #include "CPU.h"
 #include "ROM.h"
+#include "PPU.h"
 #include "Mapper.h"
 
 class NES {
@@ -18,7 +19,8 @@ public:
     ROM* rom;
     CPU* cpu;
     RAM* ram;
-    NES(CPU* cpu, ROM* rom, RAM* ram);
+    PPU* ppu;
+    NES(CPU* cpu, ROM* rom, RAM* ram, PPU* ppu);
 
     bool loadRom();
     void determineMapper(int mapperNumber);

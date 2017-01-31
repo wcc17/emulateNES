@@ -30,6 +30,29 @@ CPU::CPU(RAM* ram) {
     flags.carry = 0;
 }
 
+void CPU::onPowerUp() {
+    setProcessorFlagsFromByte(0x34);
+    accumulator = 0x00;
+    xIndex = 0x00;
+    yIndex = 0x00;
+
+    writeMemoryLocation(0x4017, 0x00);
+    writeMemoryLocation(0x4015, 0x00);
+
+    for(uint16_t i = 0x4000; i <= 0x400F; i++) {
+        //TODO: dev wiki is unsure about $4010-$4013
+        writeMemoryLocation(i, 0x00);
+    }
+
+    //TODO: all 15 bits of noise channel LFSR = 0
+}
+
+void CPU::onReset() {
+    stackPointer -= 0x03;
+    setProcessorFlagsFromByte(getProcessorFlagsAsByte() || 0x04);
+    writeMemoryLocation(0x4015, 0x00);
+}
+
 void CPU::execute() {
     //TODO: IS THIS NECESSARY? I'm not sure that this will happen with 6502 programs that other people wrote
     //TODO: i think since programCounter is 16 bit, if it goes above 0xFFFF, it will reset to 0x0000 by itself. needs testing
@@ -41,7 +64,7 @@ void CPU::execute() {
     //this will have allowed the previous instruction to finish first before doing the interrupt
     if(flags.interrupt == 0 && interruptRaised) {
 
-        //handle interrupt
+        //TODO: handle interrupt
 
         interruptRaised = false;
     } else {

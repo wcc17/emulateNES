@@ -4,10 +4,14 @@
 
 #include "NES.h"
 
-NES::NES(CPU* cpu, ROM* rom, RAM* ram) {
+NES::NES(CPU* cpu, ROM* rom, RAM* ram, PPU* ppu) {
     this->cpu = cpu;
     this->rom = rom;
     this->ram = ram;
+    this->ppu = ppu;
+
+    cpu->onPowerUp();
+    ppu->onPowerUp();
 }
 
 //will return false if rom is not loaded correctly

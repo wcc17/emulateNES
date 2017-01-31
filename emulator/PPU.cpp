@@ -10,6 +10,45 @@ PPU::PPU(RAM* ram, ROM* rom) {
     this->rom = rom;
 }
 
+void PPU::onPowerUp() {
+    //? = unknown
+    //x = irrelevant
+    //+ = often set
+    //U = unchanged
+    writeVRAM(PPU_CTRL, 0x00);
+    writeVRAM(PPU_MASK, 0x00);
+    writeVRAM(PPU_STATUS, 0xA0); //+0+x xxxx
+    writeVRAM(OAM_ADDR, 0x00);
+    //TODO: $2005 (PPUSCROLL) and $2006 (PPUADDR) latches are cleared
+    writeVRAM(PPU_SCROLL, 0x00);
+    writeVRAM(PPU_ADDR, 0x00);
+    writeVRAM(PPU_DATA, 0x00);
+    //TODO: odd frame????
+    //TODO: OAM -- pattern
+    //TODO: NT RAM (external, in Control Deck)	mostly $FF
+    //TODO: CHR RAM (external, in Game Pak)	unspecified pattern
+}
+
+void PPU::onReset() {
+    //? = unknown
+    //x = irrelevant
+    //+ = often set
+    //U = unchanged
+    writeVRAM(PPU_CTRL, 0x00);
+    writeVRAM(PPU_MASK, 0x00);
+    writeVRAM(PPU_STATUS, (readVRAM(PPU_STATUS) & 0x80)); //U??x xxxx
+    writeVRAM(OAM_ADDR, 0x00);
+    //TODO: $2005 (PPUSCROLL) and $2006 (PPUADDR) latches are cleared
+    writeVRAM(PPU_SCROLL, 0x00);
+//    writeVRAM(PPU_ADDR, 0x00); unchanged on reset
+    writeVRAM(PPU_DATA, 0x00);
+    //TODO: odd frame????
+    //TODO: OAM -- pattern
+    //TODO: NT RAM (external, in Control Deck)	unchanged
+    //TODO: CHR RAM (external, in Game Pak)	unchanged
+
+}
+
 void PPU::render() {
 
     for(scanline = 0; scanline < 262; scanline++) {
@@ -99,7 +138,6 @@ uint16_t PPU::getNameTableAddress(uint8_t nameTableSelection) {
                 printf("This is a problem\n");
         }
     }
-
 }
 
 uint8_t PPU::getNameTableSelection() {

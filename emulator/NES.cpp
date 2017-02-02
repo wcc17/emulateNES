@@ -4,14 +4,55 @@
 
 #include "NES.h"
 
-NES::NES(CPU* cpu, ROM* rom, RAM* ram, PPU* ppu) {
-    this->cpu = cpu;
-    this->rom = rom;
-    this->ram = ram;
-    this->ppu = ppu;
+using namespace std;
+
+NES::NES() {
+    //set up RAM
+    ram = new RAM();
+
+    //set up CPU
+    cpu = new CPU(ram);
+    cpu->debug = true;
+
+    //set up ROM
+    rom = new ROM();
+    rom->readRom("sample_programs/nestest.nes");
+
+    //set up PPU
+    ppu = new PPU(ram, rom);
+}
+
+void NES::start() {
+    loadRom();
 
     cpu->onPowerUp();
     ppu->onPowerUp();
+
+    execute();
+}
+
+void NES::execute() {
+    bool romLoaded = loadRom();
+
+    util.printMemory(0x0000, 0xFFFF, cpu->ram->memory);
+
+    if(romLoaded) {
+        cpu->programCounter = 0xc000;
+
+        int i = 0;
+        while(i < 2000) {
+
+//            cin.ignore();
+
+            cpu->execute();
+            i++;
+        }
+
+        cout << endl;
+        cout << "Final PC: " << hex << setw(4) << cpu->programCounter << endl << endl;
+        util.printMemory(0x0000, 0xFFFF, cpu->ram->memory);
+        util.printStack(cpu->ram->memory);
+    }
 }
 
 //will return false if rom is not loaded correctly
@@ -99,9 +140,7 @@ void NES::initializeNROM() {
         if(i == 0) {
             //copy into PPU memory
         }
-
-
     }
 
-    std::cout << "break" << std::endl;
+    cout << "break" << endl;
 }

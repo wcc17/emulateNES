@@ -5,7 +5,6 @@
 #ifndef EMULATE6502_ASSEMBLER_H
 #define EMULATE6502_ASSEMBLER_H
 
-using namespace std;
 #include <string>
 #include <fstream>
 #include <map>
@@ -14,6 +13,7 @@ using namespace std;
 #include "addressingmodes.h"
 #include "CPU.h"
 
+using namespace std;
 
 class Assembler {
 

@@ -14,12 +14,10 @@
 class CPU {
 
 public:
-    //TODO: maybe move this to Util?
     static const uint8_t ZERO = 0x00;
     static const uint16_t BASE_STACK_LOCATION = 0x100;
 
     RAM* ram;
-
     uint16_t programCounter;
     uint8_t accumulator;
     uint8_t xIndex;
@@ -45,39 +43,16 @@ public:
     int cycleGoal = 0;
     bool pageBoundaryCrossed = false;
 
-    //DEBUG STUFF
-    uint8_t opcode;
-    std::string instructionString;
-    uint8_t arg_8;
-    uint16_t arg_16;
-    bool impliedAddressingMode = false;
-    bool accumulatorAddressingMode = false;
-    bool addressingMode_8 = false;
-    bool addressingMode_16 = false;
-    uint16_t oldPC;
-
     CPU(RAM* ram);
     void onPowerUp();
     void onReset();
     void execute();
-    void executeOpCode();
-    void storeByteInMemory(uint8_t byte, uint16_t location);
-    void storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location);
 
-    void writeMemoryLocation(uint16_t address, uint8_t value);
-    uint8_t readMemoryLocation(uint16_t address);
-    void writeMemoryLocationDefault(uint16_t address, uint8_t value);
-    uint8_t readMemoryLocationDefault(uint16_t address);
-
-    void pushWord(uint16_t wordToPush);
-    void pushByte(uint8_t byteToPush);
-    uint16_t pullWord();
-    uint8_t pullByte();
+    bool debug = false;
 
     Util util;
-    bool debug = false;
-    void printCPUStatus();
 
+    //CPUInstructions.h
     void addWithCarry(uint8_t argument);
     void addWithCarry_Immediate();
     void addWithCarry_ZeroPage();
@@ -283,7 +258,32 @@ public:
     void storeYRegister_ZeroPageX();
     void storeYRegister_Absolute();
 
-private:
+    //CPUUtil.h
+    //DEBUG STUFF
+    uint8_t opcode;
+    std::string instructionString;
+    uint8_t arg_8;
+    uint16_t arg_16;
+    bool impliedAddressingMode = false;
+    bool accumulatorAddressingMode = false;
+    bool addressingMode_8 = false;
+    bool addressingMode_16 = false;
+    uint16_t oldPC;
+
+    void executeOpCode();
+    void storeByteInMemory(uint8_t byte, uint16_t location);
+    void storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location);
+
+    void writeMemoryLocation(uint16_t address, uint8_t value);
+    uint8_t readMemoryLocation(uint16_t address);
+    void writeMemoryLocationDefault(uint16_t address, uint8_t value);
+    uint8_t readMemoryLocationDefault(uint16_t address);
+
+    void pushWord(uint16_t wordToPush);
+    void pushByte(uint8_t byteToPush);
+    uint16_t pullWord();
+    uint8_t pullByte();
+
     uint8_t getProcessorFlagsAsByte();
     void setProcessorFlagsFromByte(uint8_t processorStatus);
 
@@ -300,6 +300,9 @@ private:
     uint16_t retrieveIndexedIndirectXInstruction(std::string instructionString);
     uint16_t retrieveIndirectIndexedYInstruction(std::string instructionString);
     uint16_t retrieveIndirectInstruction(std::string instructionString);
+
+    void printCPUStatus();
+    void printDebugInformation();
 };
 
 

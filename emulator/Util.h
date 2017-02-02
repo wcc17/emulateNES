@@ -39,6 +39,9 @@ public:
                         uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles);
     void printStatus(uint16_t programCounter, uint8_t opcode, uint16_t argument, std::string instruction,
                         uint8_t accumulator, uint8_t xIndex, uint8_t yIndex, uint8_t flags, uint8_t stackPointer, int cycles);
+
+    void printStack(uint8_t* memory);
+    void printMemory(uint16_t start, uint16_t end, uint8_t* memory);
 };
 
 

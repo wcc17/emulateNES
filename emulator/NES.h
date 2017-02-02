@@ -5,7 +5,7 @@
 #ifndef EMULATE6502_NES_H
 #define EMULATE6502_NES_H
 
-
+#include <iostream>
 #include "CPU.h"
 #include "ROM.h"
 #include "PPU.h"
@@ -14,14 +14,19 @@
 class NES {
 
 public:
+    NES();
+    void start();
+
+private:
+    Util util;
     Mapper mapper;
 
     ROM* rom;
     CPU* cpu;
     RAM* ram;
     PPU* ppu;
-    NES(CPU* cpu, ROM* rom, RAM* ram, PPU* ppu);
 
+    void execute();
     bool loadRom();
     void determineMapper(int mapperNumber);
     void initializeMapping();

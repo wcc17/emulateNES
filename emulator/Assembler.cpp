@@ -148,7 +148,6 @@ void Assembler::storeLabels(vector<string> words) {
 uint16_t Assembler::determineInstructionLocation(string instruction, string argument, uint16_t programLocation) {
     AddressingMode addressingMode = determineAddressingMode(argument);
 
-    //compiler generates a warning that RELATIVE is not used here. This is okay, relative is handled else where
     switch(addressingMode) {
         case NULL_ADDRESSING_MODE:
             //FAIL
@@ -188,6 +187,9 @@ uint16_t Assembler::determineInstructionLocation(string instruction, string argu
             break;
         case INDIRECT:
             programLocation += 3;
+            break;
+        case RELATIVE:
+            //FAIL. Relative is handled elsewhere. Should not get here
             break;
     }
 

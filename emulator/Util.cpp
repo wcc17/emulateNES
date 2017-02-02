@@ -313,3 +313,36 @@ void Util::printExecutedWordInstruction(string instruction, uint16_t argument) {
 void Util::printExecutedAccumulatorInstruction(std::string instruction) {
     cout << instruction << " " << "A";
 }
+
+void Util::printMemory(uint16_t start, uint16_t end, uint8_t* memory) {
+    int x = 0;
+    printf("%04x:  ", start);
+
+    //printf("%04x:  ", start);
+    for(int i = start; i <= end; i++) {
+        printf("%02x  ", memory[i]);
+
+        x++;
+        if(x % 16 == 0) {
+            printf("\n");
+            printf("%04x:  ", i+1);
+        }
+
+    }
+
+    cout << endl;
+    cout << endl;
+}
+
+void Util::printStack(uint8_t* memory) {
+    int x = 0;
+
+    for(int i = 0x0100; i <= 0x01ff; i++) {
+        printf("%02x ", memory[i]);
+
+        x++;
+        if(x % 16 == 0) {
+            printf("\n");
+        }
+    }
+}

@@ -9,8 +9,9 @@
 
 using namespace std;
 
-CPU::CPU(RAM* ram) {
-    this->ram = ram;
+CPU::CPU(Memory* memory) {
+    this->memory = memory;
+    memory->cpu = this;
 
     programCounter = 0x0600;
     programStart = 0x0600;

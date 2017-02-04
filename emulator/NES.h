@@ -19,13 +19,12 @@ public:
     void execute();
     void stop();
 
-private:
-    Util util;
-
     ROM* rom;
     CPU* cpu;
-    RAM* ram;
     PPU* ppu;
+
+private:
+    Util util;
 
     bool loadRom();
     void raiseInterrupt();

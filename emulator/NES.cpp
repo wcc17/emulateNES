@@ -3,16 +3,15 @@
 //
 
 #include "NES.h"
-#include "CPU.h"
 
 using namespace std;
 
 NES::NES() {
-    //set up RAM
-    ram = new RAM();
+    //set up Memory
+    Memory* memory = new Memory();
 
     //set up CPU
-    cpu = new CPU(ram);
+    cpu = new CPU(memory);
     cpu->debug = true;
 
     //set up ROM
@@ -20,7 +19,7 @@ NES::NES() {
     rom->readRom("sample_programs/nestest.nes");
 
     //set up PPU
-    ppu = new PPU(ram, rom);
+    ppu = new PPU(memory, rom);
 }
 
 void NES::start() {
@@ -56,8 +55,8 @@ void NES::execute() {
 void NES::stop() {
     cout << endl;
     cout << "Final PC: " << hex << setw(4) << cpu->programCounter << endl << endl;
-    util.printMemory(0x0000, 0xFFFF, cpu->ram->memory);
-    util.printStack(cpu->ram->memory);
+    util.printMemory(0x0000, 0xFFFF, cpu->memory->cpuMemory);
+    util.printStack(cpu->memory->cpuMemory);
 }
 
 //will return false if rom is not loaded correctly

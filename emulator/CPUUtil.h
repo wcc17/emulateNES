@@ -302,10 +302,10 @@ void CPU::storeWordInMemory(uint8_t lowByte, uint8_t highByte, uint16_t location
 
 //uncomment writeMemoryLocationDefault and comment everything else out to get default CPU behavior. will need a better solution later
 void CPU::writeMemoryLocation(uint16_t address, uint8_t value) {
-    ram->writeMemoryLocation(address, value);
+    memory->writeMemoryLocation(address, value);
 }
 uint8_t CPU::readMemoryLocation(uint16_t address) {
-    return ram->readMemoryLocation(address);
+    return memory->readMemoryLocation(address);
 }
 
 //simply prints the CPU status after an instruction has been executed
@@ -355,7 +355,7 @@ void CPU::printDebugInformation() {
            this->flags.breakFlag, this->flags.decimal, this->flags.interrupt, this->flags.zero, this->flags.carry);
 
     cout << "Stack: " << endl;
-    util.printStack(this->ram->memory);
+    util.printStack(this->memory->cpuMemory);
     cout << endl;
 
 //    cout << "Next instruction results to be printed: " << endl << endl;

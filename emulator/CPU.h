@@ -9,7 +9,7 @@
 #include <_types/_uint8_t.h>
 #include <_types/_uint16_t.h>
 #include "Util.h"
-#include "RAM.h"
+#include "Memory.h"
 
 class CPU {
 
@@ -35,8 +35,8 @@ public:
         uint8_t carry : 1;      //C
     } flags;
 
-    CPU(RAM* ram);
-    RAM* ram;
+    CPU(Memory* memory);
+    Memory* memory;
     Util util;
     int cyclesToExecute = 0;
     int cycleGoal = 0;

@@ -16,21 +16,18 @@ class NES {
 public:
     NES();
     void start();
+    void execute();
+    void stop();
 
 private:
     Util util;
-    Mapper mapper;
 
     ROM* rom;
     CPU* cpu;
     RAM* ram;
     PPU* ppu;
 
-    void execute();
     bool loadRom();
-    void determineMapper(int mapperNumber);
-    void initializeMapping();
-    void initializeNROM();
 };
 
 

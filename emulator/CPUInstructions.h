@@ -444,7 +444,6 @@ void CPU::branchOnEqual() {
     }
 }
 
-//TODO: AM NOT DONE WITH THIS INSTRUCTION YET
 void CPU::breakInstruction() {
     retrieveImpliedInstruction("BRK");
 

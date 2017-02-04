@@ -3,7 +3,6 @@
 //
 
 #include "PPU.h"
-#include "RAM.h"
 
 PPU::PPU(RAM* ram, ROM* rom) {
     this->ram = ram;

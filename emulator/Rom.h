@@ -8,11 +8,16 @@
 #include <_types/_uint8_t.h>
 #include <_types/_uint16_t.h>
 #include <iostream>
+#include "Mapper.h"
+#include "ROM.h"
+#include "Util.h"
+#include "CPU.h"
 
 
 class ROM {
 
 public:
+    Mapper mapper;
 
     //this is only used to hold the rom when its first loaded. eventually will be loaded into CPU/PPU memory
     uint8_t memory[0x100000];
@@ -42,6 +47,9 @@ public:
     void readRom(std::string fileName);
     bool validateRom();
     void getRomInformation();
+    void determineMapper(int mapperNumber);
+    void initializeMapping(CPU* cpu);
+    void initializeNROM(CPU* cpu);
 };
 
 

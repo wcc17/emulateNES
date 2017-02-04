@@ -40,6 +40,9 @@ bool Emulator::onInit() {
         //TODO: INITIALIZE TEXTURES HERE?
     }
 
+    nes = new NES();
+    nes->start();
+
     return true;
 }
 
@@ -55,17 +58,18 @@ int Emulator::onExecute() {
             onEvent(&event);
         }
 
+        nes->execute();
         onLoop();
         onRender();
     }
 
+    nes->stop();
     onCleanup();
 
     return 0;
 }
 
 void Emulator::onLoop() {
-
 }
 
 void Emulator::onRender() {
@@ -85,6 +89,24 @@ void Emulator::onRender() {
 void Emulator::onEvent(SDL_Event *event) {
     if(event->type == SDL_QUIT) {
         isRunning = false;
+    }
+
+    if(event->type == SDL_KEYDOWN) {
+        switch(event->key.keysym.sym) {
+            case SDLK_UP:
+                std::cout << "up" << std::endl;
+                break;
+            case SDLK_DOWN:
+                std::cout << "down" << std::endl;
+                break;
+            case SDLK_LEFT:
+                std::cout << "left" << std::endl;
+                break;
+            case SDLK_RIGHT:
+                std::cout << "right" << std::endl;
+                break;
+        }
+
     }
 }
 

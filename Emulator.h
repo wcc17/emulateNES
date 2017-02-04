@@ -7,6 +7,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <NES.h>
 
 class Emulator {
 
@@ -14,6 +15,7 @@ private:
     const int SCREEN_WIDTH = 256;
     const int SCREEN_HEIGHT = 240;
 
+    NES* nes;
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Surface *screen;

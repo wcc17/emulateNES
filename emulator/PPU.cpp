@@ -48,6 +48,10 @@ void PPU::onReset() {
 
 }
 
+void PPU::execute() {
+    //YEAHHHHHHh
+}
+
 void PPU::render() {
 
     for(scanline = 0; scanline < 262; scanline++) {

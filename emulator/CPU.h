@@ -17,7 +17,6 @@ public:
     static const uint8_t ZERO = 0x00;
     static const uint16_t BASE_STACK_LOCATION = 0x100;
 
-    RAM* ram;
     uint16_t programCounter;
     uint8_t accumulator;
     uint8_t xIndex;
@@ -36,21 +35,23 @@ public:
         uint8_t carry : 1;      //C
     } flags;
 
-    //will be used if a device raises an interrupt. this is not final, just now starting implementation of interrupts
-    bool interruptRaised = false;
-
+    CPU(RAM* ram);
+    RAM* ram;
+    Util util;
     int cyclesToExecute = 0;
     int cycleGoal = 0;
+    bool irqInterruptRaised = false;
+    bool nmiInterruptRaised = false;
     bool pageBoundaryCrossed = false;
+    bool debug = false;
 
-    CPU(RAM* ram);
     void onPowerUp();
     void onReset();
     void execute();
-
-    bool debug = false;
-
-    Util util;
+    void handleIRQInterrupt();
+    void handleNMIInterrupt();
+    void raiseIRQInterrupt();
+    void raiseNMIInterrupt();
 
     //CPUInstructions.h
     void addWithCarry(uint8_t argument);

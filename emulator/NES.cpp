@@ -3,6 +3,7 @@
 //
 
 #include "NES.h"
+#include "CPU.h"
 
 using namespace std;
 
@@ -28,7 +29,7 @@ void NES::start() {
 
     bool romLoaded = loadRom();
     if(romLoaded) {
-//        util.printMemory(0x0000, 0xFFFF, cpu->ram->memory);
+        //util.printMemory(0x0000, 0xFFFF, cpu->ram->memory);
 
         //TODO: will not be where PC starts. at least will not be handled here
         cpu->programCounter = 0xc000;
@@ -39,8 +40,15 @@ void NES::start() {
 }
 
 void NES::execute() {
-//for debug, uncomment
-//      cin.ignore();
+    //for debug, uncomment
+    //      cin.ignore();
+
+    //1 CPU cycle ~= 3 PPU cycles
+    int cycle = 0;
+    while(cycle < 3) {
+        ppu->execute();
+        cycle++;
+    }
 
     cpu->execute();
 }

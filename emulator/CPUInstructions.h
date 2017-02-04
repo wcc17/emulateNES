@@ -1480,7 +1480,7 @@ void CPU::pushProcessorStatus() {
 
     //the binary value for the flags need to be pushed onto stack
     uint8_t processorStatus = getProcessorFlagsAsByte();
-    pushByte(processorStatus | 0x10); //THE BRK FLAG IS SET BEFORE BEING PUSHED ON TO THE STACK
+    pushByte(processorStatus | 0x10); //TODO: THE BRK FLAG IS SET BEFORE BEING PUSHED ON TO THE STACK???
 
     //NOTE: PHP AFFECTS NO FLAGS, BUT PLP DOES
 

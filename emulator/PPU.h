@@ -16,6 +16,7 @@ public:
     PPU(RAM* ram, ROM* rom);
     void onPowerUp();
     void onReset();
+    void execute();
 
 private:
     RAM* ram;
@@ -81,6 +82,8 @@ private:
 
     //16kb ram. 0 - FFFF, but 4000-FFFF is a mirror of $0000-$3FFF
     uint8_t videoRAM[8000];
+
+    uint8_t sprRAM[256];
 
     //for sprites. 64 sprites at 4 bytes each
     uint8_t primaryOAM[256];

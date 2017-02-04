@@ -28,6 +28,7 @@ private:
     PPU* ppu;
 
     bool loadRom();
+    void raiseInterrupt();
 };
 
 

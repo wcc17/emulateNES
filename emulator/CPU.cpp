@@ -55,42 +55,65 @@ void CPU::onReset() {
 }
 
 void CPU::execute() {
-    //TODO: IS THIS NECESSARY? I'm not sure that this will happen with 6502 programs that other people wrote
-    //TODO: i think since programCounter is 16 bit, if it goes above 0xFFFF, it will reset to 0x0000 by itself. needs testing
-    if(programCounter > 0xFFFF) {
-        programCounter = 0x0000;
-    }
-
     //if an interrupt has been raised, handle it. otherwise, execute next instruction
     //this will have allowed the previous instruction to finish first before doing the interrupt
-    if(flags.interrupt == 0 && interruptRaised) {
-
-        //TODO: handle interrupt
-
-        interruptRaised = false;
-    } else {
-        executeOpCode();
-
-        //count cycles
-        cycleGoal += cyclesToExecute;
-        while(cyclesToExecute > 0) {
-            //wait
-            cyclesToExecute -= 1;
-        }
-
-        //this won't ever be needed after an instruction is executed, but will screw something up if left at true for the next one
-        pageBoundaryCrossed = false;
+    if(irqInterruptRaised) {
+        handleIRQInterrupt();
+    } else if(nmiInterruptRaised) {
+        handleNMIInterrupt();
     }
+
+    //TODO: not sure why executeOpCode doesn't return the cycles to execute
+    executeOpCode();
+
+    //count cycles
+    cycleGoal += cyclesToExecute;
+    while(cyclesToExecute > 0) {
+        //TODO wait. this needs to be tied to FPS
+        cyclesToExecute -= 1;
+    }
+
+    //this won't ever be needed after an instruction is executed, but will screw something up if left at true for the next one
+    pageBoundaryCrossed = false;
+}
+
+void CPU::handleIRQInterrupt() {
+    pushWord(programCounter);
+    pushProcessorStatus();
+    programCounter = readMemoryLocation(0xFFFE);
+    flags.interrupt = 1;
+    cyclesToExecute += 7;
+
+    irqInterruptRaised = false;
+}
+
+void CPU::handleNMIInterrupt() {
+    pushWord(programCounter);
+    pushProcessorStatus();
+    programCounter = readMemoryLocation(0xFFFA);
+    flags.interrupt = 1;
+    cyclesToExecute += 7;
+
+    nmiInterruptRaised = false;
+}
+
+void CPU::raiseIRQInterrupt() {
+    if(flags.interrupt != 1) {
+        irqInterruptRaised = true;
+    }
+}
+
+void CPU::raiseNMIInterrupt() {
+    nmiInterruptRaised = true;
 }
 
 //this will take the op codes from program memory and execute them one at a time
 void CPU::executeOpCode() {
-
     oldPC = programCounter;
     opcode = readMemoryLocation(programCounter++);
+
     //the cases have {} symbols to create a local scope within the case to declare local variables
     switch(opcode) {
-
         //ADC
         case ADC_IMMEDIATE:
             addWithCarry_Immediate();

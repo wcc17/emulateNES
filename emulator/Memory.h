@@ -10,13 +10,11 @@
 #include "PPUConstants.h"
 
 class PPU;
-class CPU;
 
 class Memory {
 
 public:
     PPU* ppu;
-    CPU* cpu;
 
     uint8_t* cpuMemory;
 

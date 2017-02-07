@@ -4,7 +4,6 @@
 
 #include "Memory.h"
 #include "PPU.h"
-#include "CPU.h"
 
 Memory::Memory() {
     cpuMemory = new uint8_t[65535];
@@ -13,15 +12,12 @@ Memory::Memory() {
 
 void Memory::writeMemoryLocation(uint16_t address, uint8_t value) {
     if(address <= 0x1FFF) {
-        //RAM
         uint16_t mirroredAddress = address & 0x07FF;
         cpuMemory[mirroredAddress] = value;
     } else if(address >= 0x2008 && address <= 0x3FFF) {
         uint16_t mirroredAddress = 0x2000 + (address + 0x07);
-//        cpuMemory[mirroredAddress] = value;
         ppu->writeRegister(mirroredAddress, value);
     } else {
-        //ANYTHING ELSE
         cpuMemory[address] = value;
     }
 }
@@ -32,7 +28,6 @@ uint8_t Memory::readMemoryLocation(uint16_t address) {
         return cpuMemory[mirroredAddress];
     } else if(address >= 0x2008 && address <= 0x3FFF) {
         uint16_t mirroredAddress = 0x2000 + (address + 0x07);
-//        return cpuMemory[mirroredAddress];
         return ppu->readRegister(mirroredAddress);
     } else {
         return cpuMemory[address];

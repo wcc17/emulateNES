@@ -45,7 +45,7 @@ private:
 
     void render();
     void renderScanLine();
-    uint8_t getNameTableSelection();
+    uint8_t getNameTableByte();
     uint16_t getNameTableAddress(uint8_t nameTableSelection);
 };
 

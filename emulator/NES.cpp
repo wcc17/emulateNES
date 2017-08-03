@@ -49,6 +49,7 @@ void NES::execute() {
         cycle++;
     }
 
+    //TODO: should cpu execute before PPU?
     cpu->execute();
 }
 

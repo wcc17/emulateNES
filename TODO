@@ -1,0 +1,16 @@
+4. What’s a V-blank? – nesdoug
+
+AFter each write to PPU $2007, the address (what address???) is incremented by either 1 or 32, as dictated by bit 2 of $2000
+the first read from $2007 is invalid and the data will be buffered and returned on next read. does not apply to color palettes
+clearing bit 7 of 0x2000 should disable NMI on vblank
+setting bit 5 of 0x2000 should switch to 8x16 sprites instead of 8x8
+bit 7 of $2002 should be set to indicate v blank is occurring
+bit if bit 4 of $2002 is cleared, writes to VRAM are ignored
+when a read from $2002 occurs, bit 7 is reset to 0, as are $2005 and $2006
+
+https://nesdoug.com/2015/11/18/4-whats-a-v-blank/
+if nmi interrupt is used, the program will stop what its doing when it gets a signal that v-blank is started and jump to nmi code
+
+PPU - Nesdev wiki
+
+http://wiki.nesdev.com/w/index.php/PPU

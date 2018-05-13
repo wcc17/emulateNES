@@ -49,8 +49,8 @@ private:
     void renderScanLine();
     uint8_t getNameTableByte();
     uint16_t getNameTableAddress(uint8_t nameTableSelection);
-    uint8_t getAttributeTableByte();
-    uint16_t getAttributeTableAddress(uint8_t addressTableSelection);
+//    uint8_t getAttributeTableByte();
+//    uint16_t getAttributeTableAddress(uint8_t addressTableSelection);
     void handleNMIInterrupt();
 //    uint8_t readPatternTable();
 };

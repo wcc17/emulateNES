@@ -73,9 +73,9 @@ void PPU::render() {
 
 }
 
-void PPU::renderBackground() {
-
-}
+//void PPU::renderBackground() {
+//
+//}
 
 void PPU::renderScanLine() {
 
@@ -107,7 +107,7 @@ void PPU::renderScanLine() {
             }
             case 1: {
                 //fetch attribute table byte
-                uint8_t attributeTableByte = getAttributeTableByte();
+//                uint8_t attributeTableByte = getAttributeTableByte();
                 break;
             }
 //            case 2:
@@ -218,8 +218,8 @@ uint16_t PPU::getNameTableAddress(uint8_t nameTableSelection) {
     return address;
 }
 
-uint8_t PPU::getAttributeTableByte() {
-}
+//uint8_t PPU::getAttributeTableByte() {
+//}
 
 //uint16_t PPU::getAttributeTableAddress(uint16_t addressTableAddress) {
 //    return (nameTableAddress + 0x3C0) //0x3C0 end of name table and start of attribute table
@@ -266,9 +266,10 @@ uint8_t PPU::readMemoryLocation(uint16_t address) {
 
     //in case one of the registers changes things
 //    uint8_t oldValue = memory->directReadMemoryLocation(address);
+    uint8_t returnValue = memory->directReadMemoryLocation(address);
 
     switch(address) {
-        case PPU_STATUS:
+        case PPU_STATUS: {
             //clear D7 (ppu_status)
             uint8_t ppuStatus = memory->directReadMemoryLocation(address);
             ppuStatus &= 0x7F; //set the 7th bit (far left)
@@ -279,9 +280,12 @@ uint8_t PPU::readMemoryLocation(uint16_t address) {
             loopyT = 0x0f;
 
             break;
-        case OAM_DATA:
+        }
+        case OAM_DATA: {
             uint8_t oamAddrValue = memory->directReadMemoryLocation(OAM_ADDR);
-            return ppuLatch = memory->readVRAM(oamAddrValue);
+            returnValue = ppuLatch = memory->readVRAM(oamAddrValue);
+            break;
+        }
         case PPU_SCROLL:
             break;
         case PPU_ADDR:
@@ -292,7 +296,7 @@ uint8_t PPU::readMemoryLocation(uint16_t address) {
             break;
     }
 
-    return memory->directReadMemoryLocation(address);
+    return returnValue;
 }
 
 void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
@@ -307,13 +311,14 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
         case OAM_ADDR:
             //memory already written correctly above. OAM_DATA will write a value to this address in ppu memory when used
             break;
-        case OAM_DATA:
+        case OAM_DATA: {
             uint8_t oamAddrValue = memory->directReadMemoryLocation(OAM_ADDR);
 
             //TODO: check for vertical or forced blanking. if so, don't increment
             memory->writeVRAM(oamAddrValue, data); //write value to address stored in OAM_ADDR
-            memory->directWriteMemoryLocation(OAM_ADDR, oamAddrValue+1); //then increment that address
+            memory->directWriteMemoryLocation(OAM_ADDR, oamAddrValue + 1); //then increment that address
             break;
+        }
         case PPU_SCROLL:
             break;
         case PPU_ADDR:

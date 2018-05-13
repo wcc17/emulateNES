@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include "ROM.h"
+#include "PPU.h"
 
 void ROM::readRom(std::string fileName) {
     std::fstream file(fileName, std::fstream::in);
@@ -13,24 +14,14 @@ void ROM::readRom(std::string fileName) {
     int i = 0;
     while(file >> std::noskipws >> ch) {
         uint8_t byte = ch;
-        memory[i++] = byte;
+        romCache[i++] = byte;
     }
-
-//    uint8_t byte;
-//    while (file >> std::hex >> byte) {
-//        bytes.push_back(byte);
-//    }
-//
-//    for(int i = 0; i < bytes.size(); i++) {
-//        byte = bytes[i];
-//        memory[i] = byte;
-//    }
 
     file.close();
 }
 
 bool ROM::validateRom() {
-    memcpy(&header, memory, sizeof(header));
+    memcpy(&header, romCache, sizeof(header));
 
     if(memcmp(header.signature, "NES\x1A", 4)) {
         return false;
@@ -43,8 +34,8 @@ void ROM::getRomInformation() {
     Util util;
 
     //see the declaration in Rom.h for what all of these mean
-    prgRom16KBanks = header.prgRom16KBanks;
-    chrRom8KBanks = header.chrRom8KBanks;
+    prgRom16KBanks = header.prgRom16KBanksSize;
+    chrRom8KBanks = header.chrRom8KBanksSize;
 
     bool mirroringType = util.checkBit(header.romControlByte1, 0);
     if(mirroringType) {
@@ -67,7 +58,7 @@ void ROM::getRomInformation() {
     ram8KBanks = header.reserved[0] + 1; //TODO: FIGURE OUT WHAT THIS IS. should be number of 8kb ram banks, when 0, assume there is 1 8kb ram banks. when 1, is there 2?
 }
 
-void ROM::determineMapper(int mapperNumber) {
+void ROM::determineAndSetMapper(int mapperNumber) {
     switch(mapperNumber) {
         case 0:
             mapper = NROM;
@@ -90,10 +81,10 @@ void ROM::determineMapper(int mapperNumber) {
     }
 }
 
-void ROM::initializeMapping(CPU* cpu) {
+void ROM::initializeMapping(Memory* memory) {
     switch(mapper) {
         case NROM:
-            initializeNROM(cpu);
+            initializeNROM(memory);
             break;
         case MMC1:
             break;
@@ -108,32 +99,24 @@ void ROM::initializeMapping(CPU* cpu) {
     }
 }
 
-//TODO: use memcpy instead of for loops
-void ROM::initializeNROM(CPU* cpu) {
+void ROM::initializeNROM(Memory* memory) {
     uint16_t romStart = sizeof(this->header);
 
     //if there is only one PRG-ROM block, we need to mirror it at C000-FFFF from 8000-BFFF
     uint16_t romIndex = romStart;
     if(this->prgRom16KBanks == 1) {
-        for(uint16_t i = 0x8000; i <= 0xBFFF; i++) {
-            cpu->writeMemoryLocation(i, this->memory[romIndex]);
-            cpu->writeMemoryLocation(i + 0x4000, this->memory[romIndex]);
-            romIndex++;
-        }
+        //start at cpu memory 0x8000, start at rom memory 0x0016, copy over 4000 bytes (16384 to hex = 4000)
+        memcpy(memory->cpuMemory + 0x8000, this->romCache + romStart, 16384);
+        memcpy(memory->cpuMemory + 0xC000, this->romCache + romStart, 16384); //mirror starting 0xC000
     } else {
-        for(uint16_t i = 0x8000; i<= 0xFFFF; i++) {
-            cpu->writeMemoryLocation(i, this->memory[romIndex]);
-            romIndex++;
-        }
+        //map 2x 16kb, first one into 8000, second into c000 (no mirroring starting at 0xC000 basically
+        memcpy(memory + 0x8000, this->romCache + romStart, 16384);
+        memcpy(memory + 0xC000, this->romCache + romStart + ((prgRom16KBanks - 1) * 16384), 16384);
     }
 
-    //copy CHR pages into CPU memory and PPU memory
-    romStart = romIndex;
-    for(int i = 0; i < this->header.chrRom8KBanks; i++) {
-        //this will just be mirrored memory
-        //TODO: copy the first one into the PPU memory
-        if(i == 0) {
-            //copy into PPU memory
-        }
-    }
+    //copy CHR pages into PPU memory
+    memcpy(memory->ppuMemory, this->romCache + romStart + (this->prgRom16KBanks * 16384), 8192); //8192 = 0x2000
+
+    //get title from last 128 bytes
+    //memcpy(title, this->romCache + romStart + (prgRom16KBanks * 16384) + 8192, 128);
 }

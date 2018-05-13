@@ -53,6 +53,7 @@ const uint16_t PPU_SCROLL = 0x2005;
 
 //aaaa aaaa
 //PPU read/write address (two writes, MSB, LSB)
+//This is the VRAM address (v)
 const uint16_t PPU_ADDR = 0x2006;
 
 //dddd dddd

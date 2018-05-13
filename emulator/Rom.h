@@ -20,17 +20,20 @@ public:
     Mapper mapper;
 
     //this is only used to hold the rom when its first loaded. eventually will be loaded into CPU/PPU memory
-    uint8_t memory[0x100000];
+    uint8_t romCache[0x100000];
 
     //iNES 2.0 header info:
     //http://nesdev.com/iNES.txt
     struct {
         uint8_t signature[4];
-        uint8_t prgRom16KBanks;    //16kb rom banks
-        uint8_t chrRom8KBanks;      //8kb vrom banks
+        uint8_t prgRom16KBanksSize;    //size of prg rom in 16kb unis (1 == 1 * 16kb)
+        uint8_t chrRom8KBanksSize;      //size of chr rom in 8kb units
         uint8_t romControlByte1;
         uint8_t romControlByte2;
-        uint8_t reserved[8];
+        uint8_t prgRamSize; //size of prg ram in 8kb units (value 9 infers 8
+        uint8_t romControlByte3;
+        uint8_t romControlByte4; //says unofficial on the wiki
+        uint8_t reserved[5];
 
     } header;
 
@@ -47,9 +50,11 @@ public:
     void readRom(std::string fileName);
     bool validateRom();
     void getRomInformation();
-    void determineMapper(int mapperNumber);
-    void initializeMapping(CPU* cpu);
-    void initializeNROM(CPU* cpu);
+    void determineAndSetMapper(int mapperNumber);
+    void initializeMapping(Memory* memory);
+    void initializeNROM(Memory* memory);
+
+    Util util;
 };
 
 

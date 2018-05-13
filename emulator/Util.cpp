@@ -71,6 +71,10 @@ bool Util::checkBit(uint8_t argument, int bit) {
     return isSet;
 }
 
+//u_int8 setbit(uint8_t num, final int bitnum, final boolean state) {
+//    return (state) ? (num | (1 << bitnum)) : (num & ~(1 << bitnum));
+//}
+
 uint16_t Util::convertStringToWord(string argument) {
     uint16_t x;
 

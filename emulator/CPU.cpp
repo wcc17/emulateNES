@@ -80,7 +80,8 @@ void CPU::execute() {
 void CPU::handleIRQInterrupt() {
     pushWord(programCounter);
     pushProcessorStatus();
-    programCounter = readMemoryLocation(0xFFFE);
+    // $FFFE and $FFFF
+    programCounter = (readMemoryLocation(0xFFFF) << 8 | readMemoryLocation(0xFFFE));
     flags.interrupt = 1;
     cyclesToExecute += 7;
 
@@ -90,7 +91,7 @@ void CPU::handleIRQInterrupt() {
 void CPU::handleNMIInterrupt() {
     pushWord(programCounter);
     pushProcessorStatus();
-    programCounter = readMemoryLocation(0xFFFA);
+    programCounter = (readMemoryLocation(0xFFFB) << 8 | readMemoryLocation(0xFFFA));
     flags.interrupt = 1;
     cyclesToExecute += 7;
 

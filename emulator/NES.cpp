@@ -19,19 +19,19 @@ NES::NES() {
     rom->readRom("sample_programs/nestest.nes");
 
     //set up PPU
-    ppu = new PPU(memory, rom);
+    ppu = new PPU(memory, rom, cpu);
 }
 
 void NES::start() {
     cpu->onPowerUp();
-    ppu->onPowerUp();
+//    ppu->onPowerUp();
 
     bool romLoaded = loadRom();
     if(romLoaded) {
         //util.printMemory(0x0000, 0xFFFF, cpu->ram->memory);
 
-        //TODO: will not be where PC starts. at least will not be handled here
-        cpu->programCounter = 0xc000;
+        //TODO: PC will start here, should it be moved to CPU reset/init?
+        cpu->programCounter = 0xc004;
     } else {
         //TODO: needs to be handled better
         cout << "error loading rom!" << endl;
@@ -42,6 +42,9 @@ void NES::execute() {
     //for debug, uncomment
     //      cin.ignore();
 
+    //TODO: eventually, the individual cpu cycles will liekly need to be called at different times during ppu execution
+    //TODO: code inside of ppu execute will be moved here
+    //TODO: but also maybe not. but most likely, entire frame of ppu will be individually executed here, with cpu cycles at the right times
     //1 CPU cycle ~= 3 PPU cycles
     int cycle = 0;
     while(cycle < 3) {
@@ -49,7 +52,6 @@ void NES::execute() {
         cycle++;
     }
 
-    //TODO: should cpu execute before PPU?
     cpu->execute();
 }
 
@@ -71,8 +73,8 @@ bool NES::loadRom() {
         return false;
     }
 
-    rom->determineMapper(rom->mapperNumber);
-    rom->initializeMapping(cpu);
+    rom->determineAndSetMapper(rom->mapperNumber);
+    rom->initializeMapping(cpu->memory); //could also be subbed with ppu->memory. stupid
 
     return true;
 }

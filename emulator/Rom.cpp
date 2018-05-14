@@ -110,8 +110,8 @@ void ROM::initializeNROM(Memory* memory) {
         memcpy(memory->cpuMemory + 0xC000, this->romCache + romStart, 16384); //mirror starting 0xC000
     } else {
         //map 2x 16kb, first one into 8000, second into c000 (no mirroring starting at 0xC000 basically
-        memcpy(memory + 0x8000, this->romCache + romStart, 16384);
-        memcpy(memory + 0xC000, this->romCache + romStart + ((prgRom16KBanks - 1) * 16384), 16384);
+        memcpy(memory->cpuMemory + 0x8000, this->romCache + romStart, 16384);
+        memcpy(memory->cpuMemory + 0xC000, this->romCache + romStart + ((prgRom16KBanks - 1) * 16384), 16384);
     }
 
     //copy CHR pages into PPU memory
@@ -119,4 +119,9 @@ void ROM::initializeNROM(Memory* memory) {
 
     //get title from last 128 bytes
     //memcpy(title, this->romCache + romStart + (prgRom16KBanks * 16384) + 8192, 128);
+
+    //TODO: what do i do with these:
+    //$2000-2FFF is normally mapped to the 2kB NES internal VRAM, providing 2 nametables with a mirroring configuration controlled by the cartridge, but it can be partly or fully remapped to RAM on the cartridge, allowing up to 4 simultaneous nametables.
+//    $3F00-3FFF is not configurable, always mapped to the internal palette control.
+
 }

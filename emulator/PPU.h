@@ -40,10 +40,13 @@ private:
 
     //ppu_latch?
     uint16_t ppuLatch;
+    //for scrolling:
     uint16_t loopyT; //for temp version of loopyV($2006). does nothing except reload loopyV when applicable
     uint16_t loopyV;
 
-    bool ppuAddrFirstWrite = false; //if false, first write.... if true, second write
+    bool ppuAddrFirstWrite = false; //if false, first write.... if true, second write'
+    bool isPPUReady = false;
+    int totalCycles = 0; //doesn't really matter if it rolls over, don't need it all the time
 
     void render();
     void renderScanLine();

@@ -69,7 +69,10 @@ void PPU::render() {
         scanline = 0;
     }
 
-    //OAMADDR is set to 0 during each of ticks 257-320 (the sprite tile loading interval) of the pre-render and visible scanlines.
+    //TODO: need to check if ppuCycles are done for the current scanline before increasing. may require refactoring of renderScanLine method
+    scanline++;
+
+    //TODO: OAMADDR is set to 0 during each of ticks 257-320 (the sprite tile loading interval) of the pre-render and visible scanlines.
 
 }
 
@@ -94,9 +97,16 @@ void PPU::renderScanLine() {
     //3. Pattern table bitmap #0
     //4. Pattern table bitmap #1
 
+    ppuClockCycle++;
+    totalCycles++;
+
+    if(totalCycles > 30000 && !isPPUReady) {
+        isPPUReady -= true;
+    }
+
 
     if(ppuClockCycle == 0) {
-         //idle cycle
+        //idle cycle
     } else if(ppuClockCycle < 257){
         int phase = ppuClockCycle % 4;
         switch(phase) {
@@ -119,10 +129,11 @@ void PPU::renderScanLine() {
         }
     }
 
-    scanline++;
+    //TODO: reset the ppuClockCycle when this scanline is rendered
 }
 
 //void PPU::renderVisibleScanLine() {
+//https://wiki.nesdev.com/w/index.php/PPU_sprite_evaluation
     //during all visible scanlines, the ppu scans through OAM (ppu memory (vram))
     //determines which sprites to render on the next scanline
     //sprites found are copies into secondary OAM
@@ -291,6 +302,12 @@ uint8_t PPU::readMemoryLocation(uint16_t address) {
         case PPU_ADDR:
             break;
         case PPU_DATA:
+            //TODO: i originally had this in write, but i'm pretty sure this happens when its read
+            if(util.checkBit(memory->directReadMemoryLocation(PPU_CTRL), 2) == 0) {
+                memory->directWriteMemoryLocation(PPU_ADDR, memory->directReadMemoryLocation(PPU_ADDR)+0x01);
+            } else {
+                memory->directWriteMemoryLocation(PPU_ADDR, memory->directReadMemoryLocation(PPU_ADDR)+0x20);
+            }
             break;
         case OAM_DMA:
             break;
@@ -301,20 +318,26 @@ uint8_t PPU::readMemoryLocation(uint16_t address) {
 
 void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
 
-    memory->directWriteMemoryLocation(address, data);
+    bool shouldWrite = true;
 
+    uint8_t ppuAddr = memory->directReadMemoryLocation(PPU_ADDR);
+    memory->directWriteMemoryLocation(PPU_ADDR, ppuAddr & 0x3FFF);
     switch(address) {
         case PPU_CTRL:
+            if(!ppuIsReady) {
+                //TODO: ppu needs to wait like 30k cycles before doing this
+                shouldWrite = false;
+            }
             break;
         case PPU_MASK:
-            break;
-        case OAM_ADDR:
-            //memory already written correctly above. OAM_DATA will write a value to this address in ppu memory when used
+            if(!ppuIsReady) {
+                //TODO: ppu needs to wait like 30k cycles before doing this
+                shouldWrite = false;
+            }
             break;
         case OAM_DATA: {
             uint8_t oamAddrValue = memory->directReadMemoryLocation(OAM_ADDR);
 
-            //TODO: check for vertical or forced blanking. if so, don't increment
             memory->writeVRAM(oamAddrValue, data); //write value to address stored in OAM_ADDR
             memory->directWriteMemoryLocation(OAM_ADDR, oamAddrValue + 1); //then increment that address
             break;
@@ -345,10 +368,24 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
                 break;
             }
 
-            if(util.checkBit(memory->directReadMemoryLocation(PPU_CTRL), 2) == 0) {
-                memory->directWriteMemoryLocation(PPU_ADDR, memory->directReadMemoryLocation(PPU_ADDR)+0x01);
-            } else {
-                memory->directWriteMemoryLocation(PPU_ADDR, memory->directReadMemoryLocation(PPU_ADDR)+0x20);
+            uint8_t ppuAddr = memory->directReadMemoryLocation(PPU_ADDR);
+            if(ppuAddr > 0x1FFF || ppuAddr < 0x4000) {
+                //TODO:mirroring is set by cartridge. need to come back to this
+//                if(OS_MIRROR == 1) {
+//                    ppu_memory[ppu_addr + 0x400] = data;
+//                    ppu_memory[ppu_addr + 0x800] = data;
+//                    ppu_memory[ppu_addr + 0x1200] = data;
+//                } else if(FS_MIRROR == 1) {
+//                    printf("FS_MIRRORING detected! do nothing\n");
+//                } else {
+//                    if(MIRRORING == 0) {
+//                        /* horizontal */
+//                        ppu_memory[ppu_addr + 0x400] = data;
+//                    } else {
+//                        /* vertical */
+//                        ppu_memory[ppu_addr + 0x800] = data;
+//                    }
+//                }
             }
             break;
         case OAM_DMA:
@@ -356,6 +393,11 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
             break;
     }
 
+    if(shouldWrite) {
+        memory->directWriteMemoryLocation(address, data);
+    }
+
+    //TODO: this isn't correct I don't think
     if(address > 0x1fff && address < 0x4000) {
         memory->writeVRAM(address, data);
     }

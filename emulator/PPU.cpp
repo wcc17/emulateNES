@@ -50,12 +50,13 @@ void PPU::execute() {
 
 void PPU::render() {
 
-    //TODO:will be moved inside one of these i think
-    renderScanLine();
+    if(totalCycles > 30000 && !isPPUReady) {
+        isPPUReady = true;
+    }
 
     if(scanline < 240) {
         //visible scanlines (0 - 239)
-//        renderBackground();
+        renderScanLine();
     } else if(scanline < 241) {
         //post render scanline (240)
     } else if(scanline < 261) {
@@ -76,87 +77,77 @@ void PPU::render() {
 
 }
 
-//void PPU::renderBackground() {
-//
-//}
-
+uint8_t nameTableByte;
+uint8_t tileColorBit3And2;
+uint8_t patternTableLowerPlane;
 void PPU::renderScanLine() {
 
-    //Some general rules
-    //External PPU memory can be accessed every 2 PPU clock cycles
-    //With 341 clock cycles per scanline, the PPU makes 170 memory addresses per scanline
-    //After the 170th fetch, the PPU does nothing for 1 clock cycle.
-    //A single pixel is rendered every clock cycle
-
-    //1. Memory fetch phase 1 thru 128
-    //This process is repeated 32 times (32 tiles in a scanline)
-    //Each of these 4 things takes 1 clock cycle each,
-    //all repeated 32 times = 128 clock cycles in 1 scanline
-    //1. Fetch name table byte
-    //2. Attribute table byte
-    //3. Pattern table bitmap #0
-    //4. Pattern table bitmap #1
-
-    ppuClockCycle++;
-    totalCycles++;
-
-    if(totalCycles > 30000 && !isPPUReady) {
-        isPPUReady -= true;
-    }
-
+    uint8_t scrollY = scanline >> 3;
+    uint8_t tileRowIndex = (scanline + scrollY) % 8; //which of the 8 rows in a tile
 
     if(ppuClockCycle == 0) {
         //idle cycle
     } else if(ppuClockCycle < 257){
-        int phase = ppuClockCycle % 4;
-        switch(phase) {
-            case 0: {
-                //fetch name table byte
-                uint8_t nameTableByte = getNameTableByte();
+        //TODO: the following might not be happening at the exact correct cyle, need to re-evaluate
+        switch(ppuClockCycle) {
+            case 0:
+                //nameTableByte will be the tile index in the name table
+                nameTableByte = getNameTableByte();
                 break;
-            }
-            case 1: {
-                //fetch attribute table byte
-//                uint8_t attributeTableByte = getAttributeTableByte();
+            case 1:
+                tileColorBit3And2 = getAttributeValue();
                 break;
-            }
-//            case 2:
-////                //fetch pattern table bitmap #0
-//                break;
-//            case 3:
-////                //fetch pattern table bitmap #1
-//                break;
+            case 2:
+                //get lower plane (plane 0) of pattern table
+                patternTableLowerPlane = getPatternTableByte(false, nameTableByte, tileRowIndex, 0);
+                break;
+            case 3:
+                renderTile(tileRowIndex);
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            case 6:
+                break;
+            case 7:
+                break;
+
         }
     }
 
     //TODO: reset the ppuClockCycle when this scanline is rendered
+
+    ppuClockCycle++;
+    totalCycles++;
 }
 
-//void PPU::renderVisibleScanLine() {
-//https://wiki.nesdev.com/w/index.php/PPU_sprite_evaluation
-    //during all visible scanlines, the ppu scans through OAM (ppu memory (vram))
-    //determines which sprites to render on the next scanline
-    //sprites found are copies into secondary OAM
-    //if more than 8 are found, sprite over flow flag ---> TODO:
+void PPU::renderTile(uint8_t tileRowIndex) {
+    int startBit = 7;
+    int endBit = 0;
+    uint8_t patternTableHigherPlan = getPatternTableByte(false, nameTableByte, tileRowIndex, 1);
 
-    //during each pixel clock (341 per scanline):
-    //cycles 1-64: secondary oam (32-byte buffer) is initialized to $FF
-    //TODO: during this, reads from $2004 will return $FF
+    //TODO: scrolling. need to figure out fineXScroll (loopyX)
+    //TODO: taken from neschan
+//    int tile = (int)(scanline / 6) / 8; //gets a number 0-8 depending on scanline
+//    if(loopyX > 0) {
+//        if(tile == 0) {
+//            startBit = 7 - loopyX;
+//        } else if(tile == 32) {
+//            endBit = 7 - loopyX + 1;
+//        } else if(tile > 32) {
+//            return;
+//        }
+//    } else {
+//        //render exactly 32 tiles
+//        if(tile > 31) return;
+//    }
 
-    //cycles65-256: sprite evaluation
-    //on odd cycles, data is read from primary OAM
+    for(int i = startBit; i >= endBit; --i) {
+        uint8_t columMask = 1 << i;
 
-    //on even cycles, data is written to secondary OAM (unless secondary OAM is full, in which case it will read the value at that spot)
-    //1. starting at n = 0, read a sprites y-coordinate (OAM[n][0], copying it to the next open slot in secondary OAM (unless 8 sprites have been found, then the write is ignored)
-    //  1a. If Y-coordinate is in range, copy remaining bytes of sprite data (OAM[n][1] thru OAM[n][3]) into secondary OAM.
-
-    //2. increment n
-    //  2a. if n h as overflowed back to zero (all 64 sprites evaluated, go to #4)
-    //  2b. If less than 8 sprites have been found, go to 1
-    //  2c. If exactly 8 sprites have been found, disable writes to secondary OAM because it is full
-
-    //3. starting at m = 0, evaluate OAM[n][m] as a Y-coordinate
-//}
+    }
+}
 
 uint8_t PPU::getNameTableByte() {
     //last two bits of PPU_CTRL are the name table select.
@@ -167,103 +158,143 @@ uint8_t PPU::getNameTableByte() {
         printf("Name table selection should only be 0-3\n");
     }
 
-    uint16_t nameTableAddress = getNameTableAddress(selection);
+    uint16_t nameTableAddress = getNameTableByteAddress(selection);
     return memory->readVRAM(nameTableAddress);
 }
 
-uint16_t PPU::getNameTableAddress(uint8_t nameTableSelection) {
-    uint16_t address = 0;
+uint16_t PPU::getNameTableByteAddress(uint8_t nameTableSelection) {
+    uint16_t nameTableStartAddress = 0x2000;
 
+    //TODO: need a better way to do this now that its clear
     if(rom->horizontalMirroring) {
         //$2000 equals $2400 and $2800 equals $2C00
         switch(nameTableSelection) {
             case 0x00:
-                address = 0x2000;
+                nameTableStartAddress = 0x2000;
                 break;
             case 0x01:
-                address = 0x2000;
+                nameTableStartAddress = 0x2000;
                 break;
             case 0x02:
-                address = 0x2800;
+                nameTableStartAddress = 0x2800;
                 break;
             case 0x03:
-                address = 0x2800;
+                nameTableStartAddress = 0x2800;
                 break;
         }
     } else if(rom->verticalMirroring) {
         //$2000 equals $2800 and $2400 equals $2c00
         switch(nameTableSelection) {
             case 0x00:
-                address = 0x2000;
+                nameTableStartAddress = 0x2000;
                 break;
             case 0x01:
-                address = 0x2400;
+                nameTableStartAddress = 0x2400;
                 break;
             case 0x02:
-                address = 0x2000;
+                nameTableStartAddress = 0x2000;
                 break;
             case 0x03:
-                address = 0x2400;
+                nameTableStartAddress = 0x2400;
                 break;
         }
     } else {
         switch(nameTableSelection) {
             case 0x00:
-                address = 0x2000;
+                nameTableStartAddress = 0x2000;
                 break;
             case 0x01:
-                address = 0x2400;
+                nameTableStartAddress = 0x2400;
                 break;
             case 0x02:
-                address = 0x2800;
+                nameTableStartAddress = 0x2800;
                 break;
             case 0x03:
-                address = 0x2c00;
+                nameTableStartAddress = 0x2c00;
                 break;
         }
     }
 
     //
-    //bits 0-11 of PPU_ADDR hold the nametable address (-$2000)
-    address += (memory->directReadMemoryLocation(PPU_ADDR) & 0x0FFF);
-    return address;
+    //bits 0-11 of PPU_ADDR hold the nametable address (-$2000) which is added to 0x2000 (where name table starts in cpu mem)
+    return nameTableStartAddress | (loopyV & 0x0FFF);
 }
 
-//uint8_t PPU::getAttributeTableByte() {
-//}
+uint8_t PPU::getAttributeValue() {
+    //loopyV
+    //leftmost bit ignored
+    //yyy NN YYYYY XXXXX
+    //y - fine Y, N nametable select, Y coarseY, X coarseX
 
-//uint16_t PPU::getAttributeTableAddress(uint16_t addressTableAddress) {
-//    return (nameTableAddress + 0x3C0) //0x3C0 end of name table and start of attribute table
-//}
+    //one of the 32 columns in the name table
+    uint8_t tileColumn = loopyV & 0x1f; //get first 5 bits for nametable tile column (starting from far right) coarseX
+    uint8_t tileRow = (loopyV & 0x3e0) >> 5; //get the coarseY bits (bit shifting 5 because 3e0 is greater than a byte
+    uint8_t tileAttributeColumn = (tileColumn >> 2) & 0x7; //get last three bits of tileColumn for attribute column.
+    uint8_t tileAttributeRow = (tileRow >> 2) &0x7;
 
-//void PPU::readPatternTable() {
-//    //TODO: to read pattern table
-//    //pattern table made up of shapes of tiles for background and sprites
-//    //each tile is 16 bytes (made of two planes)
-//    //first plane controls bit 0 of the color. the second plane controls bit 1
-//    //any pixel whose color is 0 is background/transparent
-//    //https://wiki.nesdev.com/w/index.php/PPU_pattern_tables
-//    //pattern table is divided into two 256-tile sections
-//    //in cpu memory:
-//    //$0000-$0FFF	$1000	Pattern table 0 (left)
-//    //$1000-$1FFF	$1000	Pattern Table 1 (right)
-//
-//    //retrieving a pattern table byte:
-//    //TODO: not sure which address to use to actually read
-//    //value written to PPU_CTRL (2000) (3rdth bit for sprite, 4th bit for background) controls whether bkgrnd and sprites
-//    // use (left) or (right) pattern tables.
-//    //
-//    //^left half (0000-0fff), right half (1000-1fff) so just set left most bit
-//    //ignore that PPU_CTRL 4th bit if not in (8x8 mode) (sprite only)
-//    //what all the bits mean in a pattern table address:
-//    //0-2: fine y offset, the row number within a tile
-//    //3: bit plane (0: lower, 1: higher) 2 planes in each tile
-//    //4-7: tile column
-//    //8-11: tile row
-//    //12: half of sprite table (0: left, 1: right) -- should be something OAMADDR related
-//    //13:  pattern table is at 0000-1fff. most significant bit for pattern table size
-//    //i guess the rest don't matter so that its below 1fff
-//}
+    //23c0 is base attribute table address (0x2000 + 960 bytes (3c0))
+    //loopyV & 0c000 will account for if we're in first name table or second name table
+    //last two operations with attributeRow and column will account for those values within the attribute table (will tack them on to the end)
+    uint16_t attributeTableAddress = 0x23c0 | (loopyV & 0x0c00) | (tileAttributeRow << 3) | tileAttributeColumn;
+    uint8_t attributeByte = memory->readVRAM(attributeTableAddress);
+
+    //we have our attribute byte now
+    //each byte represents a 4x4 group of tiles on the screen (4 quadrants of 4 tiles each)
+    //4 tiles per 1 quadrant
+    //each quadrant serves 16x16 pixels
+    //we have the attribute value (attributeByte), but need to figoure out which of the bits below we're looking at (depending on what tile we're on)
+    /**
+    7654 3210
+    |||| ||++- Color bits 3-2 for top left quadrant of this byte
+    |||| ++--- Color bits 3-2 for top right quadrant of this byte
+    ||++------ Color bits 3-2 for bottom left quadrant of this byte
+    ++-------- Color bits 3-2 for bottom right quadrant of this byte
+     */
+    uint8_t quadrantId = (tileRow & 0x2) + ((tileColumn & 0x2) >> 1); //will be a value 0-3
+    //get bits 3 and 2 for color. 1st bit will be gotten from pattern table
+    uint8_t colorBit3And2 = (attributeByte & (0x3 << (quadrantId * 2))) >> (quadrantId * 2); //I didn't take time to understand this
+
+    return (colorBit3And2 << 2);
+}
+
+uint8_t PPU::getPatternTableByte(bool isSprite, uint8_t tileIndex, uint8_t tileRowIndex, int bitPlane) {
+    //TODO: to read pattern table
+    //pattern table made up of shapes of tiles for background and sprites
+    //each tile is 16 bytes (made of two planes)
+    //first plane controls bit 0 of the color. the second plane controls bit 1
+    //any pixel whose color is 0 is background/transparent
+    //https://wiki.nesdev.com/w/index.php/PPU_pattern_tables
+    //pattern table is divided into two 256-tile sections
+    //in cpu memory:
+    //$0000-$0FFF	$1000	Pattern table 0 (left)
+    //$1000-$1FFF	$1000	Pattern Table 1 (right)
+
+    //retrieving a pattern table byte:
+    //TODO: not sure which address to use to actually read
+    //value written to PPU_CTRL (2000) (3rdth bit for sprite, 4th bit for background) controls whether bkgrnd and sprites
+    // use (left) or (right) pattern tables.
+    //
+    //^left half (0000-0fff), right half (1000-1fff) so just set left most bit
+    //ignore that PPU_CTRL 4th bit if not in (8x8 mode) (sprite only)
+    //what all the bits mean in a pattern table address:
+    //0-2: fine y offset, the row number within a tile
+    //3: bit plane (0: lower, 1: higher) 2 planes in each tile
+    //4-7: tile column
+    //8-11: tile row
+    //12: half of sprite table (0: left, 1: right) -- should be something OAMADDR related
+    //13:  pattern table is at 0000-1fff. most significant bit for pattern table size
+    //i guess the rest don't matter so that its below 1fff
+
+    //check if sprite or background. sprite = 3rd bit, background = 4th bit
+    int bitToCheck = (isSprite) ? 3 : 4;
+    bool leftOrRight = util.checkBit(memory->directReadMemoryLocation(PPU_CTRL), bitToCheck);
+
+    uint16_t tileAddress = isSprite ? ((memory->directReadMemoryLocation(PPU_CTRL) & 0x8) << 0x8)
+                                    : ((memory->directReadMemoryLocation(PPU_CTRL) & 0x10) << 0x8);
+    tileAddress |= (tileIndex << 4);
+
+    return memory->directReadMemoryLocation(tileAddress | (bitPlane << 3) | tileRowIndex);
+}
 
 void PPU::handleNMIInterrupt() {
     if(!util.checkBit(this->readMemoryLocation(PPU_CTRL), 7)) {
@@ -293,22 +324,21 @@ uint8_t PPU::readMemoryLocation(uint16_t address) {
             break;
         }
         case OAM_DATA: {
+            //TODO: is this correct? should be using oamAddrValue as the address? or is it put in loopyV?
             uint8_t oamAddrValue = memory->directReadMemoryLocation(OAM_ADDR);
-            returnValue = ppuLatch = memory->readVRAM(oamAddrValue);
+            returnValue = ppuLatch = primaryOAM[oamAddrValue];
             break;
         }
         case PPU_SCROLL:
             break;
-        case PPU_ADDR:
+        case PPU_DATA: {
+            //TODO: should i be checking for this first bad read? if not should i be incrementing? or will programmer know to account for the increment on second read?
+            returnValue = memory->readVRAM(loopyV);
+
+            uint8_t ppuCtrl = memory->directReadMemoryLocation(PPU_CTRL);
+            loopyV += (ppuCtrl == 0) ? 0x01 : 0x20; //increment by 1 or 32
             break;
-        case PPU_DATA:
-            //TODO: i originally had this in write, but i'm pretty sure this happens when its read
-            if(util.checkBit(memory->directReadMemoryLocation(PPU_CTRL), 2) == 0) {
-                memory->directWriteMemoryLocation(PPU_ADDR, memory->directReadMemoryLocation(PPU_ADDR)+0x01);
-            } else {
-                memory->directWriteMemoryLocation(PPU_ADDR, memory->directReadMemoryLocation(PPU_ADDR)+0x20);
-            }
-            break;
+        }
         case OAM_DMA:
             break;
     }
@@ -324,13 +354,16 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
     memory->directWriteMemoryLocation(PPU_ADDR, ppuAddr & 0x3FFF);
     switch(address) {
         case PPU_CTRL:
-            if(!ppuIsReady) {
+            if(!isPPUReady) {
                 //TODO: ppu needs to wait like 30k cycles before doing this
                 shouldWrite = false;
+            } else {
+                loopyT &= 0xf3ff; //(0000110000000000) zero out the two bits we're looking for
+                loopyT |= (data & 3) << 10; //get the two bits from data and or with loopyT (where we cleared them earlier)
             }
             break;
         case PPU_MASK:
-            if(!ppuIsReady) {
+            if(!isPPUReady) {
                 //TODO: ppu needs to wait like 30k cycles before doing this
                 shouldWrite = false;
             }
@@ -343,18 +376,35 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
             break;
         }
         case PPU_SCROLL:
+            if(!firstWriteRecieved) {
+                //from skinny docs
+                loopyT &= 0xffe0;
+                loopyT |= (data & 0xf8) >> 3;
+                //loopyX = data & 0x07;
+
+                firstWriteRecieved = true;
+            } else {
+                //from skinny docs
+                loopyT &= 0xfc1f;
+                loopyT |= (data & 0xf8) << 2;
+                loopyT &= 0x8ff;
+                loopyT |= (data & 0x07) << 12;
+
+                firstWriteRecieved = false;
+            }
+
             break;
         case PPU_ADDR:
-            if(!ppuAddrFirstWrite) {
+            if(!firstWriteRecieved) {
                 //first write
                 //write high byte of the address
+                //TODO: skinny docs say first two bits should be left out, but i saw some emulators that didn't do that, not doing it here
                 loopyT &= (uint16_t)(data | 0xFF00); //get the first 8 bits, put in lower half of latch
-                ppuAddrFirstWrite = true;
+                firstWriteRecieved = true;
             } else {
                 //second write
                 loopyT = (loopyT << 8) + data;
-                memory->directWriteMemoryLocation(PPU_ADDR, loopyT);
-                ppuAddrFirstWrite = false;
+                firstWriteRecieved = false;
 
                 loopyV = loopyT;
             }
@@ -362,43 +412,27 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
             //set fineY bit?
 
             break;
-        case PPU_DATA:
+        case PPU_DATA: {
             //if bit 4 of PPU_STATUS is set to 0, don't write here
-            if(util.checkBit(memory->directReadMemoryLocation(PPU_STATUS), 4)) {
+            if (util.checkBit(memory->directReadMemoryLocation(PPU_STATUS), 4)) {
                 break;
             }
 
-            uint8_t ppuAddr = memory->directReadMemoryLocation(PPU_ADDR);
-            if(ppuAddr > 0x1FFF || ppuAddr < 0x4000) {
-                //TODO:mirroring is set by cartridge. need to come back to this
-//                if(OS_MIRROR == 1) {
-//                    ppu_memory[ppu_addr + 0x400] = data;
-//                    ppu_memory[ppu_addr + 0x800] = data;
-//                    ppu_memory[ppu_addr + 0x1200] = data;
-//                } else if(FS_MIRROR == 1) {
-//                    printf("FS_MIRRORING detected! do nothing\n");
-//                } else {
-//                    if(MIRRORING == 0) {
-//                        /* horizontal */
-//                        ppu_memory[ppu_addr + 0x400] = data;
-//                    } else {
-//                        /* vertical */
-//                        ppu_memory[ppu_addr + 0x800] = data;
-//                    }
-//                }
-            }
+            //write data to address in vram in loopyV. should have been loaded in two writes for PPU_ADDR case
+            memory->writeVRAM(loopyV, data);
+
+            //increment ppuAddress by 1 or 32 depending on ppu_ctrl
+            uint8_t ppuCtrl = memory->directReadMemoryLocation(PPU_CTRL);
+            loopyV += (ppuCtrl == 0) ? 0x01 : 0x20;
             break;
+        }
         case OAM_DMA:
-            memory->writeVRAM(address, data);
+            //TODO: this stops stuff and writes 256 bytes into ppu vram
+//            memory->writeVRAM(address, data);
             break;
     }
 
     if(shouldWrite) {
         memory->directWriteMemoryLocation(address, data);
-    }
-
-    //TODO: this isn't correct I don't think
-    if(address > 0x1fff && address < 0x4000) {
-        memory->writeVRAM(address, data);
     }
 }

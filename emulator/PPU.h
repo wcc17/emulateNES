@@ -27,8 +27,6 @@ private:
     CPU* cpu;
     Util util;
 
-    uint8_t sprRAM[256];
-
     //for sprites. 64 sprites at 4 bytes each
     uint8_t primaryOAM[256];
 
@@ -42,20 +40,23 @@ private:
     uint16_t ppuLatch;
     //for scrolling:
     uint16_t loopyT; //for temp version of loopyV($2006). does nothing except reload loopyV when applicable
-    uint16_t loopyV;
+    uint16_t loopyV; //not exactly the same as the PPU_ADDR register. Will hold the actual PPU address, the registers are just used to fill it
 
-    bool ppuAddrFirstWrite = false; //if false, first write.... if true, second write'
+    bool firstWriteRecieved = false;
+
     bool isPPUReady = false;
     int totalCycles = 0; //doesn't really matter if it rolls over, don't need it all the time
 
     void render();
     void renderScanLine();
+    void renderTile(uint8_t tileRowIndex);
+
     uint8_t getNameTableByte();
-    uint16_t getNameTableAddress(uint8_t nameTableSelection);
-//    uint8_t getAttributeTableByte();
-//    uint16_t getAttributeTableAddress(uint8_t addressTableSelection);
+    uint16_t getNameTableByteAddress(uint8_t nameTableSelection);
+    uint8_t getAttributeValue();
+    uint8_t getPatternTableByte(bool isSprite, uint8_t tileIndex, uint8_t tileRowIndex, int bitPlane);
+
     void handleNMIInterrupt();
-//    uint8_t readPatternTable();
 };
 
 

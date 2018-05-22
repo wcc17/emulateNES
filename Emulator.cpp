@@ -36,8 +36,6 @@ bool Emulator::onInit() {
                 return false;
             }
         }
-
-        //TODO: INITIALIZE TEXTURES HERE?
     }
 
     nes = new NES();
@@ -72,15 +70,27 @@ int Emulator::onExecute() {
 void Emulator::onLoop() {
 }
 
+int frame = 0;
+uint8_t red;
+uint8_t blue = 85;
+uint8_t green = 170;
 void Emulator::onRender() {
     //clear screen
     SDL_RenderClear(renderer);
 
-    //set the color that the renderer will draw shapes with
-    SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0xFF);
+    if(frame % 8 == 0) {
+        red++;
+        green++;
+        blue++;
+    }
 
-    //render stuff
-//    screen->pixels
+    //set the color that the renderer will draw shapes with
+    for(int x = 0; x < SCREEN_WIDTH; x++) {
+        for(int y = 0; y < SCREEN_HEIGHT; y++) {
+            SDL_SetRenderDrawColor(renderer, red, blue, green, 0xFF);
+            SDL_RenderDrawPoint(renderer, x, y);
+        }
+    }
 
     //update screen
     SDL_RenderPresent(renderer);

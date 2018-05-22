@@ -78,6 +78,7 @@ void Emulator::onRender() {
     //clear screen
     SDL_RenderClear(renderer);
 
+//    nes->ppu->pixels;
     if(frame % 8 == 0) {
         red++;
         green++;
@@ -87,6 +88,9 @@ void Emulator::onRender() {
     //set the color that the renderer will draw shapes with
     for(int x = 0; x < SCREEN_WIDTH; x++) {
         for(int y = 0; y < SCREEN_HEIGHT; y++) {
+            uint8_t color = nes->ppu->pixels[x][y];
+
+//            uint8_t r
             SDL_SetRenderDrawColor(renderer, red, blue, green, 0xFF);
             SDL_RenderDrawPoint(renderer, x, y);
         }
@@ -121,9 +125,6 @@ void Emulator::onEvent(SDL_Event *event) {
 }
 
 void Emulator::onCleanup() {
-//    SDL_DestroyTexture(tileImageTexture);
-//    tileImageTexture = NULL;
-
     //destory the window
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -133,25 +134,3 @@ void Emulator::onCleanup() {
     IMG_Quit();
     SDL_Quit();
 }
-
-//TODO: probably will not need this
-//SDL_Texture* TileGame::loadTexture(std::string path) {
-//    //final texture
-//    SDL_Texture* newTexture = NULL;
-//
-//    //Load image at specfied path
-//    SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-//    if(loadedSurface == NULL) {
-//        printf("Unable to load image %s. SDL_image Error: %s\n", path.c_str(), IMG_GetError());
-//    } else {
-//        //Create texture from surface pixels
-//        newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
-//        if(newTexture == NULL) {
-//            printf("Unable to create texture from %s. SDL Error: %s\n", path.c_str(), SDL_GetError());
-//        }
-//
-//        SDL_FreeSurface(loadedSurface);
-//    }
-//
-//    return newTexture;
-//}

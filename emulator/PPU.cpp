@@ -102,6 +102,7 @@ void PPU::renderScanLine() {
                 patternTableLowerPlane = getPatternTableByte(false, nameTableByte, tileRowIndex, 0);
                 break;
             case 3:
+                //TODO: happening in the wrong place
                 renderTile(tileRowIndex);
                 break;
             case 4:
@@ -114,6 +115,8 @@ void PPU::renderScanLine() {
                 break;
 
         }
+    } else {
+        ppuClockCycle = 0;
     }
 
     //TODO: reset the ppuClockCycle when this scanline is rendered
@@ -125,9 +128,9 @@ void PPU::renderScanLine() {
 void PPU::renderTile(uint8_t tileRowIndex) {
     int startBit = 7;
     int endBit = 0;
-    uint8_t patternTableHigherPlan = getPatternTableByte(false, nameTableByte, tileRowIndex, 1);
+    uint8_t patternTableHigherPlane = getPatternTableByte(false, nameTableByte, tileRowIndex, 1);
 
-    //TODO: scrolling. need to figure out fineXScroll (loopyX)
+    //TODO: scrolling. need to figure out fineXScroll (loopyX). will be set in one of the register writes, see skinny docs on where
     //TODO: taken from neschan
 //    int tile = (int)(scanline / 6) / 8; //gets a number 0-8 depending on scanline
 //    if(loopyX > 0) {
@@ -144,9 +147,43 @@ void PPU::renderTile(uint8_t tileRowIndex) {
 //    }
 
     for(int i = startBit; i >= endBit; --i) {
-        uint8_t columMask = 1 << i;
+        uint8_t columnBit = 0x01 << i; //move first bit over i spots to get the correct column
 
+        //will be used along with tilePaletteBit3and2 variable
+        //basically: get lower plane bit and move to first bit, get high bit and move to second bit, combine the two into tilePaletteBit1
+        uint8_t tileColorBit1 = ((patternTableLowerPlane & columnBit) >> i) | ((patternTableHigherPlane & columnBit) >> i << 1);
+
+        uint8_t color = tileColorBit3And2 | tileColorBit1;
+
+        //TODO: how to get this? should i consider that this is a background pixel?
+        uint8_t actualPixelColor = color;
+//        uint8_t actualPixelColor = getPaletteColor(color);
+
+        //TODO: should be using SCREEN_WIDTH variable here, not 256
+//        uint16_t frameAddress = uint16_t(scanline) * 256;
+        pixels[scanline][i] = actualPixelColor;
     }
+//
+//        if (frame_addr >= sizeof(_frame_buffer_1))
+//            continue;
+//        _frame_buffer[frame_addr] = _pixel_cycle[i];
+//
+//        // record the palette index just for sprite 0 hit detection
+//        // the detection use palette 0 instead of actual color
+//        _frame_buffer_bg[frame_addr] = tile_palette_bit01;
+//    }
+//
+//    // Increment X position
+//    if ((_ppu_addr & 0x1f) == 0x1f)
+//    {
+//        // Wrap to the next name table
+//        _ppu_addr &= ~0x1f;
+//        _ppu_addr ^= 0x0400;
+//    }
+//    else
+//    {
+//        _ppu_addr++;
+//    }
 }
 
 uint8_t PPU::getNameTableByte() {
@@ -368,11 +405,15 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
                 shouldWrite = false;
             }
             break;
+        case OAM_ADDR:
+            //TODO: write to latch
+            memory->directWriteMemoryLocation(OAM_ADDR, data);
+            break;
         case OAM_DATA: {
-            uint8_t oamAddrValue = memory->directReadMemoryLocation(OAM_ADDR);
-
-            memory->writeVRAM(oamAddrValue, data); //write value to address stored in OAM_ADDR
-            memory->directWriteMemoryLocation(OAM_ADDR, oamAddrValue + 1); //then increment that address
+            //TODO: write to latch
+            uint8_t oamAddr = memory->directReadMemoryLocation(OAM_ADDR);
+            primaryOAM[memory->directReadMemoryLocation(OAM_ADDR)] = data;
+            memory->directWriteMemoryLocation(OAM_ADDR, oamAddr+1);
             break;
         }
         case PPU_SCROLL:

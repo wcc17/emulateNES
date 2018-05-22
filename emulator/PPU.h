@@ -14,13 +14,15 @@
 class PPU {
 
 public:
+    //holds color data to pass to sdl
+    uint8_t pixels[256][240];
+
     PPU(Memory* memory, ROM* rom, CPU* cpu);
     void onPowerUp();
     void onReset();
     void execute();
     uint8_t readMemoryLocation(uint16_t address);
     void writeMemoryLocation(uint16_t address, uint8_t data);
-
 private:
     Memory* memory;
     ROM* rom;
@@ -30,7 +32,7 @@ private:
     //for sprites. 64 sprites at 4 bytes each
     uint8_t primaryOAM[256];
 
-    //pallette data
+    //palette data
     uint8_t secondaryOAM[32];
 
     int ppuClockCycle = 0; //0 - 340 (341 clock cycles per 113.667 cpu clock cycles) each clock cycle renders 1 pixel (342 pixels on screen?

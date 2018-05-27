@@ -56,6 +56,9 @@ void PPU::execute(int cycleGoal) {
 
         ppuClockCycle++;
         totalPPUCycles++;
+        if(cycleGoal == 1) {
+            printf("break");
+        }
     } while(cycleGoal > 0);
 }
 

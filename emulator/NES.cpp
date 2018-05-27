@@ -39,20 +39,40 @@ void NES::start() {
 }
 
 void NES::execute() {
-    //for debug, uncomment
-    //      cin.ignore();
+    //There are supposed to be rougly (114 cpu cycles)*(262 scanlines perframe) = 29868 every second (114 cpu cycles per scanline)
+    int frameCycleGoal = (114 * 262);
 
-    //TODO: eventually, the individual cpu cycles will liekly need to be called at different times during ppu execution
-    //TODO: code inside of ppu execute will be moved here
-    //TODO: but also maybe not. but most likely, entire frame of ppu will be individually executed here, with cpu cycles at the right times
-    //1 CPU cycle ~= 3 PPU cycles
-    int cycle = 0;
-    while(cycle < 3) {
-        ppu->execute();
-        cycle++;
-    }
+    do {
+        //for debug, uncomment
+        //      cin.ignore();
 
-    cpu->execute();
+        if(frameCycleGoal % 100 == 0) {
+            printf("break");
+        }
+
+        //for the very first scanline want something to render
+        if(cpu->cycleGoal == 0) {
+            cpu->cycleGoal = 114;
+            ppu->execute(cpu->cycleGoal);
+            cpu->cycleGoal = 0;
+        } else {
+            ppu->execute(cpu->cycleGoal);
+        }
+
+        //do enough cpu cycles to do one ppu scanline
+        int cyclesForScanline = 114;
+        do {
+            cpu->execute();
+            cyclesForScanline -= cpu->cyclesToExecute;
+            cpu->cycleGoal += cpu->cyclesToExecute;
+            cpu->cyclesToExecute = 0;
+        } while (cyclesForScanline > 0);
+
+        cpu->totalCycles += cpu->cycleGoal; //add cycles executed here to overall count (will be at least one scanlines worth)
+        frameCycleGoal -= cpu->cycleGoal;
+
+        cpu->cycleGoal = 0;
+    } while (frameCycleGoal > 0);
 }
 
 void NES::stop() {

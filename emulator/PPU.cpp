@@ -9,6 +9,8 @@ PPU::PPU(Memory* memory, ROM* rom, CPU* cpu) {
     this->rom = rom;
     this->cpu = cpu;
     memory->ppu = this;
+
+    onPowerUp();
 }
 
 void PPU::onPowerUp() {
@@ -44,13 +46,23 @@ void PPU::onReset() {
     memory->directWriteMemoryLocation(PPU_DATA, 0x00);
 }
 
-void PPU::execute() {
-    render();
+//executes for 1 CPU clock cycle
+//does 3 PPU clock cycles for each CPU clock cycle
+void PPU::execute(int cycleGoal) {
+    cycleGoal *= 3;
+    do {
+        render();
+        cycleGoal--;
+
+        ppuClockCycle++;
+        totalPPUCycles++;
+    } while(cycleGoal > 0);
 }
 
+//ONE ppu clock cycle
 void PPU::render() {
 
-    if(totalCycles > 30000 && !isPPUReady) {
+    if(totalPPUCycles > 30000 && !isPPUReady) {
         isPPUReady = true;
     }
 
@@ -59,22 +71,25 @@ void PPU::render() {
         renderScanLine();
     } else if(scanline < 241) {
         //post render scanline (240)
+        //TODO: this will not be incremented here like this, need to implement what happens here
     } else if(scanline < 261) {
         //241 is the first vblank scanline. do generate nmi interrupt work
-        if(scanline == 241) {
+        //vertical blanking lines(241-260)
+        if(scanline == 241 && ppuClockCycle == 1) {
             handleNMIInterrupt();
         }
-        //vertical blanking lines(241-260)
+
     } else if(scanline == 261) {
         //pre-render scanline (261)
         scanline = 0;
     }
 
-    //TODO: need to check if ppuCycles are done for the current scanline before increasing. may require refactoring of renderScanLine method
-    scanline++;
+    if(ppuClockCycle == 340) {
+        ppuClockCycle = 0;
+        scanline++;
+    }
 
     //TODO: OAMADDR is set to 0 during each of ticks 257-320 (the sprite tile loading interval) of the pre-render and visible scanlines.
-
 }
 
 uint8_t nameTableByte;
@@ -88,41 +103,33 @@ void PPU::renderScanLine() {
     if(ppuClockCycle == 0) {
         //idle cycle
     } else if(ppuClockCycle < 257){
-        //TODO: the following might not be happening at the exact correct cyle, need to re-evaluate
+
+        //each of these things takes two cycles to happen. still increasing ppuClockCycle in the off cycles
         switch(ppuClockCycle) {
             case 0:
                 //nameTableByte will be the tile index in the name table
                 nameTableByte = getNameTableByte();
                 break;
-            case 1:
+            case 2:
                 tileColorBit3And2 = getAttributeValue();
                 break;
-            case 2:
+            case 4:
                 //get lower plane (plane 0) of pattern table
                 patternTableLowerPlane = getPatternTableByte(false, nameTableByte, tileRowIndex, 0);
                 break;
-            case 3:
-                //TODO: happening in the wrong place
+            case 6:
                 renderTile(tileRowIndex);
                 break;
-            case 4:
-                break;
-            case 5:
-                break;
-            case 6:
-                break;
-            case 7:
-                break;
-
         }
-    } else {
-        ppuClockCycle = 0;
+    } else if(ppuClockCycle < 320){
+        //tile data for the sprites on the next scaline are fetched here
+        //TODO: https://wiki.nesdev.com/w/index.php/PPU_rendering   #Cycles-257-320
+        //do other emulators just focus on sprite rendering here?
+    } else if(ppuClockCycle < 336) {
+        //first two tiles for the next scaline are fetched and locked into shift registers
+    } else if(ppuClockCycle < 340) {
+        //two bytes are fetched but it doesn't look like anything happens for normal games
     }
-
-    //TODO: reset the ppuClockCycle when this scanline is rendered
-
-    ppuClockCycle++;
-    totalCycles++;
 }
 
 void PPU::renderTile(uint8_t tileRowIndex) {
@@ -153,15 +160,12 @@ void PPU::renderTile(uint8_t tileRowIndex) {
         //basically: get lower plane bit and move to first bit, get high bit and move to second bit, combine the two into tilePaletteBit1
         uint8_t tileColorBit1 = ((patternTableLowerPlane & columnBit) >> i) | ((patternTableHigherPlane & columnBit) >> i << 1);
 
-        uint8_t color = tileColorBit3And2 | tileColorBit1;
+        uint8_t fourBitColor = tileColorBit3And2 | tileColorBit1;
 
         //TODO: how to get this? should i consider that this is a background pixel?
-        uint8_t actualPixelColor = color;
-//        uint8_t actualPixelColor = getPaletteColor(color);
+        uint8_t paletteValue = getPaletteColor(true, fourBitColor);
 
-        //TODO: should be using SCREEN_WIDTH variable here, not 256
-//        uint16_t frameAddress = uint16_t(scanline) * 256;
-        pixels[scanline][i] = actualPixelColor;
+        pixels[scanline][i] = paletteValue;
     }
 //
 //        if (frame_addr >= sizeof(_frame_buffer_1))
@@ -324,6 +328,8 @@ uint8_t PPU::getPatternTableByte(bool isSprite, uint8_t tileIndex, uint8_t tileR
 
     //check if sprite or background. sprite = 3rd bit, background = 4th bit
     int bitToCheck = (isSprite) ? 3 : 4;
+
+    //TODO: confirm this isn't needed
     bool leftOrRight = util.checkBit(memory->directReadMemoryLocation(PPU_CTRL), bitToCheck);
 
     uint16_t tileAddress = isSprite ? ((memory->directReadMemoryLocation(PPU_CTRL) & 0x8) << 0x8)
@@ -333,11 +339,25 @@ uint8_t PPU::getPatternTableByte(bool isSprite, uint8_t tileIndex, uint8_t tileR
     return memory->directReadMemoryLocation(tileAddress | (bitPlane << 3) | tileRowIndex);
 }
 
+//NOTE: paletteIndex should be a 4 bit value
+uint8_t PPU::getPaletteColor(bool isBackground, uint8_t paletteIndex) {
+    uint16_t paletteStartAddress = (isBackground ? 0x3f00 : 0x3f10);
+    uint16_t paletteAddress = (paletteStartAddress | paletteIndex);
+
+    return memory->readVRAM(paletteAddress);
+}
+
 void PPU::handleNMIInterrupt() {
-    if(!util.checkBit(this->readMemoryLocation(PPU_CTRL), 7)) {
-        printf("Vblank generated\n");
-        //TODO: have to make sure cpu increment behaves properly after setting the program counter here for NMI interrupt
-        cpu->raiseNMIInterrupt();
+    uint8_t status = cpu->memory->directReadMemoryLocation(PPU_STATUS);
+    uint8_t ctrl = cpu->memory->directReadMemoryLocation(PPU_CTRL);
+    status |= 0x80;
+
+    //TODO: sprite0 hit
+
+    cpu->memory->directWriteMemoryLocation(PPU_STATUS, status);
+
+    if(util.checkBit(ctrl, 7)) {
+        cpu->handleNMIInterrupt();
     }
 }
 
@@ -350,20 +370,28 @@ uint8_t PPU::readMemoryLocation(uint16_t address) {
     switch(address) {
         case PPU_STATUS: {
             //clear D7 (ppu_status)
-            uint8_t ppuStatus = memory->directReadMemoryLocation(address);
-            ppuStatus &= 0x7F; //set the 7th bit (far left)
+            ppuStatusTemp = ppuStatus;
+
+            ppuStatus &= 0x7F; //set the 7th bit (far left) to 0
+            memory->directWriteMemoryLocation(PPU_STATUS, ppuStatus);
+
+            ppuStatus &= 0x1f; //set the 6th bit to 0
+            memory->directWriteMemoryLocation(PPU_STATUS, ppuStatus);
 
             memory->directWriteMemoryLocation(PPU_SCROLL, 0x00);
             memory->directWriteMemoryLocation(PPU_ADDR, 0x00);
 
-            loopyT = 0x0f;
+            //TODO: reset VRAM Address Register #1 and #2?
 
+            //return bits 7-4 of unmodified ppu_status, with bits 3-0 of loopyT
+            returnValue = (ppuStatusTemp & 0xe0) | (loopyT & 0x1f);
             break;
         }
         case OAM_DATA: {
-            //TODO: is this correct? should be using oamAddrValue as the address? or is it put in loopyV?
-            uint8_t oamAddrValue = memory->directReadMemoryLocation(OAM_ADDR);
-            returnValue = ppuLatch = primaryOAM[oamAddrValue];
+            //TODO: mask oam ADdress in one of the scanlines?
+            uint8_t oamAddrValue = primaryOAM[oamAddress];
+            loopyT = oamAddrValue;
+            returnValue = oamAddrValue;
             break;
         }
         case PPU_SCROLL:
@@ -387,8 +415,10 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
 
     bool shouldWrite = true;
 
-    uint8_t ppuAddr = memory->directReadMemoryLocation(PPU_ADDR);
-    memory->directWriteMemoryLocation(PPU_ADDR, ppuAddr & 0x3FFF);
+    //TODO: what the hell is this
+//    uint8_t ppuAddr = memory->directReadMemoryLocation(PPU_ADDR);
+//    memory->directWriteMemoryLocation(PPU_ADDR, ppuAddr & 0x3FFF);
+
     switch(address) {
         case PPU_CTRL:
             if(!isPPUReady) {
@@ -397,23 +427,29 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
             } else {
                 loopyT &= 0xf3ff; //(0000110000000000) zero out the two bits we're looking for
                 loopyT |= (data & 3) << 10; //get the two bits from data and or with loopyT (where we cleared them earlier)
+
+                memory->directWriteMemoryLocation(PPU_CTRL, data);
             }
             break;
         case PPU_MASK:
             if(!isPPUReady) {
                 //TODO: ppu needs to wait like 30k cycles before doing this
                 shouldWrite = false;
+            } else {
+                loopyT = data;
             }
             break;
         case OAM_ADDR:
-            //TODO: write to latch
+//            loopyT = data; not loopyT, ppu_addr_temp
+            oamAddress = data;
             memory->directWriteMemoryLocation(OAM_ADDR, data);
             break;
         case OAM_DATA: {
-            //TODO: write to latch
-            uint8_t oamAddr = memory->directReadMemoryLocation(OAM_ADDR);
-            primaryOAM[memory->directReadMemoryLocation(OAM_ADDR)] = data;
-            memory->directWriteMemoryLocation(OAM_ADDR, oamAddr+1);
+            loopyT = data;
+            primaryOAM[oamAddress] = data;
+            oamAddress++;
+
+            memory->directWriteMemoryLocation(OAM_ADDR, data);
             break;
         }
         case PPU_SCROLL:
@@ -421,6 +457,7 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
                 //from skinny docs
                 loopyT &= 0xffe0;
                 loopyT |= (data & 0xf8) >> 3;
+                //TODO: loopyX
                 //loopyX = data & 0x07;
 
                 firstWriteRecieved = true;
@@ -468,8 +505,11 @@ void PPU::writeMemoryLocation(uint16_t address, uint8_t data) {
             break;
         }
         case OAM_DMA:
-            //TODO: this stops stuff and writes 256 bytes into ppu vram
-//            memory->writeVRAM(address, data);
+            cpu->oamDMAWrite = true;
+
+            for(uint8_t i = 0; i < 0x100; i++) {
+                primaryOAM[i] = memory->directReadMemoryLocation((0x100*data) + i);
+            }
             break;
     }
 

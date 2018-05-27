@@ -20,19 +20,18 @@ CPU::CPU(Memory* memory) {
     yIndex = 0x00;
     stackPointer = 0xff;
 
-    //TODO: all flags should be set on startup except for
     flags.negative = 0;
     flags.overflow = 0;
     flags.ignored = 1;
     flags.breakFlag = 0;
     flags.decimal = 0;
     flags.interrupt = 0;
-    flags.zero = 0;
+    flags.zero = 1;
     flags.carry = 0;
 }
 
 void CPU::onPowerUp() {
-    setProcessorFlagsFromByte(0x34);
+    //setProcessorFlagsFromByte(0x34);
     accumulator = 0x00;
     xIndex = 0x00;
     yIndex = 0x00;
@@ -54,23 +53,41 @@ void CPU::onReset() {
     writeMemoryLocation(0x4015, 0x00);
 }
 
+int oamDMACyclesTaken = 0;
 void CPU::execute() {
-    //if an interrupt has been raised, handle it. otherwise, execute next instruction
-    //this will have allowed the previous instruction to finish first before doing the interrupt
-    if(irqInterruptRaised) {
-        handleIRQInterrupt();
-    } else if(nmiInterruptRaised) {
-        handleNMIInterrupt();
+    //if writing to oam dma, only increase cycle count, don't do anything
+    if(!oamDMAWrite) {
+        //if an interrupt has been raised, handle it. otherwise, execute next instruction
+        //this will have allowed the previous instruction to finish first before doing the interrupt
+        //TODO: does oamDMA write have priority over interrupts?
+        if(irqInterruptRaised) {
+            handleIRQInterrupt();
+        } else if(nmiInterruptRaised) {
+            handleNMIInterrupt();
+        }
+
+        //TODO: not sure why executeOpCode doesn't return the cycles to execute
+        executeOpCode();
+    } else {
+        //simulate cpu running for 1 cycle
+        if(cyclesToExecute == 0) {
+            printf("just want to see this happen to be sure");
+            cyclesToExecute += 1;
+        }
     }
 
-    //TODO: not sure why executeOpCode doesn't return the cycles to execute
-    executeOpCode();
-
-    //count cycles
-    cycleGoal += cyclesToExecute;
-    while(cyclesToExecute > 0) {
-        //TODO wait. this needs to be tied to FPS
-        cyclesToExecute -= 1;
+    //increase dma cycles used and check if we're done with oam dma write
+    if(oamDMAWrite) {
+        oamDMACyclesTaken++;
+        if(oamDMACyclesTaken == 513) {
+            if(totalCycles % 2 == 0) {
+                oamDMAWrite = false;
+                oamDMACyclesTaken = 0;
+            }
+        } else if(oamDMACyclesTaken == 514) {
+            oamDMAWrite = false;
+            oamDMACyclesTaken = 0;
+        }
     }
 
     //this won't ever be needed after an instruction is executed, but will screw something up if left at true for the next one

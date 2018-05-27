@@ -11,24 +11,27 @@ Memory::Memory() {
 }
 
 void Memory::writeMemoryLocation(uint16_t address, uint8_t value) {
-    if(address <= 0x1FFF) {
+    if(address >= 0x0800 && address <= 0x1FFF) {
         uint16_t mirroredAddress = address & 0x07FF;
-        cpuMemory[mirroredAddress] = value;
+        directWriteMemoryLocation(mirroredAddress, value);
     } else if(address > 0x2000 && address <= 0x3FFF) {
         uint16_t mirroredAddress = 0x2000 + (address & 0x07);
         ppu->writeMemoryLocation(mirroredAddress, value);
     } else {
-        cpuMemory[address] = value;
+        directWriteMemoryLocation(address, value);
     }
 }
 
 uint8_t Memory::readMemoryLocation(uint16_t address) {
-    if(address < 0x2000 || address > 0x7FFF) {
-        return cpuMemory[address];
+    if(address >= 0x0800 && address <= 0x1fff) {
+        uint16_t mirroredAddress = address & 0x07ff;
+        return directReadMemoryLocation(mirroredAddress);
+    } else if(address >= 0x2000 && address <= 0x3fff) {
+        uint16_t mirroredAddress = 0x2000 + (address & 0x07);
+        return ppu->readMemoryLocation(mirroredAddress);
+    } else {
+        return directReadMemoryLocation(address);
     }
-
-    //TODO: other stuff happens to ppu registers here
-    return ppu->readMemoryLocation(address);
 }
 
 void Memory::directWriteMemoryLocation(uint16_t address, uint8_t value) {

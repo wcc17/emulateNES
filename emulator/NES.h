@@ -17,6 +17,7 @@ public:
     NES();
     void start();
     void execute();
+    void executeCPU(int cycles);
     void stop();
 
     ROM* rom;

@@ -3,18 +3,21 @@
 //
 
 #include "Emulator.h"
+#include "Emulator/Palette.h"
 
 Emulator::Emulator() {
     isRunning = true;
 }
 
+int RES_MULTIPLIER = 4;
 bool Emulator::onInit() {
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         printf("SDL could not initialize. SDL_ERROR: %s\n", SDL_GetError());
         return false;
     }
 
-    window = SDL_CreateWindow("emulateNES", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("emulateNES", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                              SCREEN_WIDTH * RES_MULTIPLIER, SCREEN_HEIGHT * RES_MULTIPLIER, SDL_WINDOW_SHOWN);
 
     if(window == NULL) {
         printf("Window could not be created. SDL_Error: %s\n", SDL_GetError());
@@ -70,29 +73,36 @@ int Emulator::onExecute() {
 void Emulator::onLoop() {
 }
 
-int frame = 0;
-uint8_t red;
-uint8_t blue = 85;
-uint8_t green = 170;
+uint8_t red = 0;
+uint8_t green = 0;
+uint8_t blue = 0;
 void Emulator::onRender() {
     //clear screen
     SDL_RenderClear(renderer);
 
-//    nes->ppu->pixels;
-    if(frame % 8 == 0) {
-        red++;
-        green++;
-        blue++;
-    }
-
-    //set the color that the renderer will draw shapes with
+//    for(int x = 0; x < SCREEN_WIDTH; x++) {
+//        for(int y = 0; y < SCREEN_HEIGHT; y++) {
+//            //    nes->ppu->pixels;
+//            red = palleteRGBValues[nes->ppu->pixels[x][y]].r;
+//            green = palleteRGBValues[nes->ppu->pixels[x][y]].g;
+//            blue = palleteRGBValues[nes->ppu->pixels[x][y]].b;
+//
+//            SDL_SetRenderDrawColor(renderer, red, blue, green, 0xFF);
+//            SDL_RenderDrawPoint(renderer, x, y);
+//        }
+//    }
     for(int x = 0; x < SCREEN_WIDTH; x++) {
         for(int y = 0; y < SCREEN_HEIGHT; y++) {
-            uint8_t color = nes->ppu->pixels[x][y];
+            red = palleteRGBValues[nes->ppu->pixels[x][y]].r;
+            green = palleteRGBValues[nes->ppu->pixels[x][y]].g;
+            blue = palleteRGBValues[nes->ppu->pixels[x][y]].b;
 
-//            uint8_t r
-            SDL_SetRenderDrawColor(renderer, red, blue, green, 0xFF);
-            SDL_RenderDrawPoint(renderer, x, y);
+            for(int a = 0; a < RES_MULTIPLIER; a++) {
+                for(int b = 0; b < RES_MULTIPLIER; b++) {
+                    SDL_SetRenderDrawColor(renderer, red, blue, green, 0xFF);
+                    SDL_RenderDrawPoint(renderer, (x*(RES_MULTIPLIER/2)+a), (y*(RES_MULTIPLIER/2)+b));
+                }
+            }
         }
     }
 

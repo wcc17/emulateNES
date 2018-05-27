@@ -310,20 +310,26 @@ uint8_t CPU::readMemoryLocation(uint16_t address) {
 
 //simply prints the CPU status after an instruction has been executed
 //the programCounter that is shown is the value of the program counter when the previous instruction is retrieved
+int lineCount = 0;
 void CPU::printCPUStatus() {
+    if(lineCount % 300 == 0) {
+        printf("break");
+    }
+
+    printf("[%d] ", lineCount++);
     if(this->impliedAddressingMode) {
         util.printStatus_Implied(oldPC, opcode, instructionString, accumulator, xIndex, yIndex,
-                                 getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+                                 getProcessorFlagsAsByte(), stackPointer, totalCycles);
     }
     else if(this->accumulatorAddressingMode) {
         util.printStatus_Accumulator(oldPC, opcode, instructionString, accumulator, xIndex, yIndex,
-                                     getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+                                     getProcessorFlagsAsByte(), stackPointer, totalCycles);
     } else if(this->addressingMode_8) {
         util.printStatus(oldPC, opcode, arg_8, instructionString, accumulator, xIndex, yIndex,
-                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+                         getProcessorFlagsAsByte(), stackPointer, totalCycles);
     } else if(this->addressingMode_16) {
         util.printStatus(oldPC, opcode, arg_16, instructionString, accumulator, xIndex, yIndex,
-                         getProcessorFlagsAsByte(), stackPointer, cycleGoal);
+                         getProcessorFlagsAsByte(), stackPointer, totalCycles);
     }
 }
 

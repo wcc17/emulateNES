@@ -10,7 +10,7 @@ set(HEADER_FILES
         NES.h
         opcodes.h
         Util.h
-        Mapper.h)
+        Mapper.h Palette.h)
 
 set(SOURCE_FILES
         Assembler.cpp

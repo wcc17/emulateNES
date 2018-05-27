@@ -40,9 +40,11 @@ public:
     Util util;
     int cyclesToExecute = 0;
     int cycleGoal = 0;
+    int totalCycles = 0;
     bool irqInterruptRaised = false;
     bool nmiInterruptRaised = false;
     bool pageBoundaryCrossed = false;
+    bool oamDMAWrite = false;
     bool debug = false;
 
     void onPowerUp();

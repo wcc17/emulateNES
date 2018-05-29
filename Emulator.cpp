@@ -9,7 +9,7 @@ Emulator::Emulator() {
     isRunning = true;
 }
 
-int RES_MULTIPLIER = 4;
+int RES_MULTIPLIER = 1;
 bool Emulator::onInit() {
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         printf("SDL could not initialize. SDL_ERROR: %s\n", SDL_GetError());
@@ -33,11 +33,11 @@ bool Emulator::onInit() {
             SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
             //initialize JPG loading
-            int imgFlags = IMG_INIT_PNG;
-            if(!(IMG_Init(imgFlags) & imgFlags)) {
-                printf("SDL_image could not be initialized. SDL_image Error: %s\n", IMG_GetError());
-                return false;
-            }
+//            int imgFlags = IMG_INIT_PNG;
+//            if(!(IMG_Init(imgFlags) & imgFlags)) {
+//                printf("SDL_image could not be initialized. SDL_image Error: %s\n", IMG_GetError());
+//                return false;
+//            }
         }
     }
 
@@ -80,29 +80,15 @@ void Emulator::onRender() {
     //clear screen
     SDL_RenderClear(renderer);
 
-//    for(int x = 0; x < SCREEN_WIDTH; x++) {
-//        for(int y = 0; y < SCREEN_HEIGHT; y++) {
-//            //    nes->ppu->pixels;
-//            red = palleteRGBValues[nes->ppu->pixels[x][y]].r;
-//            green = palleteRGBValues[nes->ppu->pixels[x][y]].g;
-//            blue = palleteRGBValues[nes->ppu->pixels[x][y]].b;
-//
-//            SDL_SetRenderDrawColor(renderer, red, blue, green, 0xFF);
-//            SDL_RenderDrawPoint(renderer, x, y);
-//        }
-//    }
     for(int x = 0; x < SCREEN_WIDTH; x++) {
         for(int y = 0; y < SCREEN_HEIGHT; y++) {
+            //    nes->ppu->pixels;
             red = palleteRGBValues[nes->ppu->pixels[x][y]].r;
             green = palleteRGBValues[nes->ppu->pixels[x][y]].g;
             blue = palleteRGBValues[nes->ppu->pixels[x][y]].b;
 
-            for(int a = 0; a < RES_MULTIPLIER; a++) {
-                for(int b = 0; b < RES_MULTIPLIER; b++) {
-                    SDL_SetRenderDrawColor(renderer, red, blue, green, 0xFF);
-                    SDL_RenderDrawPoint(renderer, (x*(RES_MULTIPLIER/2)+a), (y*(RES_MULTIPLIER/2)+b));
-                }
-            }
+            SDL_SetRenderDrawColor(renderer, red, blue, green, 0xFF);
+            SDL_RenderDrawPoint(renderer, x, y);
         }
     }
 
@@ -141,6 +127,6 @@ void Emulator::onCleanup() {
     renderer = NULL;
     window = NULL;
 
-    IMG_Quit();
+//    IMG_Quit();
     SDL_Quit();
 }

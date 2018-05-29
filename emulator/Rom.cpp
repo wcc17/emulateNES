@@ -9,6 +9,7 @@
 
 void ROM::readRom(std::string fileName) {
     std::fstream file(fileName, std::fstream::in);
+    printf(strerror(errno));
 
     char ch;
     int i = 0;
@@ -115,13 +116,19 @@ void ROM::initializeNROM(Memory* memory) {
     }
 
     //copy CHR pages into PPU memory
-    memcpy(memory->ppuMemory, this->romCache + romStart + (this->prgRom16KBanks * 16384), 8192); //8192 = 0x2000
+    for(int i = 0; i < 16384; i++) {
+        memory->ppuMemory[i] = 0;
+    }
+//    util.printMemory(0x0000, 0x4000, memory->ppuMemory);
+//    util.printMemory(0x0000, 0xFFFF, this->romCache);
+    memcpy(memory->ppuMemory, this->romCache + romStart + (this->prgRom16KBanks * 16384), 8192);
 
     //get title from last 128 bytes
     //memcpy(title, this->romCache + romStart + (prgRom16KBanks * 16384) + 8192, 128);
 
     //TODO: what do i do with these:
     //$2000-2FFF is normally mapped to the 2kB NES internal VRAM, providing 2 nametables with a mirroring configuration controlled by the cartridge, but it can be partly or fully remapped to RAM on the cartridge, allowing up to 4 simultaneous nametables.
-//    $3F00-3FFF is not configurable, always mapped to the internal palette control.
 
+
+    util.printMemory(0x0000, 0x4000, memory->ppuMemory);
 }

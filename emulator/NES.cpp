@@ -94,7 +94,7 @@ bool NES::loadRom() {
     }
 
     rom->determineAndSetMapper(rom->mapperNumber);
-    rom->initializeMapping(cpu->memory); //could also be subbed with ppu->memory. stupid
+    rom->initializeMapping(cpu->memory);
 
     return true;
 }

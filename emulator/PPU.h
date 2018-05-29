@@ -22,9 +22,7 @@ public:
     //for scrolling:
     uint16_t loopyT; //for temp version of loopyV($2006). does nothing except reload loopyV when applicable
     uint16_t loopyV; //not exactly the same as the PPU_ADDR register. Will hold the actual PPU address, the registers are just used to fill it
-    uint8_t oamAddress;
-    uint8_t ppuStatus;
-    uint8_t ppuStatusTemp;
+//    uint8_t oamAddress;
 
     PPU(Memory* memory, ROM* rom, CPU* cpu);
     void onPowerUp();
@@ -55,6 +53,7 @@ private:
     void render();
     void renderScanLine();
     void renderTile(uint8_t tileRowIndex);
+    void fetchTile(uint8_t tileRowIndex);
 
     uint8_t getNameTableByte();
     uint16_t getNameTableByteAddress(uint8_t nameTableSelection);

@@ -6,7 +6,6 @@
 #define EMULATENES_EMULATOR_H
 
 #include <SDL.h>
-#include <SDL_image.h>
 #include <NES.h>
 
 class Emulator {

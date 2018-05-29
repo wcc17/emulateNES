@@ -3,3 +3,4 @@
 *.nes
 *.bin
 alternate_rendering_timeline.txt
+cmake-build-debug/

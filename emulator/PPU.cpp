@@ -10,17 +10,24 @@ PPU::PPU(Memory* memory, ROM* rom, CPU* cpu) {
     this->cpu = cpu;
     memory->ppu = this;
 
-    onPowerUp();
+
 }
 
 void PPU::onPowerUp() {
+    //uint8_t pixels[256][240];
+    for(int i = 0; i < 256; i++) {
+        for(int j = 0; j < 240; j++) {
+            pixels[i][j] = 0;
+        }
+    }
+
     //? = unknown
     //x = irrelevant
     //+ = often set
     //U = unchanged
     memory->directWriteMemoryLocation(PPU_CTRL, 0x00);
     memory->directWriteMemoryLocation(PPU_MASK, 0x00);
-    memory->directWriteMemoryLocation(PPU_STATUS, 0xA0); //+0+x xxxx
+    memory->directWriteMemoryLocation(PPU_STATUS, 0x20); //+0+x xxxx
     memory->directWriteMemoryLocation(OAM_ADDR, 0x00);
     memory->directWriteMemoryLocation(PPU_SCROLL, 0x00);
     memory->directWriteMemoryLocation(PPU_ADDR, 0x00);

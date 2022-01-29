@@ -11,9 +11,18 @@ using namespace std;
 
 CPU::CPU(Memory* memory) {
     this->memory = memory;
+}
 
-    programCounter = 0x0600;
-    programStart = 0x0600;
+void CPU::onPowerUp() {
+    //setProcessorFlagsFromByte(0x34);
+
+    writeMemoryLocation(0x4017, 0x00);
+    writeMemoryLocation(0x4015, 0x00);
+
+    for(uint16_t i = 0x4000; i <= 0x400F; i++) {
+        //TODO: dev wiki is unsure about $4010-$4013
+        writeMemoryLocation(i, 0x00);
+    }
 
     accumulator = 0x00;
     xIndex = 0x00;
@@ -28,23 +37,10 @@ CPU::CPU(Memory* memory) {
     flags.interrupt = 0;
     flags.zero = 1;
     flags.carry = 0;
-}
 
-void CPU::onPowerUp() {
-    //setProcessorFlagsFromByte(0x34);
-    accumulator = 0x00;
-    xIndex = 0x00;
-    yIndex = 0x00;
+    //        cpu->programCounter = 0xc004; worked for nestest.nes
+    programCounter = (memory->readMemoryLocation(0xfffd) << 8) | (memory->readMemoryLocation(0xfffc));
 
-    writeMemoryLocation(0x4017, 0x00);
-    writeMemoryLocation(0x4015, 0x00);
-
-    for(uint16_t i = 0x4000; i <= 0x400F; i++) {
-        //TODO: dev wiki is unsure about $4010-$4013
-        writeMemoryLocation(i, 0x00);
-    }
-
-    //TODO: all 15 bits of noise channel LFSR = 0
 }
 
 void CPU::onReset() {

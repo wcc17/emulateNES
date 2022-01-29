@@ -115,6 +115,8 @@ void ROM::initializeNROM(Memory* memory) {
         memcpy(memory->cpuMemory + 0xC000, this->romCache + romStart + ((prgRom16KBanks - 1) * 16384), 16384);
     }
 
+    util.printMemory(0x0000, 0xFFFF, memory->cpuMemory);
+
     //copy CHR pages into PPU memory
     for(int i = 0; i < 16384; i++) {
         memory->ppuMemory[i] = 0;
@@ -130,5 +132,5 @@ void ROM::initializeNROM(Memory* memory) {
     //$2000-2FFF is normally mapped to the 2kB NES internal VRAM, providing 2 nametables with a mirroring configuration controlled by the cartridge, but it can be partly or fully remapped to RAM on the cartridge, allowing up to 4 simultaneous nametables.
 
 
-    util.printMemory(0x0000, 0x4000, memory->ppuMemory);
+//    util.printMemory(0x0000, 0x4000, memory->ppuMemory);
 }

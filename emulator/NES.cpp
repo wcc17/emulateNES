@@ -3,6 +3,7 @@
 //
 
 #include "NES.h"
+#include "CPU.h"
 
 using namespace std;
 
@@ -23,19 +24,16 @@ NES::NES() {
 }
 
 void NES::start() {
-    cpu->onPowerUp();
-//    ppu->onPowerUp();
-
     bool romLoaded = loadRom();
     if(romLoaded) {
         //util.printMemory(0x0000, 0xFFFF, cpu->ram->memory);
-
-        //TODO: PC will start here, should it be moved to CPU reset/init?
-        cpu->programCounter = 0xc004;
     } else {
         //TODO: needs to be handled better
         cout << "error loading rom!" << endl;
     }
+
+    cpu->onPowerUp();
+    ppu->onPowerUp();
 }
 
 void NES::execute() {
@@ -51,13 +49,13 @@ void NES::execute() {
         }
 
         //for the very first scanline want something to render
-        if(cpu->cycleGoal == 0) {
-            cpu->cycleGoal = 114;
-            ppu->execute(cpu->cycleGoal);
-            cpu->cycleGoal = 0;
-        } else {
-            ppu->execute(cpu->cycleGoal);
-        }
+//        if(cpu->cycleGoal == 0) {
+//            cpu->cycleGoal = 114;
+//            ppu->execute(cpu->cycleGoal);
+//            cpu->cycleGoal = 0;
+//        } else {
+//            ppu->execute(cpu->cycleGoal);
+//        }
 
         //do enough cpu cycles to do one ppu scanline
         int cyclesForScanline = 114;
